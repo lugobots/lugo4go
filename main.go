@@ -11,8 +11,6 @@ import (
 
 var (
 	player Game.Player
-	Settings Game.StartUpSettings
-	teamName Game.TeamName
 )
 
 func main() {

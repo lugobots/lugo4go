@@ -3,10 +3,13 @@ package Game
 import (
 	"math"
 	"reflect"
-	"github.com/rubens21/test1/Lib/Physics"
+
+	"github.com/maketplay/commons/BasicTypes"
+	"github.com/maketplay/commons/Units"
+	"github.com/maketplay/commons/Physics"
 )
 
-type PlayerState State
+type PlayerState BasicTypes.State
 
 const (
 	// attacking, holding the ball, home field
@@ -46,20 +49,20 @@ const (
 )
 
 //region Attack states
-func (p *Player) orderForAtckHoldHse() (msg string, orders []Order) {
+func (p *Player) orderForAtckHoldHse() (msg string, orders []BasicTypes.Order) {
 	obstacles := p.watchOpponentOnMyRoute(p.offenseGoalCoods(), ERROR_MARGIN_RUNNING)
 
 	if len(obstacles) == 0 {
-		return "I am free yet", []Order{p.orderAdvance()}
+		return "I am free yet", []BasicTypes.Order{p.orderAdvance()}
 	} else if len(obstacles) == 1 {
 		num := int(reflect.ValueOf(obstacles).MapKeys()[0].Int())
 		if p.calcDistanceScale(p.findOpponentTeam(p.lastMsg.GameInfo).Players[num].Coords) != DISTANCE_SCALE_FAR {
-			return "Dribble this guys (not yet)", []Order{p.orderPassTheBall()}
+			return "Dribble this guys (not yet)", []BasicTypes.Order{p.orderPassTheBall()}
 		} else {
-			return "Advance watching", []Order{p.orderAdvance()}
+			return "Advance watching", []BasicTypes.Order{p.orderAdvance()}
 		}
 	} else {
-		nearstObstacle := float64(COURT_WIDTH) //just initializing with a high value
+		nearstObstacle := float64(Units.CourtWidth) //just initializing with a high value
 		//num := int(reflect.ValueOf(obstacles).MapKeys()[0].Int())
 		for opponentId := range obstacles {
 			oppCoord := p.findOpponentTeam(p.lastMsg.GameInfo).Players[opponentId].Coords
@@ -68,85 +71,85 @@ func (p *Player) orderForAtckHoldHse() (msg string, orders []Order) {
 				nearstObstacle = oppDist
 			}
 		}
-		if nearstObstacle < DISTANCE_CATCH_BALL*2 {
-			return "I need help", []Order{p.orderPassTheBall(), p.orderAdvance()}
+		if nearstObstacle < Units.DistanceCatchBall*2 {
+			return "I need help", []BasicTypes.Order{p.orderPassTheBall(), p.orderAdvance()}
 		} else {
-			return "Advance watching", []Order{p.orderAdvance()}
+			return "Advance watching", []BasicTypes.Order{p.orderAdvance()}
 		}
 	}
 }
 
-func (p *Player) orderForAtckHoldFrg() (msg string, orders []Order) {
+func (p *Player) orderForAtckHoldFrg() (msg string, orders []BasicTypes.Order) {
 	goalCoords := p.offenseGoalCoods()
 	goalDistance := p.Coords.DistanceTo(goalCoords)
 	if int(math.Abs(goalDistance)) < BallMaxDistance() {
-		return "Shoot!", []Order{p.createKickOrder(goalCoords)}
+		return "Shoot!", []BasicTypes.Order{p.createKickOrder(goalCoords)}
 	} else {
 		obstacles := p.watchOpponentOnMyRoute(p.offenseGoalCoods(), ERROR_MARGIN_RUNNING)
 
 		if len(obstacles) == 0 {
-			return "I am still free", []Order{p.orderAdvance()}
+			return "I am still free", []BasicTypes.Order{p.orderAdvance()}
 		} else if len(obstacles) == 1 {
 			num := int(reflect.ValueOf(obstacles).MapKeys()[0].Int())
 			if p.calcDistanceScale(p.findOpponentTeam(p.lastMsg.GameInfo).Players[num].Coords) != DISTANCE_SCALE_FAR {
-				return "Dribble this guys (not yet)", []Order{p.orderPassTheBall()}
+				return "Dribble this guys (not yet)", []BasicTypes.Order{p.orderPassTheBall()}
 			} else {
-				return "Advace watching", []Order{p.orderAdvance()}
+				return "Advace watching", []BasicTypes.Order{p.orderAdvance()}
 			}
 		} else {
-			return "I need help", []Order{p.orderPassTheBall(), p.orderAdvance()}
+			return "I need help", []BasicTypes.Order{p.orderPassTheBall(), p.orderAdvance()}
 		}
 
 	}
 }
 
-func (p *Player) orderForAtckHelpHse() (msg string, orders []Order) {
+func (p *Player) orderForAtckHelpHse() (msg string, orders []BasicTypes.Order) {
 	if p.isItInMyRegion(p.Coords) {
 		switch p.calcDistanceScale(p.lastMsg.GameInfo.Ball.Coords) {
 		case DISTANCE_SCALE_FAR:
 			msg = "Let's attack!"
-			orders = []Order{p.createMoveOrder(p.lastMsg.GameInfo.Ball.Coords)}
+			orders = []BasicTypes.Order{p.createMoveOrder(p.lastMsg.GameInfo.Ball.Coords)}
 		case DISTANCE_SCALE_NEAR:
 			msg = "Given space"
 			opositPoint := Physics.NewVector(p.Coords, p.lastMsg.GameInfo.Ball.Coords).Invert().TargetFrom(p.Coords)
 			vectorToOpositPoint := Physics.NewVector(p.Coords, p.offenseGoalCoods())
 			vectorToOpositPoint.Add(Physics.NewVector(p.Coords, opositPoint))
-			orders = []Order{p.createMoveOrder(vectorToOpositPoint.TargetFrom(p.Coords))}
+			orders = []BasicTypes.Order{p.createMoveOrder(vectorToOpositPoint.TargetFrom(p.Coords))}
 		case DISTANCE_SCALE_GOOD:
 			msg = "Give me the ball!"
-			orders = []Order{p.createMoveOrder(p.lastMsg.GameInfo.Ball.Coords)}
+			orders = []BasicTypes.Order{p.createMoveOrder(p.lastMsg.GameInfo.Ball.Coords)}
 		}
 	} else {
 		msg = "I'll be right here"
 		myRegionVector := Physics.NewVector(p.Coords, p.myRegionCenter()).Invert().TargetFrom(p.Coords)
 		offensivePosition := Physics.NewVector(p.Coords, p.offenseGoalCoods())
 		offensivePosition.Add(Physics.NewVector(p.Coords, myRegionVector))
-		orders = []Order{p.createMoveOrder(offensivePosition.TargetFrom(p.Coords))}
+		orders = []BasicTypes.Order{p.createMoveOrder(offensivePosition.TargetFrom(p.Coords))}
 	}
 	return msg, orders
 }
 
-func (p *Player) orderForAtckHelpFrg() (msg string, orders []Order) {
+func (p *Player) orderForAtckHelpFrg() (msg string, orders []BasicTypes.Order) {
 	if p.isItInMyRegion(p.Coords) {
 		switch p.calcDistanceScale(p.lastMsg.GameInfo.Ball.Coords) {
 		case DISTANCE_SCALE_FAR:
 			msg = "Supporting on attack"
-			orders = []Order{p.createMoveOrder(p.lastMsg.GameInfo.Ball.Coords)}
+			orders = []BasicTypes.Order{p.createMoveOrder(p.lastMsg.GameInfo.Ball.Coords)}
 		case DISTANCE_SCALE_NEAR:
 			msg = "Helping on attack"
 
 			offensiveZone := Physics.NewVector(p.Coords, p.myRegionCenter())
 			offensiveZone.Add(Physics.NewVector(p.Coords, p.offenseGoalCoods()))
-			orders = []Order{p.createMoveOrder(offensiveZone.TargetFrom(p.Coords))}
+			orders = []BasicTypes.Order{p.createMoveOrder(offensiveZone.TargetFrom(p.Coords))}
 		case DISTANCE_SCALE_GOOD:
 			msg = "Holding positiong for attack"
 			offensiveZone := Physics.NewVector(p.Coords, p.lastMsg.GameInfo.Ball.Coords)
 			offensiveZone.Add(Physics.NewVector(p.Coords, p.offenseGoalCoods()))
-			orders = []Order{p.createMoveOrder(offensiveZone.TargetFrom(p.Coords))}
+			orders = []BasicTypes.Order{p.createMoveOrder(offensiveZone.TargetFrom(p.Coords))}
 		}
 	} else {
 		regionCenter := p.myRegionCenter()
-		return "Backing to my position", []Order{p.createMoveOrder(regionCenter)}
+		return "Backing to my position", []BasicTypes.Order{p.createMoveOrder(regionCenter)}
 	}
 	return msg, orders
 }
@@ -154,27 +157,27 @@ func (p *Player) orderForAtckHelpFrg() (msg string, orders []Order) {
 //endregion Attack states
 
 //region Defending states
-func (p *Player) orderForDefdMyrgHse() (msg string, orders []Order) {
-	orders = []Order{p.createMoveOrder(p.lastMsg.GameInfo.Ball.Coords)}
+func (p *Player) orderForDefdMyrgHse() (msg string, orders []BasicTypes.Order) {
+	orders = []BasicTypes.Order{p.createMoveOrder(p.lastMsg.GameInfo.Ball.Coords)}
 	return "Running towards the ball", orders
 }
 
-func (p *Player) orderForDefdMyrgFrg() (msg string, orders []Order) {
+func (p *Player) orderForDefdMyrgFrg() (msg string, orders []BasicTypes.Order) {
 	switch p.calcDistanceScale(p.lastMsg.GameInfo.Ball.Coords) {
 	case DISTANCE_SCALE_NEAR:
 		// too close
 		msg = "Pressing the player"
-		orders = []Order{p.createMoveOrder(p.lastMsg.GameInfo.Ball.Coords)}
+		orders = []BasicTypes.Order{p.createMoveOrder(p.lastMsg.GameInfo.Ball.Coords)}
 	case DISTANCE_SCALE_FAR:
 		//get closer
 		msg = "Back to my position!"
 		var backOffPos Physics.Point
-		if p.TeamName == HomeTeam {
-			backOffPos = InitialPostionHomeTeam[p.Number]
+		if p.TeamPlace == Units.HomeTeam {
+			backOffPos = Units.InitialPostionHomeTeam[p.Number]
 		} else {
-			backOffPos = InitialPostionAwayTeam[p.Number]
+			backOffPos = Units.InitialPostionAwayTeam[p.Number]
 		}
-		orders = []Order{p.createMoveOrder(backOffPos)}
+		orders = []BasicTypes.Order{p.createMoveOrder(backOffPos)}
 	case DISTANCE_SCALE_GOOD:
 		msg = "Holding positiong"
 	}
@@ -182,34 +185,34 @@ func (p *Player) orderForDefdMyrgFrg() (msg string, orders []Order) {
 	return msg, orders
 }
 
-func (p *Player) orderForDefdOtrgHse() (msg string, orders []Order) {
+func (p *Player) orderForDefdOtrgHse() (msg string, orders []BasicTypes.Order) {
 
 	if p.calcDistanceScale(p.lastMsg.GameInfo.Ball.Coords) == DISTANCE_SCALE_NEAR {
 		msg = "Defensing while back off"
 		backOffDir := Physics.NewVector(p.Coords, p.deffenseGoalCoods())
 		backOffDir.Add(Physics.NewVector(p.Coords, p.lastMsg.GameInfo.Ball.Coords))
-		orders = []Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
+		orders = []BasicTypes.Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
 	} else {
 		msg = "Back off!"
 		backOffDir := Physics.NewVector(p.Coords, p.deffenseGoalCoods())
 		backOffDir.Add(Physics.NewVector(p.Coords, p.myRegionCenter()))
-		orders = []Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
+		orders = []BasicTypes.Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
 	}
 	//nothing more smart than that so far. stay stopped
 	return msg, orders
 }
 
-func (p *Player) orderForDefdOtrgFrg() (msg string, orders []Order) {
+func (p *Player) orderForDefdOtrgFrg() (msg string, orders []BasicTypes.Order) {
 	if p.calcDistanceScale(p.lastMsg.GameInfo.Ball.Coords) == DISTANCE_SCALE_NEAR {
 		msg = "Defensing while back off"
 		backOffDir := Physics.NewVector(p.Coords, p.deffenseGoalCoods())
 		backOffDir.Add(Physics.NewVector(p.Coords, p.lastMsg.GameInfo.Ball.Coords))
-		orders = []Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
+		orders = []BasicTypes.Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
 	} else {
 		msg = "Back off!"
 		backOffDir := Physics.NewVector(p.Coords, p.deffenseGoalCoods())
 		backOffDir.Add(Physics.NewVector(p.Coords, p.myRegionCenter()))
-		orders = []Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
+		orders = []BasicTypes.Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
 	}
 	//nothing more smart than that so far. stay stopped
 	return msg, orders
@@ -217,53 +220,53 @@ func (p *Player) orderForDefdOtrgFrg() (msg string, orders []Order) {
 //endregion Defending states
 
 //region Disputing states
-func (p *Player) orderForDsptNfblHse() (msg string, orders []Order) {
+func (p *Player) orderForDsptNfblHse() (msg string, orders []BasicTypes.Order) {
 	myDistance := p.Coords.DistanceTo(p.lastMsg.GameInfo.Ball.Coords)
 	playerCloser := 0
 	for _, teamMate := range p.findMyTeam(p.lastMsg.GameInfo).Players {
 		if teamMate.Coords.DistanceTo(p.lastMsg.GameInfo.Ball.Coords) < myDistance {
 			playerCloser++
 			if playerCloser > 2 {
-				return "Holding position for suport", []Order{p.createMoveOrder(p.myRegionCenter())}
+				return "Holding position for suport", []BasicTypes.Order{p.createMoveOrder(p.myRegionCenter())}
 			}
 		}
 	}
 	msg = "Disputing for the ball"
-	orders = []Order{p.createMoveOrder(p.lastMsg.GameInfo.Ball.Coords)}
+	orders = []BasicTypes.Order{p.createMoveOrder(p.lastMsg.GameInfo.Ball.Coords)}
 	return msg, orders
 }
 
-func (p *Player) orderForDsptNfblFrg() (msg string, orders []Order) {
+func (p *Player) orderForDsptNfblFrg() (msg string, orders []BasicTypes.Order) {
 	return p.orderForDsptNfblHse()
 }
 
-func (p *Player) orderForDsptFrblHse() (msg string, orders []Order) {
+func (p *Player) orderForDsptFrblHse() (msg string, orders []BasicTypes.Order) {
 	msg = "Try to catch the ball"
 	if p.isItInMyRegion(p.lastMsg.GameInfo.Ball.Coords) {
 		backOffDir := Physics.NewVector(p.Coords, p.deffenseGoalCoods())
 		backOffDir.Add(Physics.NewVector(p.Coords, p.lastMsg.GameInfo.Ball.Coords))
-		orders = []Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
+		orders = []BasicTypes.Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
 	} else {
-		orders = []Order{p.createMoveOrder(p.myRegionCenter())}
+		orders = []BasicTypes.Order{p.createMoveOrder(p.myRegionCenter())}
 	}
 	return msg, orders
 }
 
-func (p *Player) orderForDsptFrblFrg() (msg string, orders []Order) {
+func (p *Player) orderForDsptFrblFrg() (msg string, orders []BasicTypes.Order) {
 	msg = "Watch out the ball"
 	backOffDir := Physics.NewVector(p.Coords, p.myRegionCenter())
 	backOffDir.Add(Physics.NewVector(p.Coords, p.lastMsg.GameInfo.Ball.Coords))
-	orders = []Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
+	orders = []BasicTypes.Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
 	return msg, orders
 }
 //endregion Disputing states
 
 //region helpers
-func (p *Player) orderAdvance() Order {
+func (p *Player) orderAdvance() BasicTypes.Order {
 	return p.createMoveOrder(p.offenseGoalCoods())
 }
 
-func (p *Player) orderPassTheBall() Order {
+func (p *Player) orderPassTheBall() BasicTypes.Order {
 	bestCandidate := new(Player)
 	bestScore := 0
 	for _, playerMate := range p.findMyTeam(p.lastMsg.GameInfo).Players {
@@ -303,7 +306,7 @@ func (p *Player) orderPassTheBall() Order {
 func (p *Player) calcDistanceScale(target Physics.Point) DistanceScale {
 	distance := math.Abs(p.Coords.DistanceTo(target))
 	// try to be closer the player
-	fieldDiagonal := math.Hypot(float64(COURT_WIDTH), float64(COURT_WIDTH))
+	fieldDiagonal := math.Hypot(float64(Units.CourtHeight), float64(Units.CourtWidth))
 	toFar := fieldDiagonal / 3
 	toNear := fieldDiagonal / 5
 

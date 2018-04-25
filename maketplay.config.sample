@@ -1,11 +1,12 @@
 {
+    "Uuid":"local",
    "QueueUser":"player",
    "QueuePassword":"player",
    "QueueHost":"localhost",
    "QueueVHost":"/",
    "QueuePort":"5672",
-   "OutputExchange":"player",
+   "OutputExchange":"maketplay",
    "OutputQueue":"orders",
-   "InputExchange":"player",
+   "InputExchange":"maketplay",
    "InputQueue":"announcements"
 }

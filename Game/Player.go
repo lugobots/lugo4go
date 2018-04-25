@@ -8,29 +8,32 @@ import (
 	"github.com/maketplay/commons/Physics"
 	"github.com/maketplay/commons/BasicTypes"
 	"net/url"
+	"github.com/maketplay/commons/Units"
+	"encoding/json"
+	"github.com/maketplay/commons/GameState"
 )
 
 type Player struct {
 	Physics.Element
-	Id              int          `json:"id"`
-	Number          PlayerNumber `json:"number"`
-	TeamName        TeamName     `json:"team_name"`
-	State           PlayerState  `json:"state"`
-	config			Configuration
-	OutputCom      *commons.Comunicator
-	InputCom       *commons.Comunicator
-	channel         string
-	//lastMsg         Msg
+	Id        int                `json:"id"`
+	Number    Units.PlayerNumber `json:"number"`
+	TeamPlace Units.TeamPlace    `json:"team_name"`
+	State     PlayerState        `json:"state"`
+	config    *Configuration
+	OutputCom *commons.Comunicator
+	InputCom  *commons.Comunicator
+	channel   string
+	lastMsg   GameMessage
 }
 
 var keepListenning = make(chan bool)
 
-func (p *Player) Start(configuration Configuration) {
+func (p *Player) Start(configuration *Configuration) {
 	p.config = configuration
 	p.Id = os.Getpid() //easy way to create a unique ID since the player UUID is not public
-	p.TeamName = configuration.TeamName
+	p.TeamPlace = configuration.TeamPlace
 	p.initializeCommunicator()
-	commons.NickName = fmt.Sprintf("%s-%d", p.TeamName, p.Id)
+	commons.NickName = fmt.Sprintf("%s-%d", p.TeamPlace, p.Id)
 	p.askToPlay()
 	p.keepPlaying()
 }
@@ -45,7 +48,7 @@ func (p *Player) initializeCommunicator() {
 	p.InputCom = commons.CreateListener(
 		*uri,
 		p.config.InputExchange,
-		p.config.InputQueue + p.config.Uuid,
+		p.config.InputQueue + "-" +p.config.Uuid,
 		p.onMessage)
 
 	commons.RegisterCleaner(func() {
@@ -55,67 +58,72 @@ func (p *Player) initializeCommunicator() {
 	p.OutputCom = commons.CreateSpeaker(
 		*uri,
 		p.config.OutputExchange,
-		p.config.OutputQueue + p.config.Uuid)
+		p.config.OutputQueue + "-" + p.config.Uuid)
 
 	commons.RegisterCleaner(func() {
 		p.OutputCom.Close()
 	})
 }
 
-
 func (p *Player) ResetPosition() {
-	if p.TeamName == HomeTeam {
-		p.Coords = InitialPostionHomeTeam[p.Number]
+	if p.TeamPlace == Units.HomeTeam {
+		p.Coords = Units.InitialPostionHomeTeam[p.Number]
 	} else {
-		p.Coords = InitialPostionAwayTeam[p.Number]
+		p.Coords = Units.InitialPostionAwayTeam[p.Number]
 	}
 }
 
-func (p *Player) onMessage(msg Msg) {
-	p.lastMsg = msg
-
-	switch msg.Type {
-	case ANNOUNCEMENT:
-		switch GameState(msg.State) {
-		case GETREADY:
-			p.updatePostion(p.lastMsg.GameInfo)
-			p.Number = p.findMyStatus(msg.GameInfo).Number
-		case LISTENING:
-			p.updatePostion(p.lastMsg.GameInfo)
-			p.State = p.determineMyState()
-			p.madeAMove()
+func (p *Player) onMessage(message []byte) {
+	var msg GameMessage
+	err := json.Unmarshal(message, &msg)
+	if err != nil {
+		commons.Log(err.Error())
+	} else {
+		p.lastMsg = msg
+		switch msg.Type {
+		case BasicTypes.ANNOUNCEMENT:
+			switch GameState.State(msg.State) {
+			case GameState.GETREADY:
+				p.updatePostion(p.lastMsg.GameInfo)
+				p.Number = p.findMyStatus(msg.GameInfo).Number
+			case GameState.LISTENING:
+				p.updatePostion(p.lastMsg.GameInfo)
+				p.State = p.determineMyState()
+				p.madeAMove()
+			}
+		case BasicTypes.RIP:
+			commons.Log("Sorry, guys! I'm out")
+			commons.Cleanup()
+			os.Exit(0)
 		}
-	case RIP:
-		App.Log("Sorry, guys! I'm out")
-		App.Cleanup()
-		os.Exit(0)
 	}
+
 }
 
-func (p *Player) sendOrders(message string, orders ...Order) {
-	p.gameComunicator.Send(Msg{
+func (p *Player) sendOrders(message string, orders ...BasicTypes.Order) {
+	msg := PlayerMessage{
 		BasicTypes.ORDER,
-		GameInfo{},
-		BasicTypes.State(p.State),
 		p.Id,
 		orders,
 		message,
-	})
+	}
+	jsonsified, _ := json.Marshal(msg)
+	p.OutputCom.Send([]byte(jsonsified))
 }
 
 func (p *Player) askToPlay() {
 	data := BasicTypes.Order{
 		Type: BasicTypes.ENTER,
 		Data: map[string]interface{}{
-		"teamName": p.TeamName,
-		"id":       p.Id,
-	}}
-	commons.Log("Try to join to the team %s with the id %d", p.TeamName, p.Id)
+			"teamName": p.TeamPlace,
+			"id":       p.Id,
+		}}
+	commons.Log("Try to join to the team %s with the id %d", p.TeamPlace, p.Id)
 	p.sendOrders("Let me play", data)
 }
 
 func (p *Player) keepPlaying() {
-	App.RegisterCleaner(p.stopsPlayer)
+	commons.RegisterCleaner(p.stopsPlayer)
 	for stillUp := range keepListenning {
 		if !stillUp {
 			os.Exit(0)
@@ -124,12 +132,12 @@ func (p *Player) keepPlaying() {
 }
 
 func (p *Player) stopsPlayer() {
-	App.Log("Stopping player")
+	commons.Log("Stopping player")
 	keepListenning <- false
 }
 
 func (p *Player) madeAMove() {
-	var orders []Order
+	var orders []BasicTypes.Order
 	var msg string
 
 	switch p.State {
@@ -171,7 +179,7 @@ func (p *Player) madeAMove() {
 }
 
 func (p *Player) updatePostion(status GameInfo) {
-	if p.TeamName == HomeTeam {
+	if p.TeamPlace == Units.HomeTeam {
 		p.Coords = p.findMyStatus(status).Coords
 	} else {
 		p.Coords = p.findMyStatus(status).Coords
@@ -183,7 +191,7 @@ func (p *Player) findMyStatus(gameInfo GameInfo) *Player {
 }
 
 func (p *Player) findMyTeam(gameInfo GameInfo) Team {
-	if p.TeamName == HomeTeam {
+	if p.TeamPlace == Units.HomeTeam {
 		return gameInfo.HomeTeam
 	} else {
 		return gameInfo.AwayTeam
@@ -191,64 +199,64 @@ func (p *Player) findMyTeam(gameInfo GameInfo) Team {
 }
 
 func (p *Player) findOpponentTeam(status GameInfo) Team {
-	if p.TeamName == HomeTeam {
+	if p.TeamPlace == Units.HomeTeam {
 		return status.AwayTeam
 	} else {
 		return status.HomeTeam
 	}
 }
 
-func (p *Player) playerEDecision() (string, []Order) {
-	var orders []Order
+func (p *Player) playerEDecision() (string, []BasicTypes.Order) {
+	var orders []BasicTypes.Order
 	if p.IHoldTheBall() {
 		goalDistance := p.Coords.DistanceTo(p.offenseGoalCoods())
 		if int(math.Abs(goalDistance)) < BallMaxDistance() {
-			orders = []Order{p.createKickOrder(p.offenseGoalCoods())}
+			orders = []BasicTypes.Order{p.createKickOrder(p.offenseGoalCoods())}
 		} else {
-			orders = []Order{p.orderAdvance()}
+			orders = []BasicTypes.Order{p.orderAdvance()}
 		}
 	} else {
 		ballDistance := p.Coords.DistanceTo(p.lastMsg.GameInfo.Ball.Coords)
-		if ballDistance < DISTANCE_CATCH_BALL {
-			orders = make([]Order, 2)
-			orders[0] = Order{
-				CATCH,
-				map[string]interface{}{
+		if ballDistance < Units.DistanceCatchBall {
+			orders = make([]BasicTypes.Order, 2)
+			orders[0] = BasicTypes.Order{
+				Type: BasicTypes.CATCH,
+				Data: map[string]interface{}{
 				},
 			}
 			orders[1] = p.orderAdvance()
 		} else {
-			orders = make([]Order, 1)
+			orders = make([]BasicTypes.Order, 1)
 			orders[0] = p.createMoveOrder(p.lastMsg.GameInfo.Ball.Coords)
 		}
 	}
 	return "Gerenic order", orders
 }
 
-func (p *Player) createMoveOrder(target Physics.Point) Order {
-	return Order{
-		MOVE,
-		map[string]interface{}{
+func (p *Player) createMoveOrder(target Physics.Point) BasicTypes.Order {
+	return BasicTypes.Order{
+		Type: BasicTypes.MOVE,
+		Data: map[string]interface{}{
 			"x": target.PosX,
 			"y": target.PosY,
 		},
 	}
 }
 
-func (p *Player) createKickOrder(target Physics.Point) Order {
-	return Order{
-		KICK,
-		map[string]interface{}{
+func (p *Player) createKickOrder(target Physics.Point) BasicTypes.Order {
+	return BasicTypes.Order{
+		Type: BasicTypes.KICK,
+		Data: map[string]interface{}{
 			"x": target.PosX,
 			"y": target.PosY,
 		},
 	}
 }
 
-func (p *Player) createCatchOrder() Order {
-	return Order{
-		CATCH,
-		map[string]interface{}{
+func (p *Player) createCatchOrder() BasicTypes.Order {
+	return BasicTypes.Order{
+		Type: BasicTypes.CATCH,
+		Data: map[string]interface{}{
 		},
 	}
 }
@@ -265,10 +273,10 @@ func (p *Player) determineMyState() PlayerState {
 	if p.lastMsg.GameInfo.Ball.Holder == nil {
 		ballPossess = "dsp" //disputing
 		subState = "fbl"    //far
-		if int(math.Abs(p.Coords.DistanceTo(p.lastMsg.GameInfo.Ball.Coords))) <= DISTANCE_NEAR_BALL {
+		if int(math.Abs(p.Coords.DistanceTo(p.lastMsg.GameInfo.Ball.Coords))) <= DistanceNearBall {
 			subState = "nbl" //near
 		}
-	} else if p.lastMsg.GameInfo.Ball.Holder.TeamName == p.TeamName {
+	} else if p.lastMsg.GameInfo.Ball.Holder.TeamPlace == p.TeamPlace {
 		ballPossess = "atk" //attacking
 		subState = "hlp"    //helping
 		if p.lastMsg.GameInfo.Ball.Holder.Id == p.Id {
@@ -282,10 +290,10 @@ func (p *Player) determineMyState() PlayerState {
 		}
 	}
 
-	if p.TeamName == HomeTeam {
-		isOnMyField = p.lastMsg.GameInfo.Ball.Coords.PosX <= COURT_WIDTH/2
+	if p.TeamPlace == Units.HomeTeam {
+		isOnMyField = p.lastMsg.GameInfo.Ball.Coords.PosX <= Units.CourtWidth/2
 	} else {
-		isOnMyField = p.lastMsg.GameInfo.Ball.Coords.PosX >= COURT_WIDTH/2
+		isOnMyField = p.lastMsg.GameInfo.Ball.Coords.PosX >= Units.CourtWidth/2
 	}
 	fieldState := "fr"
 	if isOnMyField {
@@ -314,16 +322,22 @@ func (p *Player) myRegionCenter() Physics.Point {
 
 func (p *Player) myRegion() PlayerRegion {
 	myRagion := HomePlayersRegions[p.Number]
-	if p.TeamName == AwayTeam {
+	if p.TeamPlace == Units.AwayTeam {
 		myRagion = MirrorRegion(myRagion)
 	}
 	return myRagion
+}
+func MirrorRegion(region PlayerRegion) PlayerRegion {
+	return PlayerRegion{
+		Units.MirrorCoordToAway(region.CornerB), // have to switch the corner because the convention for Regions
+		Units.MirrorCoordToAway(region.CornerA),
+	}
 }
 
 func (p *Player) findNearestMate() (distance float64, player *Player) {
 	var nearestPlayer *Player
 	//starting from the worst case
-	nearestDistance := math.Hypot(float64(COURT_HEIGHT), float64(COURT_WIDTH))
+	nearestDistance := math.Hypot(float64(Units.CourtHeight), float64(Units.CourtWidth))
 	myTeam := p.findMyTeam(p.lastMsg.GameInfo)
 
 	for playerId, player := range myTeam.Players {
@@ -337,19 +351,18 @@ func (p *Player) findNearestMate() (distance float64, player *Player) {
 }
 
 func (p *Player) offenseGoalCoods() Physics.Point {
-	if p.TeamName == HomeTeam {
-		return AWAY_TEAM_GOALCENTER
+	if p.TeamPlace == Units.HomeTeam {
+		return Units.AwayTeamGoalcenter
 	} else {
-		return HOME_TEAM_GOALCENTER
+		return Units.HomeTeamGoalcenter
 	}
 
 }
 
 func (p *Player) deffenseGoalCoods() Physics.Point {
-	if p.TeamName == HomeTeam {
-		return HOME_TEAM_GOALCENTER
+	if p.TeamPlace == Units.HomeTeam {
+		return Units.HomeTeamGoalcenter
 	} else {
-		return AWAY_TEAM_GOALCENTER
+		return Units.AwayTeamGoalcenter
 	}
-
 }
