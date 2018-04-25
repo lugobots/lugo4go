@@ -6,6 +6,8 @@ const HomeTeam TeamName = "home"
 const AwayTeam TeamName = "away"
 
 type StartUpSettings struct {
+	IncomeTopic string
+	OutcomeTopic string
 	TeamName TeamName
 	Port int
 	TeamTitle string

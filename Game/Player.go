@@ -1,11 +1,13 @@
 package Game
 
 import (
-	"github.com/rubens21/test1/App"
 	"os"
 	"fmt"
 	"math"
-	"github.com/rubens21/test1/Lib/Physics"
+	"github.com/eurema/commons"
+	"github.com/eurema/commons/Physics"
+	"github.com/eurema/commons/BasicTypes"
+	"net/url"
 )
 
 type Player struct {
@@ -14,27 +16,52 @@ type Player struct {
 	Number          PlayerNumber `json:"number"`
 	TeamName        TeamName     `json:"team_name"`
 	State           PlayerState  `json:"state"`
-	//gameComunicator *Comunicator
+	config			Configuration
+	OutputCom      *commons.Comunicator
+	InputCom       *commons.Comunicator
 	channel         string
 	//lastMsg         Msg
 }
 
 var keepListenning = make(chan bool)
 
-
-
-Parou quando tava limpando para ficar so o que interessa para o player
-
-
-
-func (p *Player) Start(teamName TeamName) {
-	p.Id = os.Getpid()
-	p.TeamName = teamName
-	//p.gameComunicator = CreateComunicator(MAINTOPIC, p.onMessage)
-	App.NickName = fmt.Sprintf("%s-%d", p.TeamName, p.Id)
+func (p *Player) Start(configuration Configuration) {
+	p.config = configuration
+	p.Id = os.Getpid() //easy way to create a unique ID since the player UUID is not public
+	p.TeamName = configuration.TeamName
+	p.initializeCommunicator()
+	commons.NickName = fmt.Sprintf("%s-%d", p.TeamName, p.Id)
 	p.askToPlay()
 	p.keepPlaying()
 }
+
+func (p *Player) initializeCommunicator() {
+	uri := new(url.URL)
+	uri.Scheme = "amqp"
+	uri.Host = p.config.QueueHost + ":" + p.config.QueuePort
+	uri.Path = p.config.QueueVHost
+	uri.User = url.UserPassword(p.config.QueueUser, p.config.QueuePassword)
+
+	p.InputCom = commons.CreateListener(
+		*uri,
+		p.config.InputExchange,
+		p.config.InputQueue + p.config.Uuid,
+		p.onMessage)
+
+	commons.RegisterCleaner(func() {
+		p.InputCom.Close()
+	})
+
+	p.OutputCom = commons.CreateSpeaker(
+		*uri,
+		p.config.OutputExchange,
+		p.config.OutputQueue + p.config.Uuid)
+
+	commons.RegisterCleaner(func() {
+		p.OutputCom.Close()
+	})
+}
+
 
 func (p *Player) ResetPosition() {
 	if p.TeamName == HomeTeam {
@@ -67,9 +94,9 @@ func (p *Player) onMessage(msg Msg) {
 
 func (p *Player) sendOrders(message string, orders ...Order) {
 	p.gameComunicator.Send(Msg{
-		ORDER,
+		BasicTypes.ORDER,
 		GameInfo{},
-		State(p.State),
+		BasicTypes.State(p.State),
 		p.Id,
 		orders,
 		message,
@@ -77,11 +104,13 @@ func (p *Player) sendOrders(message string, orders ...Order) {
 }
 
 func (p *Player) askToPlay() {
-	data := Order{ENTER, map[string]interface{}{
+	data := BasicTypes.Order{
+		Type: BasicTypes.ENTER,
+		Data: map[string]interface{}{
 		"teamName": p.TeamName,
 		"id":       p.Id,
 	}}
-	App.Log("Try to join to the team %s with the id %d", p.TeamName, p.Id)
+	commons.Log("Try to join to the team %s with the id %d", p.TeamName, p.Id)
 	p.sendOrders("Let me play", data)
 }
 

@@ -1,0 +1,11 @@
+{
+   "QueueUser":"player",
+   "QueuePassword":"player",
+   "QueueHost":"localhost",
+   "QueueVHost":"/",
+   "QueuePort":"5672",
+   "OutputExchange":"player",
+   "OutputQueue":"orders",
+   "InputExchange":"player",
+   "InputQueue":"announcements"
+}

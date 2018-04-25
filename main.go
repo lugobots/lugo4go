@@ -1,16 +1,13 @@
-package the_dummies
+package main
 
 import (
 	"os"
 	"math/rand"
 	"time"
 	"os/signal"
-	"github.com/ant21games/the-dummies/App"
-	"github.com/ant21games/the-dummies/Game"
-	"flag"
+	"./Game"
+	"github.com/eurema/commons"
 )
-
-
 
 var (
 	player Game.Player
@@ -21,32 +18,25 @@ var (
 func main() {
 	rand.Seed(time.Now().Unix())
 	watchInterruptions()
-	defer App.Cleanup()
-	Settings = LoadSetting()
+	defer commons.Cleanup()
+	serverConfig := new(Game.Configuration)
+	commons.Load(serverConfig)
+	serverConfig.LoadCmdArg()
+	/**********************************************/
+
 	player = Game.Player{}
-	App.NickName = "New Player"
-	player.Start(teamName)
+	commons.NickName = "New Player"
+	player.Start(serverConfig)
 }
 
 func watchInterruptions() {
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 	go func() {
-		for _ = range signalChan {
-			App.Log("*********** INTERRUPTION SIGNAL ****************")
-			App.Cleanup()
+		for range signalChan {
+			commons.Log("*********** INTERRUPTION SIGNAL ****************")
+			commons.Cleanup()
 			os.Exit(0)
 		}
 	}()
-}
-
-func LoadSetting() Game.StartUpSettings {
-	var team, title string
-	var port int64
-	flag.StringVar(&team, "team", string(Game.HomeTeam), "(home or away)")
-	flag.StringVar(&title, "title", string(Game.HomeTeam), "Team's name")
-	flag.Int64Var(&port, "port", 8080, "Port server")
-	flag.Parse()
-
-	return Game.StartUpSettings{Game.TeamName(team), int(port), title}
 }
