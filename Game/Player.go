@@ -4,9 +4,9 @@ import (
 	"os"
 	"fmt"
 	"math"
-	"github.com/eurema/commons"
-	"github.com/eurema/commons/Physics"
-	"github.com/eurema/commons/BasicTypes"
+	"github.com/maketplay/commons"
+	"github.com/maketplay/commons/Physics"
+	"github.com/maketplay/commons/BasicTypes"
 	"net/url"
 )
 
