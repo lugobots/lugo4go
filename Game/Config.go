@@ -3,6 +3,7 @@ package Game
 import (
 	"flag"
 	"github.com/maketplay/commons/Units"
+	"fmt"
 )
 
 type Configuration struct {
@@ -24,10 +25,9 @@ type Configuration struct {
 func (c *Configuration) LoadCmdArg() {
 	//mandatory
 	var name string
-	flag.StringVar(&name, "team", string(c.TeamPlace), "Team (home or away). (Auto-provided in production)")
-	if name != string(Units.HomeTeam) && name == string(Units.AwayTeam) {
-		panic("Invalid team option. Must be either home or away")
-	}
+
+	flag.StringVar(&name, "team", "home", "Team (home or away). (Auto-provided in production)")
+
 
 	flag.StringVar(&c.Uuid, "uui", c.Uuid, "Uuid for this player instance. (Auto-provided in production)")
 	flag.StringVar(&c.QueueUser, "QueueUser", c.QueueUser, "AMQP username")
@@ -40,4 +40,12 @@ func (c *Configuration) LoadCmdArg() {
 	flag.StringVar(&c.InputExchange, "InputExchange", c.InputExchange, "The match Uuid (useless locally)")
 	flag.StringVar(&c.InputQueue, "InputQueue", c.InputQueue, "The match Uuid (useless locally)")
 	flag.Parse()
+
+
+	if name != string(Units.HomeTeam) && name != string(Units.AwayTeam) {
+		panic("Invalid team option {" + name + "}. Must be either home or away")
+	}
+	c.TeamPlace = Units.TeamPlace(name)
+	fmt.Println(">>>>> " + c.Uuid)
+	fmt.Println(c.TeamPlace)
 }
