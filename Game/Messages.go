@@ -12,12 +12,11 @@ type PlayerMessage struct {
 }
 
 type GameMessage struct {
-	Type     BasicTypes.MsgType `json:"type"`
-	GameInfo GameInfo           `json:"info"`
-	State    BasicTypes.State   `json:"state"`
-	PlayerId int                `json:"player_id"`
-	Orders   []BasicTypes.Order `json:"orders"`
-	Message  string             `json:"message"`
+	Type     BasicTypes.MsgType     `json:"type"`
+	GameInfo GameInfo               `json:"info"`
+	State    BasicTypes.State       `json:"state"`
+	Data     map[string]string		`json:"data"`
+	Message  string                 `json:"message"`
 }
 
 type GameInfo struct {

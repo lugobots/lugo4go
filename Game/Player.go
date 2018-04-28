@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"github.com/maketplay/commons/GameState"
 	"github.com/gorilla/websocket"
+	"strconv"
 )
 
 type Player struct {
@@ -25,7 +26,7 @@ type Player struct {
 	//OutputCom *commons.Comunicator
 	//InputCom  *commons.Comunicator
 	//channel   string
-	lastMsg GameMessage
+	lastMsg   GameMessage
 	readingWs *commons.Task
 }
 
@@ -35,9 +36,10 @@ func (p *Player) Start(configuration *Configuration) {
 	p.config = configuration
 	p.Id = os.Getpid() //easy way to create a unique ID since the player UUID is not public
 	p.TeamPlace = configuration.TeamPlace
+	commons.Log("Try to join to the team %s ", p.TeamPlace)
 	p.initializeCommunicator()
 	commons.NickName = fmt.Sprintf("%s-%d", p.TeamPlace, p.Id)
-	p.askToPlay()
+	//p.askToPlay()
 	p.keepPlaying()
 }
 
@@ -87,6 +89,21 @@ func (p *Player) ResetPosition() {
 func (p *Player) onMessage(msg GameMessage) {
 	p.lastMsg = msg
 	switch msg.Type {
+	case BasicTypes.WELCOME:
+		commons.LogInfo("Accepted by the game server")
+		if myId, ok := msg.Data["id"]; ok {
+			i, err := strconv.Atoi(myId)
+			if err != nil {
+				commons.LogError("Invalid player id: %v", err.Error())
+				panic("Invalid player id")
+			}
+			p.Id = i
+		} else {
+			commons.LogError("Player id missing in the welcome message")
+			panic("Player id missing in the welcome message")
+		}
+		p.updatePostion(p.lastMsg.GameInfo)
+		p.Number = p.findMyStatus(msg.GameInfo).Number
 	case BasicTypes.ANNOUNCEMENT:
 		commons.LogAnn("ANN %s", string(msg.State))
 		switch GameState.State(msg.State) {
@@ -124,11 +141,9 @@ func (p *Player) sendOrders(message string, orders ...BasicTypes.Order) {
 func (p *Player) askToPlay() {
 	data := BasicTypes.Order{
 		Type: BasicTypes.ENTER,
-		Data: map[string]interface{}{
-			"teamName": p.TeamPlace,
-			"id":       p.Id,
-		}}
-	commons.Log("Try to join to the team %s with the id %d", p.TeamPlace, p.Id)
+		Data: nil,
+	}
+
 	p.sendOrders("Let me play", data)
 }
 
@@ -384,6 +399,7 @@ func (p *Player) websocketListenner() {
 			commons.LogError("Fail reading websocket message (%d): %s", msgType, err)
 		} else {
 			var msg GameMessage
+			commons.Log(string(message))
 			err = json.Unmarshal(message, &msg)
 			if err != nil {
 				commons.LogError("Fail on convert wb message: %s", err.Error())
