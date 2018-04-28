@@ -125,7 +125,6 @@ func (p *Player) onMessage(msg GameMessage) {
 func (p *Player) sendOrders(message string, orders ...BasicTypes.Order) {
 	msg := PlayerMessage{
 		BasicTypes.ORDER,
-		p.Id,
 		orders,
 		message,
 	}
@@ -399,7 +398,6 @@ func (p *Player) websocketListenner() {
 			commons.LogError("Fail reading websocket message (%d): %s", msgType, err)
 		} else {
 			var msg GameMessage
-			commons.Log(string(message))
 			err = json.Unmarshal(message, &msg)
 			if err != nil {
 				commons.LogError("Fail on convert wb message: %s", err.Error())

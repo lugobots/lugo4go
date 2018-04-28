@@ -6,7 +6,6 @@ import (
 
 type PlayerMessage struct {
 	Type     BasicTypes.MsgType `json:"type"`
-	PlayerId int                `json:"player_id"`
 	Orders   []BasicTypes.Order `json:"orders"`
 	Debug    string             `json:"message"`
 }
