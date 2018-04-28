@@ -11,7 +11,7 @@ import (
 	"github.com/maketplay/commons/Units"
 	"encoding/json"
 	"github.com/maketplay/commons/GameState"
-	"github.com/rafaeljesus/rabbus"
+	"github.com/gorilla/websocket"
 )
 
 type Player struct {
@@ -21,13 +21,16 @@ type Player struct {
 	TeamPlace Units.TeamPlace    `json:"team_name"`
 	State     PlayerState        `json:"state"`
 	config    *Configuration
-	OutputCom *commons.Comunicator
-	InputCom  *commons.Comunicator
-	channel   string
-	lastMsg   GameMessage
+	GameConn  *websocket.Conn
+	//OutputCom *commons.Comunicator
+	//InputCom  *commons.Comunicator
+	//channel   string
+	lastMsg GameMessage
+	readingWs *commons.Task
 }
 
 var keepListenning = make(chan bool)
+var stillUp = make(chan *struct{})
 
 func (p *Player) Start(configuration *Configuration) {
 	p.config = configuration
@@ -41,29 +44,37 @@ func (p *Player) Start(configuration *Configuration) {
 
 func (p *Player) initializeCommunicator() {
 	uri := new(url.URL)
-	uri.Scheme = "amqp"
-	uri.Host = p.config.QueueHost + ":" + p.config.QueuePort
-	uri.Path = p.config.QueueVHost
-	uri.User = url.UserPassword(p.config.QueueUser, p.config.QueuePassword)
+	uri.Scheme = "ws"
+	uri.Host = "localhost:8080"
+	uri.Path = fmt.Sprintf("/announcements/%s/%s", p.config.Uuid, p.TeamPlace)
 
-	p.InputCom = commons.CreateListener(
-		*uri,
-		p.config.InputExchange,
-		p.config.InputQueue + "-" +p.config.Uuid,
-		p.onMessage)
-
-	commons.RegisterCleaner("Input communicator", func(interrupted bool) {
-		p.InputCom.Close()
+	var err error
+	p.GameConn, _, err = websocket.DefaultDialer.Dial(uri.String(), nil)
+	if err != nil {
+		commons.Log("Fail on dial: %s", err.Error())
+	}
+	commons.RegisterCleaner("Websocket connection", func(interrupted bool) {
+		err := p.GameConn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+		if err != nil {
+			commons.LogError("Fail on closing ws connection: %s", err.Error())
+		}
+		p.readingWs.Stop()
+		p.GameConn.Close()
 	})
 
-	p.OutputCom = commons.CreateSpeaker(
-		*uri,
-		p.config.OutputExchange,
-		p.config.OutputQueue + "-" + p.config.Uuid)
-
-	commons.RegisterCleaner("Output communicator", func(interrupted bool) {
-		p.OutputCom.Close()
+	p.GameConn.SetCloseHandler(func(code int, text string) error {
+		p.readingWs.Stop()
+		if code == websocket.CloseNormalClosure {
+			commons.Log("Game has closed the websocket connection")
+		} else {
+			commons.LogError("Lost webscket connection with the game: msgType %d: %s", code, text)
+		}
+		commons.Cleanup(true)
+		os.Exit(0)
+		return nil
 	})
+
+	go p.websocketListenner()
 }
 
 func (p *Player) ResetPosition() {
@@ -74,32 +85,25 @@ func (p *Player) ResetPosition() {
 	}
 }
 
-func (p *Player) onMessage(message *rabbus.ConsumerMessage) {
-	var msg GameMessage
-	err := json.Unmarshal(message.Body, &msg)
-	if err != nil {
-		commons.Log(err.Error())
-	} else {
-		p.lastMsg = msg
-		switch msg.Type {
-		case BasicTypes.ANNOUNCEMENT:
-			commons.LogAnn("ANN %s", string(msg.State))
-			switch GameState.State(msg.State) {
-			case GameState.GETREADY:
-				p.updatePostion(p.lastMsg.GameInfo)
-				p.Number = p.findMyStatus(msg.GameInfo).Number
-			case GameState.LISTENING:
-				p.updatePostion(p.lastMsg.GameInfo)
-				p.State = p.determineMyState()
-				p.madeAMove()
-			}
-		case BasicTypes.RIP:
-			commons.LogError("The server has stopped :/")
-			commons.Cleanup(true)
-			os.Exit(0)
+func (p *Player) onMessage(msg GameMessage) {
+	p.lastMsg = msg
+	switch msg.Type {
+	case BasicTypes.ANNOUNCEMENT:
+		commons.LogAnn("ANN %s", string(msg.State))
+		switch GameState.State(msg.State) {
+		case GameState.GETREADY:
+			p.updatePostion(p.lastMsg.GameInfo)
+			p.Number = p.findMyStatus(msg.GameInfo).Number
+		case GameState.LISTENING:
+			p.updatePostion(p.lastMsg.GameInfo)
+			p.State = p.determineMyState()
+			p.madeAMove()
 		}
+	case BasicTypes.RIP:
+		commons.LogError("The server has stopped :/")
+		commons.Cleanup(true)
+		os.Exit(0)
 	}
-
 }
 
 func (p *Player) sendOrders(message string, orders ...BasicTypes.Order) {
@@ -110,7 +114,12 @@ func (p *Player) sendOrders(message string, orders ...BasicTypes.Order) {
 		message,
 	}
 	jsonsified, _ := json.Marshal(msg)
-	p.OutputCom.Send([]byte(jsonsified))
+
+	err := p.GameConn.WriteMessage(websocket.TextMessage, jsonsified)
+	if err != nil {
+		commons.LogError("Fail on sending message: %s", err.Error())
+		return
+	}
 }
 
 func (p *Player) askToPlay() {
@@ -366,4 +375,23 @@ func (p *Player) deffenseGoalCoods() Physics.Point {
 	} else {
 		return Units.AwayTeamGoalcenter
 	}
+}
+func (p *Player) websocketListenner() {
+	p.readingWs = commons.NewTask(func(task *commons.Task) {
+		msgType, message, err := p.GameConn.ReadMessage()
+		if msgType == -1 {
+			return
+		} else if err != nil {
+			commons.LogError("Fail reading websocket message (%d): %s", msgType, err)
+		} else {
+			var msg GameMessage
+			err = json.Unmarshal(message, &msg)
+			if err != nil {
+				commons.LogError("Fail on convert wb message: %s", err.Error())
+			} else {
+				p.onMessage(msg)
+			}
+		}
+	})
+	p.readingWs.Start()
 }
