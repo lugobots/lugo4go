@@ -19,8 +19,8 @@ type Player struct {
 	Physics.Element
 	Id        int                `json:"id"`
 	Number    Units.PlayerNumber `json:"number"`
-	TeamPlace Units.TeamPlace    `json:"team_name"`
-	State     PlayerState        `json:"state"`
+	TeamPlace Units.TeamPlace    `json:"team_place"`
+	state     PlayerState
 	config    *Configuration
 	GameConn  *websocket.Conn
 	//OutputCom *commons.Comunicator
@@ -112,7 +112,8 @@ func (p *Player) onMessage(msg GameMessage) {
 			p.Number = p.findMyStatus(msg.GameInfo).Number
 		case GameState.LISTENING:
 			p.updatePostion(p.lastMsg.GameInfo)
-			p.State = p.determineMyState()
+			p.state = p.determineMyState()
+			commons.LogDebug("State: %s", p.state)
 			p.madeAMove()
 		}
 	case BasicTypes.RIP:
@@ -163,7 +164,7 @@ func (p *Player) madeAMove() {
 	var orders []BasicTypes.Order
 	var msg string
 
-	switch p.State {
+	switch p.state {
 	case AtckHoldHse:
 		msg, orders = p.orderForAtckHoldHse()
 	case AtckHoldFrg:
