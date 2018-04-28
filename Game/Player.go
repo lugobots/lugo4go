@@ -30,7 +30,6 @@ type Player struct {
 }
 
 var keepListenning = make(chan bool)
-var stillUp = make(chan *struct{})
 
 func (p *Player) Start(configuration *Configuration) {
 	p.config = configuration
