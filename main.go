@@ -16,7 +16,7 @@ var (
 func main() {
 	rand.Seed(time.Now().Unix())
 	watchInterruptions()
-	defer commons.Cleanup()
+	defer commons.Cleanup(false)
 	serverConfig := new(Game.Configuration)
 	commons.Load(serverConfig)
 	serverConfig.LoadCmdArg()
@@ -33,7 +33,7 @@ func watchInterruptions() {
 	go func() {
 		for range signalChan {
 			commons.Log("*********** INTERRUPTION SIGNAL ****************")
-			commons.Cleanup()
+			commons.Cleanup(true)
 			os.Exit(0)
 		}
 	}()

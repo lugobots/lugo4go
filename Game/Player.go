@@ -11,6 +11,7 @@ import (
 	"github.com/maketplay/commons/Units"
 	"encoding/json"
 	"github.com/maketplay/commons/GameState"
+	"github.com/rafaeljesus/rabbus"
 )
 
 type Player struct {
@@ -51,7 +52,7 @@ func (p *Player) initializeCommunicator() {
 		p.config.InputQueue + "-" +p.config.Uuid,
 		p.onMessage)
 
-	commons.RegisterCleaner(func() {
+	commons.RegisterCleaner("Input communicator", func(interrupted bool) {
 		p.InputCom.Close()
 	})
 
@@ -60,7 +61,7 @@ func (p *Player) initializeCommunicator() {
 		p.config.OutputExchange,
 		p.config.OutputQueue + "-" + p.config.Uuid)
 
-	commons.RegisterCleaner(func() {
+	commons.RegisterCleaner("Output communicator", func(interrupted bool) {
 		p.OutputCom.Close()
 	})
 }
@@ -73,15 +74,16 @@ func (p *Player) ResetPosition() {
 	}
 }
 
-func (p *Player) onMessage(message []byte) {
+func (p *Player) onMessage(message *rabbus.ConsumerMessage) {
 	var msg GameMessage
-	err := json.Unmarshal(message, &msg)
+	err := json.Unmarshal(message.Body, &msg)
 	if err != nil {
 		commons.Log(err.Error())
 	} else {
 		p.lastMsg = msg
 		switch msg.Type {
 		case BasicTypes.ANNOUNCEMENT:
+			commons.LogAnn("ANN %s", string(msg.State))
 			switch GameState.State(msg.State) {
 			case GameState.GETREADY:
 				p.updatePostion(p.lastMsg.GameInfo)
@@ -92,8 +94,8 @@ func (p *Player) onMessage(message []byte) {
 				p.madeAMove()
 			}
 		case BasicTypes.RIP:
-			commons.Log("Sorry, guys! I'm out")
-			commons.Cleanup()
+			commons.LogError("The server has stopped :/")
+			commons.Cleanup(true)
 			os.Exit(0)
 		}
 	}
@@ -123,7 +125,7 @@ func (p *Player) askToPlay() {
 }
 
 func (p *Player) keepPlaying() {
-	commons.RegisterCleaner(p.stopsPlayer)
+	commons.RegisterCleaner("Stopping to play", p.stopsPlayer)
 	for stillUp := range keepListenning {
 		if !stillUp {
 			os.Exit(0)
@@ -131,8 +133,7 @@ func (p *Player) keepPlaying() {
 	}
 }
 
-func (p *Player) stopsPlayer() {
-	commons.Log("Stopping player")
+func (p *Player) stopsPlayer(interrupted bool) {
 	keepListenning <- false
 }
 
