@@ -4,9 +4,9 @@ import (
 	"math"
 	"reflect"
 
-	"github.com/maketplay/commons/BasicTypes"
-	"github.com/maketplay/commons/Units"
-	"github.com/maketplay/commons/Physics"
+	"github.com/makeitplay/commons/BasicTypes"
+	"github.com/makeitplay/commons/Units"
+	"github.com/makeitplay/commons/Physics"
 )
 
 type PlayerState BasicTypes.State

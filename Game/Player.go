@@ -4,13 +4,13 @@ import (
 	"os"
 	"fmt"
 	"math"
-	"github.com/maketplay/commons"
-	"github.com/maketplay/commons/Physics"
-	"github.com/maketplay/commons/BasicTypes"
+	"github.com/makeitplay/commons"
+	"github.com/makeitplay/commons/Physics"
+	"github.com/makeitplay/commons/BasicTypes"
 	"net/url"
-	"github.com/maketplay/commons/Units"
+	"github.com/makeitplay/commons/Units"
 	"encoding/json"
-	"github.com/maketplay/commons/GameState"
+	"github.com/makeitplay/commons/GameState"
 	"github.com/gorilla/websocket"
 	"strconv"
 )
@@ -136,15 +136,6 @@ func (p *Player) sendOrders(message string, orders ...BasicTypes.Order) {
 		commons.LogError("Fail on sending message: %s", err.Error())
 		return
 	}
-}
-
-func (p *Player) askToPlay() {
-	data := BasicTypes.Order{
-		Type: BasicTypes.ENTER,
-		Data: nil,
-	}
-
-	p.sendOrders("Let me play", data)
 }
 
 func (p *Player) keepPlaying() {
@@ -326,6 +317,18 @@ func (p *Player) determineMyState() PlayerState {
 	return PlayerState(ballPossess + "-" + subState + "-" + fieldState)
 }
 
+// Scala do campo ok
+// continuar testes
+
+GOLLLLERIo
+
+- rearrangin should change the player directions
+6. incluir testes para entrdas invalidas
+//Debugar the dummies
+//1. numero de jogadores
+//2. golero e gol
+
+
 func (p *Player) isItInMyRegion(coords Physics.Point) bool {
 	myRagion := p.myRegion()
 	isInX := coords.PosX >= myRagion.CornerA.PosX && coords.PosX <= myRagion.CornerB.PosX
@@ -376,18 +379,18 @@ func (p *Player) findNearestMate() (distance float64, player *Player) {
 
 func (p *Player) offenseGoalCoods() Physics.Point {
 	if p.TeamPlace == Units.HomeTeam {
-		return Units.AwayTeamGoalcenter
+		return Units.AwayTeamGoalCenter
 	} else {
-		return Units.HomeTeamGoalcenter
+		return Units.HomeTeamGoalCenter
 	}
 
 }
 
 func (p *Player) deffenseGoalCoods() Physics.Point {
 	if p.TeamPlace == Units.HomeTeam {
-		return Units.HomeTeamGoalcenter
+		return Units.HomeTeamGoalCenter
 	} else {
-		return Units.AwayTeamGoalcenter
+		return Units.AwayTeamGoalCenter
 	}
 }
 func (p *Player) websocketListenner() {

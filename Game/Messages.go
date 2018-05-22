@@ -1,7 +1,7 @@
 package Game
 
 import (
-	"github.com/maketplay/commons/BasicTypes"
+	"github.com/makeitplay/commons/BasicTypes"
 )
 
 type PlayerMessage struct {

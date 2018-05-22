@@ -2,7 +2,7 @@ package Game
 
 import (
 	"strconv"
-	"github.com/maketplay/commons/Units"
+	"github.com/makeitplay/commons/Units"
 )
 
 type Team struct {

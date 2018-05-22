@@ -6,7 +6,7 @@ import (
 	"time"
 	"os/signal"
 	"./Game"
-	"github.com/maketplay/commons"
+	"github.com/makeitplay/commons"
 )
 
 var (
