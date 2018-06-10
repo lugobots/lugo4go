@@ -3,6 +3,7 @@ package Game
 import (
 	"strconv"
 	"github.com/makeitplay/commons/Units"
+	"github.com/makeitplay/commons/BasicTypes"
 )
 
 type Team struct {
@@ -20,7 +21,7 @@ func (t *Team) AddPlayer(player *Player) (numPlayers int, err error) {
 	nextNumber := strconv.Itoa(countPlayers)
 
 	player.TeamPlace = t.Name
-	player.Number = Units.PlayerNumber(nextNumber)
+	player.Number = BasicTypes.PlayerNumber(nextNumber)
 	t.Players[player.Id] = player
 
 	return countPlayers, nil

@@ -13,19 +13,17 @@ import (
 	"github.com/makeitplay/commons/GameState"
 	"github.com/gorilla/websocket"
 	"strconv"
+	"github.com/makeitplay/the-dummies/tatics"
 )
 
 type Player struct {
 	Physics.Element
 	Id        int                `json:"id"`
-	Number    Units.PlayerNumber `json:"number"`
+	Number    BasicTypes.PlayerNumber `json:"number"`
 	TeamPlace Units.TeamPlace    `json:"team_place"`
 	state     PlayerState
 	config    *Configuration
 	GameConn  *websocket.Conn
-	//OutputCom *commons.Comunicator
-	//InputCom  *commons.Comunicator
-	//channel   string
 	lastMsg   GameMessage
 	readingWs *commons.Task
 }
@@ -34,12 +32,10 @@ var keepListenning = make(chan bool)
 
 func (p *Player) Start(configuration *Configuration) {
 	p.config = configuration
-	p.Id = os.Getpid() //easy way to create a unique ID since the player UUID is not public
 	p.TeamPlace = configuration.TeamPlace
 	commons.Log("Try to join to the team %s ", p.TeamPlace)
 	p.initializeCommunicator()
-	commons.NickName = fmt.Sprintf("%s-%d", p.TeamPlace, p.Id)
-	//p.askToPlay()
+	commons.NickName = fmt.Sprintf("%s-%d", p.TeamPlace, p.Number)
 	p.keepPlaying()
 }
 
@@ -79,11 +75,7 @@ func (p *Player) initializeCommunicator() {
 }
 
 func (p *Player) ResetPosition() {
-	if p.TeamPlace == Units.HomeTeam {
-		p.Coords = Units.InitialPostionHomeTeam[p.Number]
-	} else {
-		p.Coords = Units.InitialPostionAwayTeam[p.Number]
-	}
+	p.Coords = *p.myRegion().InitialPosition()
 }
 
 func (p *Player) onMessage(msg GameMessage) {
@@ -105,7 +97,7 @@ func (p *Player) onMessage(msg GameMessage) {
 		p.updatePostion(p.lastMsg.GameInfo)
 		p.Number = p.findMyStatus(msg.GameInfo).Number
 	case BasicTypes.ANNOUNCEMENT:
-		commons.LogAnn("ANN %s", string(msg.State))
+		commons.LogBroadcast("ANN %s", string(msg.State))
 		switch GameState.State(msg.State) {
 		case GameState.GETREADY:
 			p.updatePostion(p.lastMsg.GameInfo)
@@ -221,32 +213,6 @@ func (p *Player) findOpponentTeam(status GameInfo) Team {
 	}
 }
 
-func (p *Player) playerEDecision() (string, []BasicTypes.Order) {
-	var orders []BasicTypes.Order
-	if p.IHoldTheBall() {
-		goalDistance := p.Coords.DistanceTo(p.offenseGoalCoods())
-		if int(math.Abs(goalDistance)) < BallMaxDistance() {
-			orders = []BasicTypes.Order{p.createKickOrder(p.offenseGoalCoods())}
-		} else {
-			orders = []BasicTypes.Order{p.orderAdvance()}
-		}
-	} else {
-		ballDistance := p.Coords.DistanceTo(p.lastMsg.GameInfo.Ball.Coords)
-		if ballDistance < Units.DistanceCatchBall {
-			orders = make([]BasicTypes.Order, 2)
-			orders[0] = BasicTypes.Order{
-				Type: BasicTypes.CATCH,
-				Data: map[string]interface{}{
-				},
-			}
-			orders[1] = p.orderAdvance()
-		} else {
-			orders = make([]BasicTypes.Order, 1)
-			orders[0] = p.createMoveOrder(p.lastMsg.GameInfo.Ball.Coords)
-		}
-	}
-	return "Gerenic order", orders
-}
 
 func (p *Player) createMoveOrder(target Physics.Point) BasicTypes.Order {
 	return BasicTypes.Order{
@@ -317,17 +283,6 @@ func (p *Player) determineMyState() PlayerState {
 	return PlayerState(ballPossess + "-" + subState + "-" + fieldState)
 }
 
-// Scala do campo ok
-// continuar testes
-
-GOLLLLERIo
-
-- rearrangin should change the player directions
-6. incluir testes para entrdas invalidas
-//Debugar the dummies
-//1. numero de jogadores
-//2. golero e gol
-
 
 func (p *Player) isItInMyRegion(coords Physics.Point) bool {
 	myRagion := p.myRegion()
@@ -347,17 +302,17 @@ func (p *Player) myRegionCenter() Physics.Point {
 	}
 }
 
-func (p *Player) myRegion() PlayerRegion {
-	myRagion := HomePlayersRegions[p.Number]
+func (p *Player) myRegion() tatics.PlayerRegion {
+	myRagion := tatics.HomePlayersRegions[p.Number]
 	if p.TeamPlace == Units.AwayTeam {
 		myRagion = MirrorRegion(myRagion)
 	}
 	return myRagion
 }
-func MirrorRegion(region PlayerRegion) PlayerRegion {
-	return PlayerRegion{
-		Units.MirrorCoordToAway(region.CornerB), // have to switch the corner because the convention for Regions
-		Units.MirrorCoordToAway(region.CornerA),
+func MirrorRegion(region tatics.PlayerRegion) tatics.PlayerRegion {
+	return tatics.PlayerRegion{
+		CornerA: tatics.MirrorCoordToAway(region.CornerB), // have to switch the corner because the convention for Regions
+		CornerB: tatics.MirrorCoordToAway(region.CornerA),
 	}
 }
 
@@ -379,18 +334,18 @@ func (p *Player) findNearestMate() (distance float64, player *Player) {
 
 func (p *Player) offenseGoalCoods() Physics.Point {
 	if p.TeamPlace == Units.HomeTeam {
-		return Units.AwayTeamGoalCenter
+		return commons.AwayTeamGoal.Center
 	} else {
-		return Units.HomeTeamGoalCenter
+		return commons.HomeTeamGoal.Center
 	}
 
 }
 
 func (p *Player) deffenseGoalCoods() Physics.Point {
 	if p.TeamPlace == Units.HomeTeam {
-		return Units.HomeTeamGoalCenter
+		return commons.HomeTeamGoal.Center
 	} else {
-		return Units.AwayTeamGoalCenter
+		return  commons.AwayTeamGoal.Center
 	}
 }
 func (p *Player) websocketListenner() {

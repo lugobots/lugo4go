@@ -71,7 +71,7 @@ func (p *Player) orderForAtckHoldHse() (msg string, orders []BasicTypes.Order) {
 				nearstObstacle = oppDist
 			}
 		}
-		if nearstObstacle < Units.DistanceCatchBall*2 {
+		if nearstObstacle < Units.PlayerMaxSpeed*2 {
 			return "I need help", []BasicTypes.Order{p.orderPassTheBall(), p.orderAdvance()}
 		} else {
 			return "Advance watching", []BasicTypes.Order{p.orderAdvance()}
@@ -172,11 +172,7 @@ func (p *Player) orderForDefdMyrgFrg() (msg string, orders []BasicTypes.Order) {
 		//get closer
 		msg = "Back to my position!"
 		var backOffPos Physics.Point
-		if p.TeamPlace == Units.HomeTeam {
-			backOffPos = Units.InitialPostionHomeTeam[p.Number]
-		} else {
-			backOffPos = Units.InitialPostionAwayTeam[p.Number]
-		}
+		backOffPos = *p.myRegion().CentralDefense()
 		orders = []BasicTypes.Order{p.createMoveOrder(backOffPos)}
 	case DISTANCE_SCALE_GOOD:
 		msg = "Holding positiong"
