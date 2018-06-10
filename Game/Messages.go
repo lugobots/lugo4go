@@ -20,6 +20,7 @@ type GameMessage struct {
 
 type GameInfo struct {
 	State            BasicTypes.State `json:"state"`
+	Turn             int              `json:"turn"`
 	Ball             Ball             `json:"ball"`
 	HomeTeam         Team             `json:"home"`
 	AwayTeam         Team             `json:"away"`

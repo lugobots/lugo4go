@@ -172,7 +172,8 @@ func (p *Player) orderForDefdMyrgFrg() (msg string, orders []BasicTypes.Order) {
 		//get closer
 		msg = "Back to my position!"
 		var backOffPos Physics.Point
-		backOffPos = *p.myRegion().CentralDefense()
+		region := p.myRegion()
+		backOffPos = region.CentralDefense()
 		orders = []BasicTypes.Order{p.createMoveOrder(backOffPos)}
 	case DISTANCE_SCALE_GOOD:
 		msg = "Holding positiong"

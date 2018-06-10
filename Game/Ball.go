@@ -9,7 +9,6 @@ var maxDistance = 0
 
 type Ball struct {
 	Physics.Element
-	Vector *Physics.Vector `json:"vector"`
 	Holder *Player
 }
 

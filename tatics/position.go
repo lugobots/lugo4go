@@ -16,12 +16,12 @@ type PlayerRegion struct {
 	CornerB Physics.Point
 }
 
-func (p *PlayerRegion) InitialPosition() *Physics.Point {
+func (p *PlayerRegion) InitialPosition() Physics.Point {
 	return p.CentralDefense()
 }
 
-func (p *PlayerRegion) CentralDefense() *Physics.Point {
-	return &Physics.Point{
+func (p *PlayerRegion) CentralDefense() Physics.Point {
+	return Physics.Point{
 		PosX: p.CornerA.PosX + ((p.CornerB.PosX - p.CornerA.PosX) / 3),
 		PosY: (p.CornerB.PosY - p.CornerA.PosY) / 2,
 	}

@@ -2,18 +2,16 @@ package Game
 
 import (
 	"os"
-	"fmt"
 	"math"
 	"github.com/makeitplay/commons"
 	"github.com/makeitplay/commons/Physics"
 	"github.com/makeitplay/commons/BasicTypes"
-	"net/url"
 	"github.com/makeitplay/commons/Units"
 	"encoding/json"
-	"github.com/makeitplay/commons/GameState"
 	"github.com/gorilla/websocket"
-	"strconv"
 	"github.com/makeitplay/the-dummies/tatics"
+	"github.com/makeitplay/commons/talk"
+	"fmt"
 )
 
 type Player struct {
@@ -24,6 +22,7 @@ type Player struct {
 	state     PlayerState
 	config    *Configuration
 	GameConn  *websocket.Conn
+	talker *talk.Channel
 	lastMsg   GameMessage
 	readingWs *commons.Task
 }
@@ -33,87 +32,19 @@ var keepListenning = make(chan bool)
 func (p *Player) Start(configuration *Configuration) {
 	p.config = configuration
 	p.TeamPlace = configuration.TeamPlace
+	p.Number = configuration.PlayerNumber
+	commons.NickName = fmt.Sprintf("%s-%s", p.TeamPlace, p.Number)
 	commons.Log("Try to join to the team %s ", p.TeamPlace)
 	p.initializeCommunicator()
-	commons.NickName = fmt.Sprintf("%s-%d", p.TeamPlace, p.Number)
 	p.keepPlaying()
 }
 
-func (p *Player) initializeCommunicator() {
-	uri := new(url.URL)
-	uri.Scheme = "ws"
-	uri.Host = "localhost:8080"
-	uri.Path = fmt.Sprintf("/announcements/%s/%s", p.config.Uuid, p.TeamPlace)
-
-	var err error
-	p.GameConn, _, err = websocket.DefaultDialer.Dial(uri.String(), nil)
-	if err != nil {
-		commons.Log("Fail on dial: %s", err.Error())
-	}
-	commons.RegisterCleaner("Websocket connection", func(interrupted bool) {
-		err := p.GameConn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-		if err != nil {
-			commons.LogError("Fail on closing ws connection: %s", err.Error())
-		}
-		p.readingWs.Stop()
-		p.GameConn.Close()
-	})
-
-	p.GameConn.SetCloseHandler(func(code int, text string) error {
-		p.readingWs.Stop()
-		if code == websocket.CloseNormalClosure {
-			commons.Log("Game has closed the websocket connection")
-		} else {
-			commons.LogError("Lost webscket connection with the game: msgType %d: %s", code, text)
-		}
-		commons.Cleanup(true)
-		os.Exit(0)
-		return nil
-	})
-
-	go p.websocketListenner()
-}
 
 func (p *Player) ResetPosition() {
-	p.Coords = *p.myRegion().InitialPosition()
+	region := p.myRegion()
+	p.Coords = region.InitialPosition()
 }
 
-func (p *Player) onMessage(msg GameMessage) {
-	p.lastMsg = msg
-	switch msg.Type {
-	case BasicTypes.WELCOME:
-		commons.LogInfo("Accepted by the game server")
-		if myId, ok := msg.Data["id"]; ok {
-			i, err := strconv.Atoi(myId)
-			if err != nil {
-				commons.LogError("Invalid player id: %v", err.Error())
-				panic("Invalid player id")
-			}
-			p.Id = i
-		} else {
-			commons.LogError("Player id missing in the welcome message")
-			panic("Player id missing in the welcome message")
-		}
-		p.updatePostion(p.lastMsg.GameInfo)
-		p.Number = p.findMyStatus(msg.GameInfo).Number
-	case BasicTypes.ANNOUNCEMENT:
-		commons.LogBroadcast("ANN %s", string(msg.State))
-		switch GameState.State(msg.State) {
-		case GameState.GETREADY:
-			p.updatePostion(p.lastMsg.GameInfo)
-			p.Number = p.findMyStatus(msg.GameInfo).Number
-		case GameState.LISTENING:
-			p.updatePostion(p.lastMsg.GameInfo)
-			p.state = p.determineMyState()
-			commons.LogDebug("State: %s", p.state)
-			p.madeAMove()
-		}
-	case BasicTypes.RIP:
-		commons.LogError("The server has stopped :/")
-		commons.Cleanup(true)
-		os.Exit(0)
-	}
-}
 
 func (p *Player) sendOrders(message string, orders ...BasicTypes.Order) {
 	msg := PlayerMessage{
