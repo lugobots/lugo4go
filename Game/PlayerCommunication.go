@@ -58,16 +58,16 @@ func (p *Player) onMessage(msg GameMessage) {
 			commons.LogError("Player id missing in the welcome message")
 			panic("Player id missing in the welcome message")
 		}
-		p.updatePostion(p.lastMsg.GameInfo)
+		p.updatePosition(p.lastMsg.GameInfo)
 		p.Number = p.findMyStatus(msg.GameInfo).Number
 	case BasicTypes.ANNOUNCEMENT:
 		commons.LogBroadcast("ANN %s", string(msg.State))
 		switch GameState.State(msg.State) {
 		case GameState.GETREADY:
-			p.updatePostion(p.lastMsg.GameInfo)
+			p.updatePosition(p.lastMsg.GameInfo)
 			p.Number = p.findMyStatus(msg.GameInfo).Number
 		case GameState.LISTENING:
-			p.updatePostion(p.lastMsg.GameInfo)
+			p.updatePosition(p.lastMsg.GameInfo)
 			p.state = p.determineMyState()
 			commons.LogDebug("State: %s", p.state)
 			p.madeAMove()

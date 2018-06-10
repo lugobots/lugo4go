@@ -8,7 +8,6 @@ import (
 	"github.com/makeitplay/commons/BasicTypes"
 	"github.com/makeitplay/commons/Units"
 	"encoding/json"
-	"github.com/gorilla/websocket"
 	"github.com/makeitplay/the-dummies/tatics"
 	"github.com/makeitplay/commons/talk"
 	"fmt"
@@ -21,7 +20,6 @@ type Player struct {
 	TeamPlace Units.TeamPlace    `json:"team_place"`
 	state     PlayerState
 	config    *Configuration
-	GameConn  *websocket.Conn
 	talker *talk.Channel
 	lastMsg   GameMessage
 	readingWs *commons.Task
@@ -54,7 +52,8 @@ func (p *Player) sendOrders(message string, orders ...BasicTypes.Order) {
 	}
 	jsonsified, _ := json.Marshal(msg)
 
-	err := p.GameConn.WriteMessage(websocket.TextMessage, jsonsified)
+	err := p.talker.Send(jsonsified)
+	commons.LogDebug("==== ORDER SENT === ")
 	if err != nil {
 		commons.LogError("Fail on sending message: %s", err.Error())
 		return
@@ -112,11 +111,12 @@ func (p *Player) madeAMove() {
 		msg, orders = p.orderForDsptFrblFrg()
 		orders = append(orders, p.createCatchOrder())
 	}
+	commons.LogDebug("Sending order")
 	p.sendOrders(msg, orders...)
 
 }
 
-func (p *Player) updatePostion(status GameInfo) {
+func (p *Player) updatePosition(status GameInfo) {
 	if p.TeamPlace == Units.HomeTeam {
 		p.Coords = p.findMyStatus(status).Coords
 	} else {
@@ -146,22 +146,20 @@ func (p *Player) findOpponentTeam(status GameInfo) Team {
 
 
 func (p *Player) createMoveOrder(target Physics.Point) BasicTypes.Order {
+	vec := Physics.NewZeroedVelocity(*Physics.NewVector(p.Coords, target))
+	vec.Speed = Units.PlayerMaxSpeed
 	return BasicTypes.Order{
 		Type: BasicTypes.MOVE,
-		Data: map[string]interface{}{
-			"x": target.PosX,
-			"y": target.PosY,
-		},
+		Data: BasicTypes.MoveOrderData{Velocity: vec},
 	}
 }
 
 func (p *Player) createKickOrder(target Physics.Point) BasicTypes.Order {
+	vec := Physics.NewZeroedVelocity(*Physics.NewVector(p.Coords, target).Normalize())
+	vec.Speed = Units.BallMaxSpeed
 	return BasicTypes.Order{
 		Type: BasicTypes.KICK,
-		Data: map[string]interface{}{
-			"x": target.PosX,
-			"y": target.PosY,
-		},
+		Data: BasicTypes.KickOrderData{Velocity: vec},
 	}
 }
 
@@ -242,8 +240,8 @@ func (p *Player) myRegion() tatics.PlayerRegion {
 }
 func MirrorRegion(region tatics.PlayerRegion) tatics.PlayerRegion {
 	return tatics.PlayerRegion{
-		CornerA: tatics.MirrorCoordToAway(region.CornerB), // have to switch the corner because the convention for Regions
-		CornerB: tatics.MirrorCoordToAway(region.CornerA),
+		CornerA: tatics.MirrorCoordToAway(region.CornerA), // have to switch the corner because the convention for Regions
+		CornerB: tatics.MirrorCoordToAway(region.CornerB),
 	}
 }
 
@@ -278,23 +276,4 @@ func (p *Player) deffenseGoalCoods() Physics.Point {
 	} else {
 		return  commons.AwayTeamGoal.Center
 	}
-}
-func (p *Player) websocketListenner() {
-	p.readingWs = commons.NewTask(func(task *commons.Task) {
-		msgType, message, err := p.GameConn.ReadMessage()
-		if msgType == -1 {
-			return
-		} else if err != nil {
-			commons.LogError("Fail reading websocket message (%d): %s", msgType, err)
-		} else {
-			var msg GameMessage
-			err = json.Unmarshal(message, &msg)
-			if err != nil {
-				commons.LogError("Fail on convert wb message: %s", err.Error())
-			} else {
-				p.onMessage(msg)
-			}
-		}
-	})
-	p.readingWs.Start()
 }

@@ -22,8 +22,8 @@ func (p *PlayerRegion) InitialPosition() Physics.Point {
 
 func (p *PlayerRegion) CentralDefense() Physics.Point {
 	return Physics.Point{
-		PosX: p.CornerA.PosX + ((p.CornerB.PosX - p.CornerA.PosX) / 3),
-		PosY: (p.CornerB.PosY - p.CornerA.PosY) / 2,
+		PosX: p.CornerA.PosX + ((p.CornerB.PosX - p.CornerA.PosX) / 5),
+		PosY: p.CornerA.PosY + (p.CornerB.PosY - p.CornerA.PosY) / 2,
 	}
 }
 
@@ -36,8 +36,8 @@ func MirrorCoordToAway(coords Physics.Point) Physics.Point {
 	}
 }
 
-var regionLength = int(math.Round(Units.CourtWidth * 0.6))
-var regionWidth = int(math.Round(Units.CourtHeight * 0.3))
+var regionWidth = int(math.Round(Units.CourtWidth * 0.6))
+var regionLength = int(math.Round(Units.CourtHeight * 0.3))
 var regionOverlap = ((regionLength * 4) - Units.CourtHeight) / 3
 
 var HomePlayersRegions = map[BasicTypes.PlayerNumber]PlayerRegion{
@@ -51,10 +51,10 @@ var HomePlayersRegions = map[BasicTypes.PlayerNumber]PlayerRegion{
 	},
 	"4": {
 		CornerA: Physics.Point{0, 2 * (regionLength - regionOverlap)},
-		CornerB: Physics.Point{regionWidth, 3*regionWidth - 2*regionOverlap},
+		CornerB: Physics.Point{regionWidth, 3*regionLength - 2*regionOverlap},
 	},
 	"5": {
-		CornerA: Physics.Point{0, 3 * (regionWidth - regionOverlap)},
+		CornerA: Physics.Point{0, 3 * (regionLength - regionOverlap)},
 		CornerB: Physics.Point{regionWidth, Units.CourtHeight},
 	},
 
@@ -69,10 +69,10 @@ var HomePlayersRegions = map[BasicTypes.PlayerNumber]PlayerRegion{
 	},
 	"8": {
 		CornerA: Physics.Point{Units.CourtHeight / 3, 2 * (regionLength - regionOverlap)},
-		CornerB: Physics.Point{regionWidth + (Units.CourtHeight / 3), 3*regionWidth - 2*regionOverlap},
+		CornerB: Physics.Point{regionWidth + (Units.CourtHeight / 3), 3*regionLength - 2*regionOverlap},
 	},
 	"9": {
-		CornerA: Physics.Point{Units.CourtHeight / 3, 3 * (regionWidth - regionOverlap)},
+		CornerA: Physics.Point{Units.CourtHeight / 3, 3 * (regionLength - regionOverlap)},
 		CornerB: Physics.Point{regionWidth + (Units.CourtHeight / 3), Units.CourtHeight},
 	},
 
@@ -82,8 +82,8 @@ var HomePlayersRegions = map[BasicTypes.PlayerNumber]PlayerRegion{
 		CornerB: Physics.Point{regionWidth + (Units.CourtWidth / 3), (2 * regionLength) - regionOverlap},
 	},
 	"11": {
-		CornerA: Physics.Point{Units.CourtWidth / 3, 2 * (regionLength - regionOverlap)},
-		CornerB: Physics.Point{regionWidth + (Units.CourtWidth / 3), 3*regionWidth - 2*regionOverlap},
+		CornerA: Physics.Point{Units.CourtWidth / 3, 2 * (regionLength) - regionOverlap},
+		CornerB: Physics.Point{regionWidth + (Units.CourtWidth / 3), 3*regionLength - 2*regionOverlap},
 	},
 }
 
