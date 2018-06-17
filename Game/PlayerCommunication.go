@@ -70,7 +70,7 @@ func (p *Player) onMessage(msg GameMessage) {
 			p.updatePosition(p.lastMsg.GameInfo)
 			p.state = p.determineMyState()
 			commons.LogDebug("State: %s", p.state)
-			p.madeAMove()
+			p.TakeAnAction()
 		}
 	case BasicTypes.RIP:
 		commons.LogError("The server has stopped :/")

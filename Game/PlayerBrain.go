@@ -43,7 +43,7 @@ func (p *Player) determineMyState() PlayerState {
 	return PlayerState(ballPossess + "-" + subState + "-" + fieldState)
 }
 
-func (p *Player) madeAMove() {
+func (p *Player) TakeAnAction() {
 	var orders []BasicTypes.Order
 	var msg string
 
