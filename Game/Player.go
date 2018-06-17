@@ -8,7 +8,7 @@ import (
 	"github.com/makeitplay/commons/BasicTypes"
 	"github.com/makeitplay/commons/Units"
 	"encoding/json"
-	"github.com/makeitplay/the-dummies/tatics"
+	"github.com/makeitplay/client-player-go/tatics"
 	"github.com/makeitplay/commons/talk"
 	"fmt"
 )
@@ -77,13 +77,13 @@ func (p *Player) stopsPlayer(interrupted bool) {
 
 func (p *Player) updatePosition(status GameInfo) {
 	if p.TeamPlace == Units.HomeTeam {
-		p.Coords = p.findMyStatus(status).Coords
+		p.Coords = p.FindMyStatus(status).Coords
 	} else {
-		p.Coords = p.findMyStatus(status).Coords
+		p.Coords = p.FindMyStatus(status).Coords
 	}
 }
 
-func (p *Player) findMyStatus(gameInfo GameInfo) *Player {
+func (p *Player) FindMyStatus(gameInfo GameInfo) *Player {
 	return p.findMyTeam(gameInfo).Players[p.Id]
 }
 
