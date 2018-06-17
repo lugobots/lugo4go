@@ -50,7 +50,7 @@ const (
 
 //region Attack states
 func (p *Player) orderForAtckHoldHse() (msg string, orders []BasicTypes.Order) {
-	obstacles := p.watchOpponentOnMyRoute(p.offenseGoalCoods(), ERROR_MARGIN_RUNNING)
+	obstacles := p.watchOpponentOnMyRoute(p.offenseGoalCoords(), ERROR_MARGIN_RUNNING)
 
 	if len(obstacles) == 0 {
 		return "I am free yet", []BasicTypes.Order{p.orderAdvance()}
@@ -80,12 +80,12 @@ func (p *Player) orderForAtckHoldHse() (msg string, orders []BasicTypes.Order) {
 }
 
 func (p *Player) orderForAtckHoldFrg() (msg string, orders []BasicTypes.Order) {
-	goalCoords := p.offenseGoalCoods()
+	goalCoords := p.offenseGoalCoords()
 	goalDistance := p.Coords.DistanceTo(goalCoords)
 	if int(math.Abs(goalDistance)) < BallMaxDistance() {
 		return "Shoot!", []BasicTypes.Order{p.createKickOrder(goalCoords)}
 	} else {
-		obstacles := p.watchOpponentOnMyRoute(p.offenseGoalCoods(), ERROR_MARGIN_RUNNING)
+		obstacles := p.watchOpponentOnMyRoute(p.offenseGoalCoords(), ERROR_MARGIN_RUNNING)
 
 		if len(obstacles) == 0 {
 			return "I am still free", []BasicTypes.Order{p.orderAdvance()}
@@ -112,7 +112,7 @@ func (p *Player) orderForAtckHelpHse() (msg string, orders []BasicTypes.Order) {
 		case DISTANCE_SCALE_NEAR:
 			msg = "Given space"
 			opositPoint := Physics.NewVector(p.Coords, p.lastMsg.GameInfo.Ball.Coords).Invert().TargetFrom(p.Coords)
-			vectorToOpositPoint := Physics.NewVector(p.Coords, p.offenseGoalCoods())
+			vectorToOpositPoint := Physics.NewVector(p.Coords, p.offenseGoalCoords())
 			vectorToOpositPoint.Add(Physics.NewVector(p.Coords, opositPoint))
 			orders = []BasicTypes.Order{p.createMoveOrder(vectorToOpositPoint.TargetFrom(p.Coords))}
 		case DISTANCE_SCALE_GOOD:
@@ -122,7 +122,7 @@ func (p *Player) orderForAtckHelpHse() (msg string, orders []BasicTypes.Order) {
 	} else {
 		msg = "I'll be right here"
 		myRegionVector := Physics.NewVector(p.Coords, p.myRegionCenter()).Invert().TargetFrom(p.Coords)
-		offensivePosition := Physics.NewVector(p.Coords, p.offenseGoalCoods())
+		offensivePosition := Physics.NewVector(p.Coords, p.offenseGoalCoords())
 		offensivePosition.Add(Physics.NewVector(p.Coords, myRegionVector))
 		orders = []BasicTypes.Order{p.createMoveOrder(offensivePosition.TargetFrom(p.Coords))}
 	}
@@ -139,12 +139,12 @@ func (p *Player) orderForAtckHelpFrg() (msg string, orders []BasicTypes.Order) {
 			msg = "Helping on attack"
 
 			offensiveZone := Physics.NewVector(p.Coords, p.myRegionCenter())
-			offensiveZone.Add(Physics.NewVector(p.Coords, p.offenseGoalCoods()))
+			offensiveZone.Add(Physics.NewVector(p.Coords, p.offenseGoalCoords()))
 			orders = []BasicTypes.Order{p.createMoveOrder(offensiveZone.TargetFrom(p.Coords))}
 		case DISTANCE_SCALE_GOOD:
 			msg = "Holding positiong for attack"
 			offensiveZone := Physics.NewVector(p.Coords, p.lastMsg.GameInfo.Ball.Coords)
-			offensiveZone.Add(Physics.NewVector(p.Coords, p.offenseGoalCoods()))
+			offensiveZone.Add(Physics.NewVector(p.Coords, p.offenseGoalCoords()))
 			orders = []BasicTypes.Order{p.createMoveOrder(offensiveZone.TargetFrom(p.Coords))}
 		}
 	} else {
@@ -186,12 +186,12 @@ func (p *Player) orderForDefdOtrgHse() (msg string, orders []BasicTypes.Order) {
 
 	if p.calcDistanceScale(p.lastMsg.GameInfo.Ball.Coords) == DISTANCE_SCALE_NEAR {
 		msg = "Defensing while back off"
-		backOffDir := Physics.NewVector(p.Coords, p.deffenseGoalCoods())
+		backOffDir := Physics.NewVector(p.Coords, p.defenseGoalCoords())
 		backOffDir.Add(Physics.NewVector(p.Coords, p.lastMsg.GameInfo.Ball.Coords))
 		orders = []BasicTypes.Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
 	} else {
 		msg = "Back off!"
-		backOffDir := Physics.NewVector(p.Coords, p.deffenseGoalCoods())
+		backOffDir := Physics.NewVector(p.Coords, p.defenseGoalCoords())
 		backOffDir.Add(Physics.NewVector(p.Coords, p.myRegionCenter()))
 		orders = []BasicTypes.Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
 	}
@@ -202,12 +202,12 @@ func (p *Player) orderForDefdOtrgHse() (msg string, orders []BasicTypes.Order) {
 func (p *Player) orderForDefdOtrgFrg() (msg string, orders []BasicTypes.Order) {
 	if p.calcDistanceScale(p.lastMsg.GameInfo.Ball.Coords) == DISTANCE_SCALE_NEAR {
 		msg = "Defensing while back off"
-		backOffDir := Physics.NewVector(p.Coords, p.deffenseGoalCoods())
+		backOffDir := Physics.NewVector(p.Coords, p.defenseGoalCoords())
 		backOffDir.Add(Physics.NewVector(p.Coords, p.lastMsg.GameInfo.Ball.Coords))
 		orders = []BasicTypes.Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
 	} else {
 		msg = "Back off!"
-		backOffDir := Physics.NewVector(p.Coords, p.deffenseGoalCoods())
+		backOffDir := Physics.NewVector(p.Coords, p.defenseGoalCoords())
 		backOffDir.Add(Physics.NewVector(p.Coords, p.myRegionCenter()))
 		orders = []BasicTypes.Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
 	}
@@ -240,7 +240,7 @@ func (p *Player) orderForDsptNfblFrg() (msg string, orders []BasicTypes.Order) {
 func (p *Player) orderForDsptFrblHse() (msg string, orders []BasicTypes.Order) {
 	msg = "Try to catch the ball"
 	if p.isItInMyRegion(p.lastMsg.GameInfo.Ball.Coords) {
-		backOffDir := Physics.NewVector(p.Coords, p.deffenseGoalCoods())
+		backOffDir := Physics.NewVector(p.Coords, p.defenseGoalCoords())
 		backOffDir.Add(Physics.NewVector(p.Coords, p.lastMsg.GameInfo.Ball.Coords))
 		orders = []BasicTypes.Order{p.createMoveOrder(backOffDir.TargetFrom(p.Coords))}
 	} else {
@@ -260,7 +260,7 @@ func (p *Player) orderForDsptFrblFrg() (msg string, orders []BasicTypes.Order) {
 
 //region helpers
 func (p *Player) orderAdvance() BasicTypes.Order {
-	return p.createMoveOrder(p.offenseGoalCoods())
+	return p.createMoveOrder(p.offenseGoalCoords())
 }
 
 func (p *Player) orderPassTheBall() BasicTypes.Order {
@@ -271,9 +271,9 @@ func (p *Player) orderPassTheBall() BasicTypes.Order {
 			continue
 		}
 		obstaclesFromMe := p.watchOpponentOnMyRoute(playerMate.Coords, ERROR_MARGIN_PASSING)
-		obstaclesToGoal := playerMate.watchOpponentOnMyRoute(p.offenseGoalCoods(), ERROR_MARGIN_RUNNING)
+		obstaclesToGoal := playerMate.watchOpponentOnMyRoute(p.offenseGoalCoords(), ERROR_MARGIN_RUNNING)
 		distanceFromMe := p.Coords.DistanceTo(playerMate.Coords)
-		distanceToGoal := playerMate.Coords.DistanceTo(p.offenseGoalCoods())
+		distanceToGoal := playerMate.Coords.DistanceTo(p.offenseGoalCoords())
 		score := 1000
 		score -= len(obstaclesFromMe) * 10
 		score -= len(obstaclesToGoal) * 5

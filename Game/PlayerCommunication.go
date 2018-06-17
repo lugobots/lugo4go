@@ -64,8 +64,8 @@ func (p *Player) onMessage(msg GameMessage) {
 		commons.LogBroadcast("ANN %s", string(msg.State))
 		switch GameState.State(msg.State) {
 		case GameState.GETREADY:
-			p.updatePosition(p.lastMsg.GameInfo)
-			p.Number = p.findMyStatus(msg.GameInfo).Number
+			//p.updatePosition(p.lastMsg.GameInfo)
+			//p.Number = p.findMyStatus(msg.GameInfo).Number
 		case GameState.LISTENING:
 			p.updatePosition(p.lastMsg.GameInfo)
 			p.state = p.determineMyState()

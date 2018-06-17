@@ -23,7 +23,6 @@ func main() {
 	/**********************************************/
 
 	player = Game.Player{}
-	commons.NickName = "New Player"
 	player.Start(serverConfig)
 }
 
