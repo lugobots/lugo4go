@@ -9,7 +9,6 @@ import (
 	"github.com/makeitplay/commons"
 	"strconv"
 	"os"
-	"github.com/makeitplay/commons/GameState"
 )
 
 func (p *Player) initializeCommunicator() {
@@ -17,10 +16,9 @@ func (p *Player) initializeCommunicator() {
 	uri.Scheme = "ws"
 	uri.Host = "localhost:8080"
 	uri.Path = fmt.Sprintf("/announcements/%s/%s", p.config.Uuid, p.TeamPlace)
-	region := p.myRegion()
 	p.talker = talk.NewTalkChannel(*uri, BasicTypes.PlayerSpecifications{
 		Number:        p.Number,
-		InitialCoords: region.InitialPosition(),
+		InitialCoords: p.Coords,
 	})
 
 	err := p.talker.OpenConnection(func(bytes []byte) {
@@ -43,7 +41,15 @@ func (p *Player) initializeCommunicator() {
 }
 
 func (p *Player) onMessage(msg GameMessage) {
-	p.lastMsg = msg
+	if p.OnMessage == nil {
+		p.defaultOnMessage(msg)
+	} else {
+		p.OnMessage(msg)
+	}
+	p.LastMsg = msg
+}
+
+func (p *Player) defaultOnMessage(msg GameMessage){
 	switch msg.Type {
 	case BasicTypes.WELCOME:
 		commons.LogInfo("Accepted by the game server")
@@ -54,23 +60,19 @@ func (p *Player) onMessage(msg GameMessage) {
 				panic("Invalid player id")
 			}
 			p.Id = i
+			commons.LogDebug("-----------------------------Setou o ID %d", i)
 		} else {
 			commons.LogError("Player id missing in the welcome message")
 			panic("Player id missing in the welcome message")
 		}
-		p.updatePosition(p.lastMsg.GameInfo)
+
 		p.Number = p.FindMyStatus(msg.GameInfo).Number
 	case BasicTypes.ANNOUNCEMENT:
-		commons.LogBroadcast("ANN %s", string(msg.State))
-		switch GameState.State(msg.State) {
-		case GameState.GETREADY:
-			//p.updatePosition(p.lastMsg.GameInfo)
-			//p.Number = p.FindMyStatus(msg.GameInfo).Number
-		case GameState.LISTENING:
-			p.updatePosition(p.lastMsg.GameInfo)
-			p.state = p.determineMyState()
-			commons.LogDebug("State: %s", p.state)
-			p.TakeAnAction()
+		if p.OnAnnouncement == nil {
+			panic("the player must implement the `OnAnnouncement` method")
+		} else {
+			commons.LogDebug("-----------------------------CHAMOU")
+			p.OnAnnouncement(msg)
 		}
 	case BasicTypes.RIP:
 		commons.LogError("The server has stopped :/")

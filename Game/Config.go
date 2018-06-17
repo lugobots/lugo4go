@@ -35,15 +35,6 @@ func (c *Configuration) LoadCmdArg() {
 	flag.IntVar(&number, "number", 0, "Player's number")
 
 	flag.StringVar(&c.Uuid, "uui", c.Uuid, "Uuid for this player instance. (Auto-provided in production)")
-	flag.StringVar(&c.QueueUser, "QueueUser", c.QueueUser, "AMQP username")
-	flag.StringVar(&c.QueuePassword, "QueuePassword", c.QueuePassword, "AMQP Password")
-	flag.StringVar(&c.QueueHost, "QueueHost", c.QueueHost, "AMQP server host")
-	flag.StringVar(&c.QueueVHost, "QueueVHost", c.QueueVHost, "AMQP ")
-	flag.StringVar(&c.QueuePort, "QueuePort", c.QueuePort, "The match Uuid (useless locally)")
-	flag.StringVar(&c.OutputExchange, "OutputExchange", c.OutputExchange, "The match Uuid (useless locally)")
-	flag.StringVar(&c.OutputQueue, "OutputQueue", c.OutputQueue, "The match Uuid (useless locally)")
-	flag.StringVar(&c.InputExchange, "InputExchange", c.InputExchange, "The match Uuid (useless locally)")
-	flag.StringVar(&c.InputQueue, "InputQueue", c.InputQueue, "The match Uuid (useless locally)")
 	flag.Parse()
 
 	if name != string(Units.HomeTeam) && name != string(Units.AwayTeam) {
