@@ -41,12 +41,13 @@ func (p *Player) initializeCommunicator() {
 }
 
 func (p *Player) onMessage(msg GameMessage) {
+	p.LastMsg = msg
 	if p.OnMessage == nil {
 		p.defaultOnMessage(msg)
 	} else {
 		p.OnMessage(msg)
 	}
-	p.LastMsg = msg
+
 }
 
 func (p *Player) defaultOnMessage(msg GameMessage){
