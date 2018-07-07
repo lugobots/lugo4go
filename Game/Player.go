@@ -15,9 +15,9 @@ import (
 
 type Player struct {
 	Physics.Element
-	Id             int                `json:"id"`
+	Id             int                     `json:"id"`
 	Number         BasicTypes.PlayerNumber `json:"number"`
-	TeamPlace      Units.TeamPlace    `json:"team_place"`
+	TeamPlace      Units.TeamPlace         `json:"team_place"`
 	OnMessage      func(msg GameMessage)
 	OnAnnouncement func(msg GameMessage)
 	config         *Configuration
@@ -39,14 +39,12 @@ func (p *Player) Start(configuration *Configuration) {
 	p.keepPlaying()
 }
 
-
 func (p *Player) LastServerMessage() GameMessage {
 	return p.LastMsg
 }
 
-
-
 func (p *Player) SendOrders(message string, orders ...BasicTypes.Order) {
+	commons.LogDebug(message)
 	msg := PlayerMessage{
 		BasicTypes.ORDER,
 		orders,
@@ -55,7 +53,6 @@ func (p *Player) SendOrders(message string, orders ...BasicTypes.Order) {
 	jsonsified, _ := json.Marshal(msg)
 
 	err := p.talker.Send(jsonsified)
-	commons.LogDebug("==== ORDER SENT === ")
 	if err != nil {
 		commons.LogError("Fail on sending message: %s", err.Error())
 		return
@@ -63,7 +60,7 @@ func (p *Player) SendOrders(message string, orders ...BasicTypes.Order) {
 }
 
 func (p *Player) keepPlaying() {
-	commons.RegisterCleaner("Stopping to play", p.stopsPlayer)
+	commons.RegisterCleaner("Stopping to play", p.stopToPlay)
 	for stillUp := range keepListening {
 		if !stillUp {
 			os.Exit(0)
@@ -71,22 +68,17 @@ func (p *Player) keepPlaying() {
 	}
 }
 
-func (p *Player) stopsPlayer(interrupted bool) {
+func (p *Player) stopToPlay(interrupted bool) {
 	keepListening <- false
 }
 
-
-
 func (p *Player) UpdatePosition(gameInfo GameInfo) {
-	if p.TeamPlace == Units.HomeTeam {
-		p.Coords = p.FindMyStatus(gameInfo).Coords
-	} else {
-		p.Coords = p.FindMyStatus(gameInfo).Coords
-	}
+	status := p.FindMyStatus(gameInfo)
+	p.Velocity = status.Velocity
+	p.Coords = status.Coords
 }
 
 func (p *Player) FindMyStatus(gameInfo GameInfo) *Player {
-	commons.LogDebug("-----------------------------Mey id eh ID %d", p.Id)
 	return p.GetMyTeam(gameInfo).Players[p.Id]
 }
 
@@ -106,7 +98,6 @@ func (p *Player) GetOpponentTeam(status GameInfo) Team {
 	}
 }
 
-
 func (p *Player) CreateMoveOrder(target Physics.Point) BasicTypes.Order {
 	vec := Physics.NewZeroedVelocity(*Physics.NewVector(p.Coords, target))
 	vec.Speed = Units.PlayerMaxSpeed
@@ -116,9 +107,20 @@ func (p *Player) CreateMoveOrder(target Physics.Point) BasicTypes.Order {
 	}
 }
 
-func (p *Player) CreateKickOrder(target Physics.Point) BasicTypes.Order {
-	vec := Physics.NewZeroedVelocity(*Physics.NewVector(p.Coords, target).Normalize())
-	vec.Speed = Units.BallMaxSpeed
+func (p *Player) CreateStopOrder() BasicTypes.Order {
+	vec := p.Velocity.Copy()
+	vec.Speed = 0
+	return BasicTypes.Order{
+		Type: BasicTypes.MOVE,
+		Data: BasicTypes.MoveOrderData{Velocity: vec},
+	}
+}
+
+func (p *Player) CreateKickOrder(target Physics.Point, speed float64) BasicTypes.Order {
+	ballExpectedDirection := Physics.NewVector(p.LastMsg.GameInfo.Ball.Coords, target)
+	diffVector := *p.LastMsg.GameInfo.Ball.Velocity.Direction.Sub(ballExpectedDirection)
+	vec := Physics.NewZeroedVelocity(diffVector)
+	vec.Speed = speed
 	return BasicTypes.Order{
 		Type: BasicTypes.KICK,
 		Data: BasicTypes.KickOrderData{Velocity: vec},
@@ -136,8 +138,6 @@ func (p *Player) CreateCatchOrder() BasicTypes.Order {
 func (p *Player) IHoldTheBall() bool {
 	return p.LastMsg.GameInfo.Ball.Holder != nil && p.LastMsg.GameInfo.Ball.Holder.Id == p.Id
 }
-
-
 
 func (p *Player) FindNearestMate() (distance float64, player *Player) {
 	var nearestPlayer *Player
@@ -167,6 +167,6 @@ func (p *Player) DefenseGoal() BasicTypes.Goal {
 	if p.TeamPlace == Units.HomeTeam {
 		return commons.HomeTeamGoal
 	} else {
-		return  commons.AwayTeamGoal
+		return commons.AwayTeamGoal
 	}
 }

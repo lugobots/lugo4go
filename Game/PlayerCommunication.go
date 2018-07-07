@@ -61,7 +61,6 @@ func (p *Player) defaultOnMessage(msg GameMessage){
 				panic("Invalid player id")
 			}
 			p.Id = i
-			commons.LogDebug("-----------------------------Setou o ID %d", i)
 		} else {
 			commons.LogError("Player id missing in the welcome message")
 			panic("Player id missing in the welcome message")
@@ -72,7 +71,6 @@ func (p *Player) defaultOnMessage(msg GameMessage){
 		if p.OnAnnouncement == nil {
 			panic("the player must implement the `OnAnnouncement` method")
 		} else {
-			commons.LogDebug("-----------------------------CHAMOU")
 			p.OnAnnouncement(msg)
 		}
 	case BasicTypes.RIP:
