@@ -50,9 +50,13 @@ func (p *Player) SendOrders(message string, orders ...BasicTypes.Order) {
 		orders,
 		message,
 	}
-	jsonsified, _ := json.Marshal(msg)
+	jsonsified, err := json.Marshal(msg)
+	if err != nil {
+		commons.LogError("Fail generating JSON: %s", err.Error())
+		return
+	}
 
-	err := p.talker.Send(jsonsified)
+	err = p.talker.Send(jsonsified)
 	if err != nil {
 		commons.LogError("Fail on sending message: %s", err.Error())
 		return
@@ -99,7 +103,7 @@ func (p *Player) GetOpponentTeam(status GameInfo) Team {
 }
 
 func (p *Player) CreateMoveOrder(target Physics.Point) BasicTypes.Order {
-	vec := Physics.NewZeroedVelocity(*Physics.NewVector(p.Coords, target))
+	vec := Physics.NewZeroedVelocity(*Physics.NewVector(p.Coords, target).Normalize())
 	vec.Speed = Units.PlayerMaxSpeed
 	return BasicTypes.Order{
 		Type: BasicTypes.MOVE,
@@ -107,9 +111,10 @@ func (p *Player) CreateMoveOrder(target Physics.Point) BasicTypes.Order {
 	}
 }
 
-func (p *Player) CreateStopOrder() BasicTypes.Order {
+func (p *Player) CreateStopOrder(direction Physics.Vector) BasicTypes.Order {
 	vec := p.Velocity.Copy()
 	vec.Speed = 0
+	vec.Direction = &direction
 	return BasicTypes.Order{
 		Type: BasicTypes.MOVE,
 		Data: BasicTypes.MoveOrderData{Velocity: vec},
@@ -118,7 +123,7 @@ func (p *Player) CreateStopOrder() BasicTypes.Order {
 
 func (p *Player) CreateKickOrder(target Physics.Point, speed float64) BasicTypes.Order {
 	ballExpectedDirection := Physics.NewVector(p.LastMsg.GameInfo.Ball.Coords, target)
-	diffVector := *p.LastMsg.GameInfo.Ball.Velocity.Direction.Sub(ballExpectedDirection)
+	diffVector := *ballExpectedDirection.Sub(p.LastMsg.GameInfo.Ball.Velocity.Direction)
 	vec := Physics.NewZeroedVelocity(diffVector)
 	vec.Speed = speed
 	return BasicTypes.Order{
