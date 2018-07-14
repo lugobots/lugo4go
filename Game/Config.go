@@ -14,16 +14,6 @@ type Configuration struct {
 	PlayerNumber BasicTypes.PlayerNumber
 	Uuid      string //this value will be automatically given to your binary by the server :) You may ignore it locally
 
-	QueueUser     string
-	QueuePassword string
-	QueueHost     string
-	QueueVHost    string
-	QueuePort     string
-
-	OutputExchange string
-	OutputQueue    string
-	InputExchange  string
-	InputQueue     string
 }
 
 func (c *Configuration) LoadCmdArg() {
@@ -34,7 +24,7 @@ func (c *Configuration) LoadCmdArg() {
 	flag.StringVar(&name, "team", "home", "Team (home or away). (Auto-provided in production)")
 	flag.IntVar(&number, "number", 0, "Player's number")
 
-	flag.StringVar(&c.Uuid, "uui", c.Uuid, "Uuid for this player instance. (Auto-provided in production)")
+	flag.StringVar(&c.Uuid, "uui", "local", "Uuid for this player instance. (Auto-provided in production)")
 	flag.Parse()
 
 	if name != string(Units.HomeTeam) && name != string(Units.AwayTeam) {
