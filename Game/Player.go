@@ -44,7 +44,6 @@ func (p *Player) LastServerMessage() GameMessage {
 }
 
 func (p *Player) SendOrders(message string, orders ...BasicTypes.Order) {
-	commons.LogDebug(message)
 	msg := PlayerMessage{
 		BasicTypes.ORDER,
 		orders,
