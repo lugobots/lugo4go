@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-func (p *Player) initializeCommunicator() {
+func (p *Player) initializeCommunicator() bool {
 	uri := new(url.URL)
 	uri.Scheme = "ws"
 	uri.Host = "localhost:8080"
@@ -31,11 +31,13 @@ func (p *Player) initializeCommunicator() {
 	})
 
 	if err != nil {
-		panic(err)
+		commons.LogError("Fail on oppening the websocket connection: %s", err)
+		return false
 	} else {
 		commons.RegisterCleaner("Websocket connection", func(interrupted bool) {
 			p.talker.CloseConnection()
 		})
+		return true
 	}
 }
 

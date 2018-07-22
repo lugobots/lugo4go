@@ -42,8 +42,9 @@ func (p *Player) Start(configuration *Configuration) {
 	}
 	commons.NickName = fmt.Sprintf("%s-%s", p.TeamPlace, p.Number)
 	commons.Log("Try to join to the team %s ", p.TeamPlace)
-	p.initializeCommunicator()
-	p.keepPlaying()
+	if p.initializeCommunicator() {
+		p.keepPlaying()
+	}
 }
 
 func (p *Player) LastServerMessage() GameMessage {
