@@ -7,7 +7,6 @@ import (
 	"github.com/makeitplay/commons/BasicTypes"
 	"encoding/json"
 	"github.com/makeitplay/commons"
-	"strconv"
 	"os"
 )
 
@@ -54,18 +53,6 @@ func (p *Player) defaultOnMessage(msg GameMessage){
 	switch msg.Type {
 	case BasicTypes.WELCOME:
 		commons.LogInfo("Accepted by the game server")
-		if myId, ok := msg.Data["id"]; ok {
-			i, err := strconv.Atoi(myId)
-			if err != nil {
-				commons.LogError("Invalid player id: %v", err.Error())
-				panic("Invalid player id")
-			}
-			p.Id = i
-		} else {
-			commons.LogError("Player id missing in the welcome message")
-			panic("Player id missing in the welcome message")
-		}
-
 		p.Number = p.FindMyStatus(msg.GameInfo).Number
 	case BasicTypes.ANNOUNCEMENT:
 		if p.OnAnnouncement == nil {

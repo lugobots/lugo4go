@@ -15,7 +15,7 @@ import (
 
 type Player struct {
 	Physics.Element
-	Id             int                     `json:"id"`
+	Id             string                  `json:"id"`
 	Number         BasicTypes.PlayerNumber `json:"number"`
 	TeamPlace      Units.TeamPlace         `json:"team_place"`
 	OnMessage      func(msg GameMessage)
@@ -27,6 +27,13 @@ type Player struct {
 }
 
 var keepListening = make(chan bool)
+
+func (p *Player) ID() string {
+	if p.Id == "" {
+		p.Id = fmt.Sprintf("%s-%s", p.TeamPlace, p.Number)
+	}
+	return p.Id
+}
 
 func (p *Player) Start(configuration *Configuration) {
 	p.config = configuration
@@ -82,10 +89,16 @@ func (p *Player) UpdatePosition(gameInfo GameInfo) {
 }
 
 func (p *Player) FindMyStatus(gameInfo GameInfo) *Player {
-	return p.GetMyTeam(gameInfo).Players[p.Id]
+	myteamInfo := p.FindMyTeamStatus(gameInfo)
+	for _, playerInfo := range myteamInfo.Players {
+		if playerInfo.ID() == p.ID() {
+			return playerInfo
+		}
+	}
+	return nil
 }
 
-func (p *Player) GetMyTeam(gameInfo GameInfo) Team {
+func (p *Player) FindMyTeamStatus(gameInfo GameInfo) Team {
 	if p.TeamPlace == Units.HomeTeam {
 		return gameInfo.HomeTeam
 	} else {
@@ -99,6 +112,16 @@ func (p *Player) GetOpponentTeam(status GameInfo) Team {
 	} else {
 		return status.HomeTeam
 	}
+}
+
+func (p *Player) GetOpponentPlayer(status GameInfo, playerId string) *Player {
+	teamInfo := p.GetOpponentTeam(status)
+	for _, playerInfo := range teamInfo.Players {
+		if playerInfo.ID() == playerId {
+			return playerInfo
+		}
+	}
+	return nil
 }
 
 func (p *Player) CreateMoveOrder(target Physics.Point) BasicTypes.Order {
@@ -140,18 +163,18 @@ func (p *Player) CreateCatchOrder() BasicTypes.Order {
 }
 
 func (p *Player) IHoldTheBall() bool {
-	return p.LastMsg.GameInfo.Ball.Holder != nil && p.LastMsg.GameInfo.Ball.Holder.Id == p.Id
+	return p.LastMsg.GameInfo.Ball.Holder != nil && p.LastMsg.GameInfo.Ball.Holder.ID() == p.ID()
 }
 
 func (p *Player) FindNearestMate() (distance float64, player *Player) {
 	var nearestPlayer *Player
 	//starting from the worst case
 	nearestDistance := math.Hypot(float64(Units.CourtHeight), float64(Units.CourtWidth))
-	myTeam := p.GetMyTeam(p.LastMsg.GameInfo)
+	myTeam := p.FindMyTeamStatus(p.LastMsg.GameInfo)
 
-	for playerId, player := range myTeam.Players {
+	for _, player := range myTeam.Players {
 		distance := math.Abs(p.Coords.DistanceTo(player.Coords))
-		if distance <= nearestDistance && playerId != p.Id {
+		if distance <= nearestDistance && player.ID() != p.ID() {
 			nearestDistance = distance
 			nearestPlayer = player
 		}
