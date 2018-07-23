@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"github.com/makeitplay/commons"
 	"os"
+	"runtime/debug"
 )
 
 func (p *Player) initializeCommunicator() bool {
@@ -42,6 +43,12 @@ func (p *Player) initializeCommunicator() bool {
 }
 
 func (p *Player) onMessage(msg GameMessage) {
+	defer func() {
+		if err := recover(); err != nil {
+			commons.LogError("Panic processing new game message: %s", err)
+			debug.PrintStack()
+		}
+	}()
 	p.LastMsg = msg
 	if p.OnMessage == nil {
 		p.defaultOnMessage(msg)
