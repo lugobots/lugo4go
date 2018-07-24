@@ -125,13 +125,17 @@ func (p *Player) GetOpponentPlayer(status GameInfo, playerId string) *Player {
 	return nil
 }
 
-func (p *Player) CreateMoveOrder(target Physics.Point) BasicTypes.Order {
+func (p *Player) CreateMoveOrder(target Physics.Point, speed float64) BasicTypes.Order {
 	vec := Physics.NewZeroedVelocity(*Physics.NewVector(p.Coords, target).Normalize())
-	vec.Speed = Units.PlayerMaxSpeed
+	vec.Speed = speed
 	return BasicTypes.Order{
 		Type: BasicTypes.MOVE,
 		Data: BasicTypes.MoveOrderData{Velocity: vec},
 	}
+}
+
+func (p *Player) CreateMoveOrderMaxSpeed(target Physics.Point) BasicTypes.Order {
+	return p.CreateMoveOrder(target, Units.PlayerMaxSpeed)
 }
 
 func (p *Player) CreateStopOrder(direction Physics.Vector) BasicTypes.Order {
