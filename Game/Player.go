@@ -202,3 +202,7 @@ func (p *Player) DefenseGoal() BasicTypes.Goal {
 		return commons.AwayTeamGoal
 	}
 }
+
+func (p *Player) IsGoalkeeper() bool {
+	return p.Number == commons.GoalkeeperNumber
+}
