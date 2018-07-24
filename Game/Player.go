@@ -115,10 +115,10 @@ func (p *Player) GetOpponentTeam(status GameInfo) Team {
 	}
 }
 
-func (p *Player) GetOpponentPlayer(status GameInfo, playerId string) *Player {
+func (p *Player) GetOpponentPlayer(status GameInfo, playerNumber BasicTypes.PlayerNumber) *Player {
 	teamInfo := p.GetOpponentTeam(status)
 	for _, playerInfo := range teamInfo.Players {
-		if playerInfo.ID() == playerId {
+		if playerInfo.Number == playerNumber {
 			return playerInfo
 		}
 	}
