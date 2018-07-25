@@ -2,136 +2,68 @@ package Game
 
 import (
 	"os"
-	"fmt"
 	"math"
 	"github.com/makeitplay/commons"
 	"github.com/makeitplay/commons/Physics"
 	"github.com/makeitplay/commons/BasicTypes"
-	"net/url"
 	"github.com/makeitplay/commons/Units"
 	"encoding/json"
-	"github.com/makeitplay/commons/GameState"
-	"github.com/gorilla/websocket"
-	"strconv"
+	"github.com/makeitplay/commons/talk"
+	"fmt"
+	"log"
 )
 
 type Player struct {
 	Physics.Element
-	Id        int                `json:"id"`
-	Number    Units.PlayerNumber `json:"number"`
-	TeamPlace Units.TeamPlace    `json:"team_place"`
-	state     PlayerState
-	config    *Configuration
-	GameConn  *websocket.Conn
-	//OutputCom *commons.Comunicator
-	//InputCom  *commons.Comunicator
-	//channel   string
-	lastMsg   GameMessage
-	readingWs *commons.Task
+	Id             string                  `json:"id"`
+	Number         BasicTypes.PlayerNumber `json:"number"`
+	TeamPlace      Units.TeamPlace         `json:"team_place"`
+	OnMessage      func(msg GameMessage)
+	OnAnnouncement func(msg GameMessage)
+	config         *Configuration
+	talker         *talk.Channel
+	LastMsg        GameMessage
+	readingWs      *commons.Task
 }
 
-var keepListenning = make(chan bool)
+var keepListening = make(chan bool)
+
+func (p *Player) ID() string {
+	if p.Id == "" {
+		p.Id = fmt.Sprintf("%s-%s", p.TeamPlace, p.Number)
+	}
+	return p.Id
+}
 
 func (p *Player) Start(configuration *Configuration) {
 	p.config = configuration
-	p.Id = os.Getpid() //easy way to create a unique ID since the player UUID is not public
-	p.TeamPlace = configuration.TeamPlace
+	if p.OnAnnouncement == nil {
+		log.Fatal("your player must implement the `OnAnnouncement` action")
+	}
+	commons.NickName = fmt.Sprintf("%s-%s", p.TeamPlace, p.Number)
 	commons.Log("Try to join to the team %s ", p.TeamPlace)
-	p.initializeCommunicator()
-	commons.NickName = fmt.Sprintf("%s-%d", p.TeamPlace, p.Id)
-	//p.askToPlay()
-	p.keepPlaying()
-}
-
-func (p *Player) initializeCommunicator() {
-	uri := new(url.URL)
-	uri.Scheme = "ws"
-	uri.Host = "localhost:8080"
-	uri.Path = fmt.Sprintf("/announcements/%s/%s", p.config.Uuid, p.TeamPlace)
-
-	var err error
-	p.GameConn, _, err = websocket.DefaultDialer.Dial(uri.String(), nil)
-	if err != nil {
-		commons.Log("Fail on dial: %s", err.Error())
-	}
-	commons.RegisterCleaner("Websocket connection", func(interrupted bool) {
-		err := p.GameConn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
-		if err != nil {
-			commons.LogError("Fail on closing ws connection: %s", err.Error())
-		}
-		p.readingWs.Stop()
-		p.GameConn.Close()
-	})
-
-	p.GameConn.SetCloseHandler(func(code int, text string) error {
-		p.readingWs.Stop()
-		if code == websocket.CloseNormalClosure {
-			commons.Log("Game has closed the websocket connection")
-		} else {
-			commons.LogError("Lost webscket connection with the game: msgType %d: %s", code, text)
-		}
-		commons.Cleanup(true)
-		os.Exit(0)
-		return nil
-	})
-
-	go p.websocketListenner()
-}
-
-func (p *Player) ResetPosition() {
-	if p.TeamPlace == Units.HomeTeam {
-		p.Coords = Units.InitialPostionHomeTeam[p.Number]
-	} else {
-		p.Coords = Units.InitialPostionAwayTeam[p.Number]
+	if p.initializeCommunicator() {
+		p.keepPlaying()
 	}
 }
 
-func (p *Player) onMessage(msg GameMessage) {
-	p.lastMsg = msg
-	switch msg.Type {
-	case BasicTypes.WELCOME:
-		commons.LogInfo("Accepted by the game server")
-		if myId, ok := msg.Data["id"]; ok {
-			i, err := strconv.Atoi(myId)
-			if err != nil {
-				commons.LogError("Invalid player id: %v", err.Error())
-				panic("Invalid player id")
-			}
-			p.Id = i
-		} else {
-			commons.LogError("Player id missing in the welcome message")
-			panic("Player id missing in the welcome message")
-		}
-		p.updatePostion(p.lastMsg.GameInfo)
-		p.Number = p.findMyStatus(msg.GameInfo).Number
-	case BasicTypes.ANNOUNCEMENT:
-		commons.LogAnn("ANN %s", string(msg.State))
-		switch GameState.State(msg.State) {
-		case GameState.GETREADY:
-			p.updatePostion(p.lastMsg.GameInfo)
-			p.Number = p.findMyStatus(msg.GameInfo).Number
-		case GameState.LISTENING:
-			p.updatePostion(p.lastMsg.GameInfo)
-			p.state = p.determineMyState()
-			commons.LogDebug("State: %s", p.state)
-			p.madeAMove()
-		}
-	case BasicTypes.RIP:
-		commons.LogError("The server has stopped :/")
-		commons.Cleanup(true)
-		os.Exit(0)
-	}
+func (p *Player) LastServerMessage() GameMessage {
+	return p.LastMsg
 }
 
-func (p *Player) sendOrders(message string, orders ...BasicTypes.Order) {
+func (p *Player) SendOrders(message string, orders ...BasicTypes.Order) {
 	msg := PlayerMessage{
 		BasicTypes.ORDER,
 		orders,
 		message,
 	}
-	jsonsified, _ := json.Marshal(msg)
+	jsonsified, err := json.Marshal(msg)
+	if err != nil {
+		commons.LogError("Fail generating JSON: %s", err.Error())
+		return
+	}
 
-	err := p.GameConn.WriteMessage(websocket.TextMessage, jsonsified)
+	err = p.talker.Send(jsonsified)
 	if err != nil {
 		commons.LogError("Fail on sending message: %s", err.Error())
 		return
@@ -139,73 +71,35 @@ func (p *Player) sendOrders(message string, orders ...BasicTypes.Order) {
 }
 
 func (p *Player) keepPlaying() {
-	commons.RegisterCleaner("Stopping to play", p.stopsPlayer)
-	for stillUp := range keepListenning {
+	commons.RegisterCleaner("Stopping to play", p.stopToPlay)
+	for stillUp := range keepListening {
 		if !stillUp {
 			os.Exit(0)
 		}
 	}
 }
 
-func (p *Player) stopsPlayer(interrupted bool) {
-	keepListenning <- false
+func (p *Player) stopToPlay(interrupted bool) {
+	keepListening <- false
 }
 
-func (p *Player) madeAMove() {
-	var orders []BasicTypes.Order
-	var msg string
+func (p *Player) UpdatePosition(gameInfo GameInfo) {
+	status := p.FindMyStatus(gameInfo)
+	p.Velocity = status.Velocity
+	p.Coords = status.Coords
+}
 
-	switch p.state {
-	case AtckHoldHse:
-		msg, orders = p.orderForAtckHoldHse()
-	case AtckHoldFrg:
-		msg, orders = p.orderForAtckHoldFrg()
-	case AtckHelpHse:
-		msg, orders = p.orderForAtckHelpHse()
-	case AtckHelpFrg:
-		msg, orders = p.orderForAtckHelpFrg()
-	case DefdMyrgHse:
-		msg, orders = p.orderForDefdMyrgHse()
-		orders = append(orders, p.createCatchOrder())
-	case DefdMyrgFrg:
-		msg, orders = p.orderForDefdMyrgFrg()
-		orders = append(orders, p.createCatchOrder())
-	case DefdOtrgHse:
-		msg, orders = p.orderForDefdOtrgHse()
-		orders = append(orders, p.createCatchOrder())
-	case DefdOtrgFrg:
-		msg, orders = p.orderForDefdOtrgFrg()
-		orders = append(orders, p.createCatchOrder())
-	case DsptNfblHse:
-		msg, orders = p.orderForDsptNfblHse()
-		orders = append(orders, p.createCatchOrder())
-	case DsptNfblFrg:
-		msg, orders = p.orderForDsptNfblFrg()
-		orders = append(orders, p.createCatchOrder())
-	case DsptFrblHse:
-		msg, orders = p.orderForDsptFrblHse()
-		orders = append(orders, p.createCatchOrder())
-	case DsptFrblFrg:
-		msg, orders = p.orderForDsptFrblFrg()
-		orders = append(orders, p.createCatchOrder())
+func (p *Player) FindMyStatus(gameInfo GameInfo) *Player {
+	myteamInfo := p.FindMyTeamStatus(gameInfo)
+	for _, playerInfo := range myteamInfo.Players {
+		if playerInfo.ID() == p.ID() {
+			return playerInfo
+		}
 	}
-	p.sendOrders(msg, orders...)
-
+	return nil
 }
 
-func (p *Player) updatePostion(status GameInfo) {
-	if p.TeamPlace == Units.HomeTeam {
-		p.Coords = p.findMyStatus(status).Coords
-	} else {
-		p.Coords = p.findMyStatus(status).Coords
-	}
-}
-
-func (p *Player) findMyStatus(gameInfo GameInfo) *Player {
-	return p.findMyTeam(gameInfo).Players[p.Id]
-}
-
-func (p *Player) findMyTeam(gameInfo GameInfo) Team {
+func (p *Player) FindMyTeamStatus(gameInfo GameInfo) Team {
 	if p.TeamPlace == Units.HomeTeam {
 		return gameInfo.HomeTeam
 	} else {
@@ -213,7 +107,7 @@ func (p *Player) findMyTeam(gameInfo GameInfo) Team {
 	}
 }
 
-func (p *Player) findOpponentTeam(status GameInfo) Team {
+func (p *Player) GetOpponentTeam(status GameInfo) Team {
 	if p.TeamPlace == Units.HomeTeam {
 		return status.AwayTeam
 	} else {
@@ -221,54 +115,51 @@ func (p *Player) findOpponentTeam(status GameInfo) Team {
 	}
 }
 
-func (p *Player) playerEDecision() (string, []BasicTypes.Order) {
-	var orders []BasicTypes.Order
-	if p.IHoldTheBall() {
-		goalDistance := p.Coords.DistanceTo(p.offenseGoalCoods())
-		if int(math.Abs(goalDistance)) < BallMaxDistance() {
-			orders = []BasicTypes.Order{p.createKickOrder(p.offenseGoalCoods())}
-		} else {
-			orders = []BasicTypes.Order{p.orderAdvance()}
-		}
-	} else {
-		ballDistance := p.Coords.DistanceTo(p.lastMsg.GameInfo.Ball.Coords)
-		if ballDistance < Units.DistanceCatchBall {
-			orders = make([]BasicTypes.Order, 2)
-			orders[0] = BasicTypes.Order{
-				Type: BasicTypes.CATCH,
-				Data: map[string]interface{}{
-				},
-			}
-			orders[1] = p.orderAdvance()
-		} else {
-			orders = make([]BasicTypes.Order, 1)
-			orders[0] = p.createMoveOrder(p.lastMsg.GameInfo.Ball.Coords)
+func (p *Player) GetOpponentPlayer(status GameInfo, playerNumber BasicTypes.PlayerNumber) *Player {
+	teamInfo := p.GetOpponentTeam(status)
+	for _, playerInfo := range teamInfo.Players {
+		if playerInfo.Number == playerNumber {
+			return playerInfo
 		}
 	}
-	return "Gerenic order", orders
+	return nil
 }
 
-func (p *Player) createMoveOrder(target Physics.Point) BasicTypes.Order {
+func (p *Player) CreateMoveOrder(target Physics.Point, speed float64) BasicTypes.Order {
+	vec := Physics.NewZeroedVelocity(*Physics.NewVector(p.Coords, target).Normalize())
+	vec.Speed = speed
 	return BasicTypes.Order{
 		Type: BasicTypes.MOVE,
-		Data: map[string]interface{}{
-			"x": target.PosX,
-			"y": target.PosY,
-		},
+		Data: BasicTypes.MoveOrderData{Velocity: vec},
 	}
 }
 
-func (p *Player) createKickOrder(target Physics.Point) BasicTypes.Order {
+func (p *Player) CreateMoveOrderMaxSpeed(target Physics.Point) BasicTypes.Order {
+	return p.CreateMoveOrder(target, Units.PlayerMaxSpeed)
+}
+
+func (p *Player) CreateStopOrder(direction Physics.Vector) BasicTypes.Order {
+	vec := p.Velocity.Copy()
+	vec.Speed = 0
+	vec.Direction = &direction
+	return BasicTypes.Order{
+		Type: BasicTypes.MOVE,
+		Data: BasicTypes.MoveOrderData{Velocity: vec},
+	}
+}
+
+func (p *Player) CreateKickOrder(target Physics.Point, speed float64) BasicTypes.Order {
+	ballExpectedDirection := Physics.NewVector(p.LastMsg.GameInfo.Ball.Coords, target)
+	diffVector := *ballExpectedDirection.Sub(p.LastMsg.GameInfo.Ball.Velocity.Direction)
+	vec := Physics.NewZeroedVelocity(diffVector)
+	vec.Speed = speed
 	return BasicTypes.Order{
 		Type: BasicTypes.KICK,
-		Data: map[string]interface{}{
-			"x": target.PosX,
-			"y": target.PosY,
-		},
+		Data: BasicTypes.KickOrderData{Velocity: vec},
 	}
 }
 
-func (p *Player) createCatchOrder() BasicTypes.Order {
+func (p *Player) CreateCatchOrder() BasicTypes.Order {
 	return BasicTypes.Order{
 		Type: BasicTypes.CATCH,
 		Data: map[string]interface{}{
@@ -277,99 +168,18 @@ func (p *Player) createCatchOrder() BasicTypes.Order {
 }
 
 func (p *Player) IHoldTheBall() bool {
-	return p.lastMsg.GameInfo.Ball.Holder != nil && p.lastMsg.GameInfo.Ball.Holder.Id == p.Id
+	return p.LastMsg.GameInfo.Ball.Holder != nil && p.LastMsg.GameInfo.Ball.Holder.ID() == p.ID()
 }
 
-func (p *Player) determineMyState() PlayerState {
-	var isOnMyField bool
-	var subState string
-	var ballPossess string
-
-	if p.lastMsg.GameInfo.Ball.Holder == nil {
-		ballPossess = "dsp" //disputing
-		subState = "fbl"    //far
-		if int(math.Abs(p.Coords.DistanceTo(p.lastMsg.GameInfo.Ball.Coords))) <= DistanceNearBall {
-			subState = "nbl" //near
-		}
-	} else if p.lastMsg.GameInfo.Ball.Holder.TeamPlace == p.TeamPlace {
-		ballPossess = "atk" //attacking
-		subState = "hlp"    //helping
-		if p.lastMsg.GameInfo.Ball.Holder.Id == p.Id {
-			subState = "hld" //holdin
-		}
-	} else {
-		ballPossess = "dfd"
-		subState = "org"
-		if p.isItInMyRegion(p.lastMsg.GameInfo.Ball.Coords) {
-			subState = "mrg"
-		}
-	}
-
-	if p.TeamPlace == Units.HomeTeam {
-		isOnMyField = p.lastMsg.GameInfo.Ball.Coords.PosX <= Units.CourtWidth/2
-	} else {
-		isOnMyField = p.lastMsg.GameInfo.Ball.Coords.PosX >= Units.CourtWidth/2
-	}
-	fieldState := "fr"
-	if isOnMyField {
-		fieldState = "hs"
-	}
-	return PlayerState(ballPossess + "-" + subState + "-" + fieldState)
-}
-
-// Scala do campo ok
-// continuar testes
-
-GOLLLLERIo
-
-- rearrangin should change the player directions
-6. incluir testes para entrdas invalidas
-//Debugar the dummies
-//1. numero de jogadores
-//2. golero e gol
-
-
-func (p *Player) isItInMyRegion(coords Physics.Point) bool {
-	myRagion := p.myRegion()
-	isInX := coords.PosX >= myRagion.CornerA.PosX && coords.PosX <= myRagion.CornerB.PosX
-	isInY := coords.PosY >= myRagion.CornerA.PosY && coords.PosY <= myRagion.CornerB.PosY
-	return isInX && isInY
-}
-
-func (p *Player) myRegionCenter() Physics.Point {
-	myRegiao := p.myRegion()
-	//regionDiagonal := math.Hypot(float64(myRegiao.CornerA.PosX), float64(myRegiao.CornerB.PosY))
-	halfXDistance := (myRegiao.CornerB.PosX - myRegiao.CornerA.PosX) / 2
-	halfYDistance := (myRegiao.CornerB.PosY - myRegiao.CornerA.PosY) / 2
-	return Physics.Point{
-		PosX: int(myRegiao.CornerA.PosX + halfXDistance),
-		PosY: int(myRegiao.CornerA.PosY + halfYDistance),
-	}
-}
-
-func (p *Player) myRegion() PlayerRegion {
-	myRagion := HomePlayersRegions[p.Number]
-	if p.TeamPlace == Units.AwayTeam {
-		myRagion = MirrorRegion(myRagion)
-	}
-	return myRagion
-}
-func MirrorRegion(region PlayerRegion) PlayerRegion {
-	return PlayerRegion{
-		Units.MirrorCoordToAway(region.CornerB), // have to switch the corner because the convention for Regions
-		Units.MirrorCoordToAway(region.CornerA),
-	}
-}
-
-func (p *Player) findNearestMate() (distance float64, player *Player) {
+func (p *Player) FindNearestMate() (distance float64, player *Player) {
 	var nearestPlayer *Player
 	//starting from the worst case
 	nearestDistance := math.Hypot(float64(Units.CourtHeight), float64(Units.CourtWidth))
-	myTeam := p.findMyTeam(p.lastMsg.GameInfo)
+	myTeam := p.FindMyTeamStatus(p.LastMsg.GameInfo)
 
-	for playerId, player := range myTeam.Players {
+	for _, player := range myTeam.Players {
 		distance := math.Abs(p.Coords.DistanceTo(player.Coords))
-		if distance <= nearestDistance && playerId != p.Id {
+		if distance <= nearestDistance && player.ID() != p.ID() {
 			nearestDistance = distance
 			nearestPlayer = player
 		}
@@ -377,38 +187,22 @@ func (p *Player) findNearestMate() (distance float64, player *Player) {
 	return nearestDistance, nearestPlayer
 }
 
-func (p *Player) offenseGoalCoods() Physics.Point {
+func (p *Player) OpponentGoal() BasicTypes.Goal {
 	if p.TeamPlace == Units.HomeTeam {
-		return Units.AwayTeamGoalCenter
+		return commons.AwayTeamGoal
 	} else {
-		return Units.HomeTeamGoalCenter
-	}
-
-}
-
-func (p *Player) deffenseGoalCoods() Physics.Point {
-	if p.TeamPlace == Units.HomeTeam {
-		return Units.HomeTeamGoalCenter
-	} else {
-		return Units.AwayTeamGoalCenter
+		return commons.HomeTeamGoal
 	}
 }
-func (p *Player) websocketListenner() {
-	p.readingWs = commons.NewTask(func(task *commons.Task) {
-		msgType, message, err := p.GameConn.ReadMessage()
-		if msgType == -1 {
-			return
-		} else if err != nil {
-			commons.LogError("Fail reading websocket message (%d): %s", msgType, err)
-		} else {
-			var msg GameMessage
-			err = json.Unmarshal(message, &msg)
-			if err != nil {
-				commons.LogError("Fail on convert wb message: %s", err.Error())
-			} else {
-				p.onMessage(msg)
-			}
-		}
-	})
-	p.readingWs.Start()
+
+func (p *Player) DefenseGoal() BasicTypes.Goal {
+	if p.TeamPlace == Units.HomeTeam {
+		return commons.HomeTeamGoal
+	} else {
+		return commons.AwayTeamGoal
+	}
+}
+
+func (p *Player) IsGoalkeeper() bool {
+	return p.Number == commons.GoalkeeperNumber
 }

@@ -1,27 +1,18 @@
 package Game
 
 import (
-	"strconv"
 	"github.com/makeitplay/commons/Units"
 )
 
 type Team struct {
-	Name    Units.TeamPlace        `json:"name"`
+	Name    Units.TeamPlace `json:"name"`
 	Score   int             `json:"score"`
-	Players map[int]*Player `json:"players"`
+	Players []*Player       `json:"players"`
 }
 
 func (t *Team) AddPlayer(player *Player) (numPlayers int, err error) {
-	if t.Players == nil {
-		t.Players = map[int]*Player{}
-	}
-
-	countPlayers := len(t.Players) + 1
-	nextNumber := strconv.Itoa(countPlayers)
-
 	player.TeamPlace = t.Name
-	player.Number = Units.PlayerNumber(nextNumber)
-	t.Players[player.Id] = player
+	t.Players = append(t.Players, player)
 
-	return countPlayers, nil
+	return len(t.Players), nil
 }
