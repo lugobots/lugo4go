@@ -115,18 +115,16 @@ func (p *Player) FindMyStatus(gameInfo GameInfo) *Player {
 func (p *Player) FindMyTeamStatus(gameInfo GameInfo) Team {
 	if p.TeamPlace == Units.HomeTeam {
 		return gameInfo.HomeTeam
-	} else {
-		return gameInfo.AwayTeam
 	}
+	return gameInfo.AwayTeam
 }
 
 // GetOpponentTeam retrieve the opponent team status from the game server message
 func (p *Player) GetOpponentTeam(status GameInfo) Team {
 	if p.TeamPlace == Units.HomeTeam {
 		return status.AwayTeam
-	} else {
-		return status.HomeTeam
 	}
+	return status.HomeTeam
 }
 
 // GetOpponentPlayer retrieve a specific opponent player status from the game server message
@@ -212,18 +210,16 @@ func (p *Player) FindNearestMate() (distance float64, player *Player) {
 func (p *Player) OpponentGoal() BasicTypes.Goal {
 	if p.TeamPlace == Units.HomeTeam {
 		return commons.AwayTeamGoal
-	} else {
-		return commons.HomeTeamGoal
 	}
+	return commons.HomeTeamGoal
 }
 
 // DefenseGoal returns the player team goal
 func (p *Player) DefenseGoal() BasicTypes.Goal {
 	if p.TeamPlace == Units.HomeTeam {
 		return commons.HomeTeamGoal
-	} else {
-		return commons.AwayTeamGoal
 	}
+	return commons.AwayTeamGoal
 }
 
 // IsGoalkeeper returns true if the player is the goalkeeper

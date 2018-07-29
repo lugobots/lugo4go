@@ -33,14 +33,13 @@ func (p *Player) initializeCommunicator() bool {
 	})
 
 	if err != nil {
-		commons.LogError("Fail on oppening the websocket connection: %s", err)
+		commons.LogError("Fail on opening the websocket connection: %s", err)
 		return false
-	} else {
-		commons.RegisterCleaner("Websocket connection", func(interrupted bool) {
-			p.talker.CloseConnection()
-		})
-		return true
 	}
+	commons.RegisterCleaner("Websocket connection", func(interrupted bool) {
+		p.talker.CloseConnection()
+	})
+	return true
 }
 
 // onMessage is the callback function called when the game server sends a new message
