@@ -11,6 +11,7 @@ import (
 	"runtime/debug"
 )
 
+// initializeCommunicator initialize a communication with the game server
 func (p *Player) initializeCommunicator() bool {
 	uri := new(url.URL)
 	uri.Scheme = "ws"
@@ -42,6 +43,7 @@ func (p *Player) initializeCommunicator() bool {
 	}
 }
 
+// onMessage is the callback function called when the game server sends a new message
 func (p *Player) onMessage(msg GameMessage) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -58,6 +60,7 @@ func (p *Player) onMessage(msg GameMessage) {
 
 }
 
+// defaultOnMessage is the default callback to process the new messages got from the game server
 func (p *Player) defaultOnMessage(msg GameMessage) {
 	switch msg.Type {
 	case BasicTypes.WELCOME:

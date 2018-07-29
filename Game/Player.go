@@ -13,6 +13,9 @@ import (
 	"os"
 )
 
+// Player acts a brainless player in the game. This struct implements many methods that does not affect the player
+// intelligence/behaviour/decisions. So, it is meant to reduce the developer concerns about communication, protocols,
+// attributes, etc, and focusing in the player intelligence.
 type Player struct {
 	Physics.Element
 	Id             string                  `json:"id"`
@@ -26,8 +29,10 @@ type Player struct {
 	readingWs      *commons.Task
 }
 
+// keepListening is used to keep the process running while the player is playing
 var keepListening = make(chan bool)
 
+// ID returns the player ID, that is the team place and it concatenated.
 func (p *Player) ID() string {
 	if p.Id == "" {
 		p.Id = fmt.Sprintf("%s-%s", p.TeamPlace, p.Number)
@@ -35,6 +40,7 @@ func (p *Player) ID() string {
 	return p.Id
 }
 
+// Start make the player start to play
 func (p *Player) Start(configuration *Configuration) {
 	p.config = configuration
 	if p.OnAnnouncement == nil {
@@ -47,29 +53,32 @@ func (p *Player) Start(configuration *Configuration) {
 	}
 }
 
+// LastServerMessage returns the last message got from the server
 func (p *Player) LastServerMessage() GameMessage {
 	return p.LastMsg
 }
 
+// SendOrders sends a list of orders to the game server, and includes a message to them (only displayed in the game server log)
 func (p *Player) SendOrders(message string, orders ...BasicTypes.Order) {
 	msg := PlayerMessage{
 		BasicTypes.ORDER,
 		orders,
 		message,
 	}
-	jsonsified, err := json.Marshal(msg)
+	stringed, err := json.Marshal(msg)
 	if err != nil {
 		commons.LogError("Fail generating JSON: %s", err.Error())
 		return
 	}
 
-	err = p.talker.Send(jsonsified)
+	err = p.talker.Send(stringed)
 	if err != nil {
 		commons.LogError("Fail on sending message: %s", err.Error())
 		return
 	}
 }
 
+// keepPlaying keeps the process running while the player plays
 func (p *Player) keepPlaying() {
 	commons.RegisterCleaner("Stopping to play", p.stopToPlay)
 	for stillUp := range keepListening {
@@ -79,16 +88,19 @@ func (p *Player) keepPlaying() {
 	}
 }
 
+// stopToPlay stop the player to play
 func (p *Player) stopToPlay(interrupted bool) {
 	keepListening <- false
 }
 
+// UpdatePosition update the player status after the last game server message
 func (p *Player) UpdatePosition(gameInfo GameInfo) {
 	status := p.FindMyStatus(gameInfo)
 	p.Velocity = status.Velocity
 	p.Coords = status.Coords
 }
 
+// FindMyStatus retrieve the player status from the game server message
 func (p *Player) FindMyStatus(gameInfo GameInfo) *Player {
 	myteamInfo := p.FindMyTeamStatus(gameInfo)
 	for _, playerInfo := range myteamInfo.Players {
@@ -99,6 +111,7 @@ func (p *Player) FindMyStatus(gameInfo GameInfo) *Player {
 	return nil
 }
 
+// FindMyTeamStatus retrieve the player team status from the game server message
 func (p *Player) FindMyTeamStatus(gameInfo GameInfo) Team {
 	if p.TeamPlace == Units.HomeTeam {
 		return gameInfo.HomeTeam
@@ -107,6 +120,7 @@ func (p *Player) FindMyTeamStatus(gameInfo GameInfo) Team {
 	}
 }
 
+// GetOpponentTeam retrieve the opponent team status from the game server message
 func (p *Player) GetOpponentTeam(status GameInfo) Team {
 	if p.TeamPlace == Units.HomeTeam {
 		return status.AwayTeam
@@ -115,6 +129,7 @@ func (p *Player) GetOpponentTeam(status GameInfo) Team {
 	}
 }
 
+// GetOpponentPlayer retrieve a specific opponent player status from the game server message
 func (p *Player) GetOpponentPlayer(status GameInfo, playerNumber BasicTypes.PlayerNumber) *Player {
 	teamInfo := p.GetOpponentTeam(status)
 	for _, playerInfo := range teamInfo.Players {
@@ -125,6 +140,7 @@ func (p *Player) GetOpponentPlayer(status GameInfo, playerNumber BasicTypes.Play
 	return nil
 }
 
+// CreateMoveOrder creates a move order
 func (p *Player) CreateMoveOrder(target Physics.Point, speed float64) BasicTypes.Order {
 	vec := Physics.NewZeroedVelocity(*Physics.NewVector(p.Coords, target).Normalize())
 	vec.Speed = speed
@@ -134,10 +150,12 @@ func (p *Player) CreateMoveOrder(target Physics.Point, speed float64) BasicTypes
 	}
 }
 
+// CreateMoveOrderMaxSpeed creates a move order with max speed allowed
 func (p *Player) CreateMoveOrderMaxSpeed(target Physics.Point) BasicTypes.Order {
 	return p.CreateMoveOrder(target, Units.PlayerMaxSpeed)
 }
 
+// CreateStopOrder creates a move order with speed zero
 func (p *Player) CreateStopOrder(direction Physics.Vector) BasicTypes.Order {
 	vec := p.Velocity.Copy()
 	vec.Speed = 0
@@ -148,6 +166,7 @@ func (p *Player) CreateStopOrder(direction Physics.Vector) BasicTypes.Order {
 	}
 }
 
+// CreateKickOrder creates a kick order and try to find the best vector to reach the target
 func (p *Player) CreateKickOrder(target Physics.Point, speed float64) BasicTypes.Order {
 	ballExpectedDirection := Physics.NewVector(p.LastMsg.GameInfo.Ball.Coords, target)
 	diffVector := *ballExpectedDirection.Sub(p.LastMsg.GameInfo.Ball.Velocity.Direction)
@@ -159,6 +178,7 @@ func (p *Player) CreateKickOrder(target Physics.Point, speed float64) BasicTypes
 	}
 }
 
+// CreateCatchOrder creates the catch order
 func (p *Player) CreateCatchOrder() BasicTypes.Order {
 	return BasicTypes.Order{
 		Type: BasicTypes.CATCH,
@@ -166,10 +186,12 @@ func (p *Player) CreateCatchOrder() BasicTypes.Order {
 	}
 }
 
+// IHoldTheBall returns true when the player is holding the ball
 func (p *Player) IHoldTheBall() bool {
 	return p.LastMsg.GameInfo.Ball.Holder != nil && p.LastMsg.GameInfo.Ball.Holder.ID() == p.ID()
 }
 
+// FindNearestMate returns the nearest team player and the distance to him
 func (p *Player) FindNearestMate() (distance float64, player *Player) {
 	var nearestPlayer *Player
 	//starting from the worst case
@@ -186,6 +208,7 @@ func (p *Player) FindNearestMate() (distance float64, player *Player) {
 	return nearestDistance, nearestPlayer
 }
 
+// OpponentGoal returns the Goal os the opponent
 func (p *Player) OpponentGoal() BasicTypes.Goal {
 	if p.TeamPlace == Units.HomeTeam {
 		return commons.AwayTeamGoal
@@ -194,6 +217,7 @@ func (p *Player) OpponentGoal() BasicTypes.Goal {
 	}
 }
 
+// DefenseGoal returns the player team goal
 func (p *Player) DefenseGoal() BasicTypes.Goal {
 	if p.TeamPlace == Units.HomeTeam {
 		return commons.HomeTeamGoal
@@ -202,6 +226,7 @@ func (p *Player) DefenseGoal() BasicTypes.Goal {
 	}
 }
 
+// IsGoalkeeper returns true if the player is the goalkeeper
 func (p *Player) IsGoalkeeper() bool {
 	return p.Number == commons.GoalkeeperNumber
 }
