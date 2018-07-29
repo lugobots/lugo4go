@@ -64,7 +64,8 @@ func (p *Player) defaultOnMessage(msg GameMessage) {
 	switch msg.Type {
 	case BasicTypes.WELCOME:
 		commons.LogInfo("Accepted by the game server")
-		p.Number = p.FindMyStatus(msg.GameInfo).Number
+		myStatus := p.FindMyStatus(msg.GameInfo)
+		p.Number = myStatus.Number
 	case BasicTypes.ANNOUNCEMENT:
 		if p.OnAnnouncement == nil {
 			panic("the player must implement the `OnAnnouncement` method")

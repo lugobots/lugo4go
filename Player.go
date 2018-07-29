@@ -13,7 +13,7 @@ import (
 	"os"
 )
 
-// Player acts a brainless player in the game. This struct implements many methods that does not affect the player
+// Player acts as a brainless player in the game. This struct implements many methods that does not affect the player
 // intelligence/behaviour/decisions. So, it is meant to reduce the developer concerns about communication, protocols,
 // attributes, etc, and focusing in the player intelligence.
 type Player struct {
@@ -43,6 +43,7 @@ func (p *Player) ID() string {
 // Start make the player start to play
 func (p *Player) Start(configuration *Configuration) {
 	p.config = configuration
+	p.Size = Units.PlayerSize
 	if p.OnAnnouncement == nil {
 		log.Fatal("your player must implement the `OnAnnouncement` action")
 	}
@@ -96,6 +97,12 @@ func (p *Player) stopToPlay(interrupted bool) {
 // UpdatePosition update the player status after the last game server message
 func (p *Player) UpdatePosition(gameInfo GameInfo) {
 	status := p.FindMyStatus(gameInfo)
+	if status == nil {
+		// sometimes the player gets a message before his welcome message be processed, then he is not officially in the game,
+		// so, this status is not available yet.
+		return
+	}
+
 	p.Velocity = status.Velocity
 	p.Coords = status.Coords
 }
