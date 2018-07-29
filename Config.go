@@ -1,4 +1,4 @@
-package Game
+package client
 
 import (
 	"flag"
