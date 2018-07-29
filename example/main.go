@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/makeitplay/client-player-go"
-	"github.com/makeitplay/commons/Units"
 	"github.com/makeitplay/commons/GameState"
+	"github.com/makeitplay/commons/Units"
 )
 
 var player *client.Player
@@ -42,5 +42,3 @@ func reactToNewState(msg client.GameMessage) {
 		player.SendOrders("Shoot!", orderToMove, orderToCatch)
 	}
 }
-
-
