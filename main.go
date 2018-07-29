@@ -18,7 +18,6 @@ func main() {
 	watchInterruptions()
 	defer commons.Cleanup(false)
 	serverConfig := new(Game.Configuration)
-	commons.Load(serverConfig)
 	serverConfig.LoadCmdArg()
 	/**********************************************/
 

@@ -14,25 +14,16 @@
   version = "v1.2.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/makeitplay/commons"
   packages = [
     ".",
     "BasicTypes",
-    "GameState",
     "Physics",
-    "Units"
+    "Units",
+    "talk"
   ]
-  revision = "e41f2a4ffa5fa597337a2e488a7a7b2a70af6d46"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/maketplay/commons"
-  packages = [
-    "BasicTypes",
-    "Physics"
-  ]
-  revision = "e41f2a4ffa5fa597337a2e488a7a7b2a70af6d46"
+  revision = "c2a894d6669a37b40ebe35b591f67097a721acca"
+  version = "1.0.0-alpha"
 
 [[projects]]
   name = "github.com/mattn/go-colorable"
@@ -47,6 +38,12 @@
   version = "v0.0.3"
 
 [[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
@@ -55,6 +52,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8910875c1b3eb05c235363996eaf80e9cad0536ba187049fd09f47bc0b4ffbbd"
+  inputs-digest = "9d2c5b219d9db30f63d413532fad490b5aea32be96ada1861e83e2c6e0a3838c"
   solver-name = "gps-cdcl"
   solver-version = 1
