@@ -20,8 +20,6 @@ package tatics
 //	}
 //}
 
-
-
 //var regionWidth = int(math.Round(Units.CourtWidth * 0.6))
 //var regionLength = int(math.Round(Units.CourtHeight * 0.3))
 //var regionOverlap = ((regionLength * 4) - Units.CourtHeight) / 3
@@ -75,7 +73,7 @@ package tatics
 
 //type PlayerPosition struct {
 //	InitialPosition Physics.Point
-	//Region PlayerRegion
-	//Number BasicTypes.PlayerNumber
+//Region PlayerRegion
+//Number BasicTypes.PlayerNumber
 //}
 //

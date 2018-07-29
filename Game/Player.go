@@ -1,16 +1,16 @@
 package Game
 
 import (
-	"os"
-	"math"
-	"github.com/makeitplay/commons"
-	"github.com/makeitplay/commons/Physics"
-	"github.com/makeitplay/commons/BasicTypes"
-	"github.com/makeitplay/commons/Units"
 	"encoding/json"
-	"github.com/makeitplay/commons/talk"
 	"fmt"
+	"github.com/makeitplay/commons"
+	"github.com/makeitplay/commons/BasicTypes"
+	"github.com/makeitplay/commons/Physics"
+	"github.com/makeitplay/commons/Units"
+	"github.com/makeitplay/commons/talk"
 	"log"
+	"math"
+	"os"
 )
 
 type Player struct {
@@ -162,8 +162,7 @@ func (p *Player) CreateKickOrder(target Physics.Point, speed float64) BasicTypes
 func (p *Player) CreateCatchOrder() BasicTypes.Order {
 	return BasicTypes.Order{
 		Type: BasicTypes.CATCH,
-		Data: map[string]interface{}{
-		},
+		Data: map[string]interface{}{},
 	}
 }
 

@@ -1,12 +1,12 @@
 package Game
 
 import (
-	"net/url"
-	"fmt"
-	"github.com/makeitplay/commons/talk"
-	"github.com/makeitplay/commons/BasicTypes"
 	"encoding/json"
+	"fmt"
 	"github.com/makeitplay/commons"
+	"github.com/makeitplay/commons/BasicTypes"
+	"github.com/makeitplay/commons/talk"
+	"net/url"
 	"os"
 	"runtime/debug"
 )
@@ -58,7 +58,7 @@ func (p *Player) onMessage(msg GameMessage) {
 
 }
 
-func (p *Player) defaultOnMessage(msg GameMessage){
+func (p *Player) defaultOnMessage(msg GameMessage) {
 	switch msg.Type {
 	case BasicTypes.WELCOME:
 		commons.LogInfo("Accepted by the game server")

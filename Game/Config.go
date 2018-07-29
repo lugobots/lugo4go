@@ -2,9 +2,9 @@ package Game
 
 import (
 	"flag"
-	"github.com/makeitplay/commons/Units"
 	"fmt"
 	"github.com/makeitplay/commons/BasicTypes"
+	"github.com/makeitplay/commons/Units"
 	"log"
 	"strconv"
 )
@@ -26,7 +26,6 @@ func (c *Configuration) LoadCmdArg() {
 	flag.StringVar(&name, "team", "home", "Team (home or away)")
 	flag.IntVar(&number, "number", 0, "Player's number")
 	flag.StringVar(&c.Uuid, "uui", "local", "Uuid for this player instance. (Auto-provided in production)")
-
 
 	flag.StringVar(&c.WSHost, "wshost", "localhost", "Game server's websocket endpoint")
 	flag.StringVar(&c.WSPort, "wsport", "8080", "Port for the websocket endpoint")

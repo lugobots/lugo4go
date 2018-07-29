@@ -1,12 +1,12 @@
 package main
 
 import (
-	"os"
-	"math/rand"
-	"time"
-	"os/signal"
 	"./Game"
 	"github.com/makeitplay/commons"
+	"math/rand"
+	"os"
+	"os/signal"
+	"time"
 )
 
 var (
