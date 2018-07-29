@@ -9,15 +9,21 @@ import (
 	"strconv"
 )
 
+// Configuration is the set of values expected as a initial configuration of the player
 type Configuration struct {
+	// TeamPlace must be "home" or "away" and identifies the side of the field that the team is going to play
 	TeamPlace    Units.TeamPlace
+	// PlayerNumber must be a number between 1-11 that identifies this player in his team
 	PlayerNumber BasicTypes.PlayerNumber
-	Uuid         string //this value will be automatically given to your binary by the server :) You may ignore it locally
-
+	// UUID is the match UUID. It will be always local for local games
+	UUID   string
+	// WSHost is the hostname of the game server (only HTTP for now)
 	WSHost string
+	// WSPort is the port used by the game server
 	WSPort string
 }
 
+// LoadCmdArg sets the flag that will allows us to change the default config
 func (c *Configuration) LoadCmdArg() {
 	//mandatory
 	var name string
@@ -25,7 +31,7 @@ func (c *Configuration) LoadCmdArg() {
 
 	flag.StringVar(&name, "team", "home", "Team (home or away)")
 	flag.IntVar(&number, "number", 0, "Player's number")
-	flag.StringVar(&c.Uuid, "uui", "local", "Uuid for this player instance. (Auto-provided in production)")
+	flag.StringVar(&c.UUID, "uui", "local", "UUID for this player instance. (Auto-provided in production)")
 
 	flag.StringVar(&c.WSHost, "wshost", "localhost", "Game server's websocket endpoint")
 	flag.StringVar(&c.WSPort, "wsport", "8080", "Port for the websocket endpoint")
