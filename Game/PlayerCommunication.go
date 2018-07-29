@@ -14,7 +14,7 @@ import (
 func (p *Player) initializeCommunicator() bool {
 	uri := new(url.URL)
 	uri.Scheme = "ws"
-	uri.Host = "localhost:8080"
+	uri.Host = fmt.Sprintf("%s:%s", p.config.WSHost, p.config.WSPort)
 	uri.Path = fmt.Sprintf("/announcements/%s/%s", p.config.Uuid, p.TeamPlace)
 	p.talker = talk.NewTalkChannel(*uri, BasicTypes.PlayerSpecifications{
 		Number:        p.Number,
