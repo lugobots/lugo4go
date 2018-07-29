@@ -29,6 +29,7 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
 ### Kick start
 
 0. Copy the example directory as a new Golang project
+
 0. Build your bot executing the command below inside the project directory
     ```bash 
     go build -o myAwesomeBot
@@ -39,7 +40,7 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
     ```
 0. You will need to spin up 22 process (11 as the home team players, and 11 as the away team players). 
 
-    You can do this manually executing the command `./myAwesomeBot -team=[home|away\ -number=[1-11]`
+    You can do this manually executing the command `./myAwesomeBot -team=[home|away] -number=[1-11]`
       
     **or**
     
@@ -52,7 +53,5 @@ to play against your team (soon available at [MakeItPlay Docker Hub](https://hub
 
 You will be able to create a Docker container with your player bot and share it with another developers.
 
-See the Dockerfile template* in the example directory.
-
-* Not tested yet!
+See the Dockerfile template (not tested yet) in the example directory.
 
