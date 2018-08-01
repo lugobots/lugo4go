@@ -18,7 +18,7 @@ func main() {
 	player.TeamPlace = serverConfig.TeamPlace
 	player.Number = serverConfig.PlayerNumber
 
-	// we have to set the call back function that we process the player behaviour when the game state has been changed
+	// we have to set the call back function that will process the player behaviour when the game state has been changed
 	player.OnAnnouncement = reactToNewState
 	player.Start(serverConfig)
 }
@@ -39,6 +39,6 @@ func reactToNewState(msg client.GameMessage) {
 		// otherwise, let's run towards the ball like kids
 		orderToMove := player.CreateMoveOrderMaxSpeed(player.LastServerMessage().GameInfo.Ball.Coords)
 		orderToCatch := player.CreateCatchOrder()
-		player.SendOrders("Shoot!", orderToMove, orderToCatch)
+		player.SendOrders("Catch the ball!", orderToMove, orderToCatch)
 	}
 }
