@@ -1,5 +1,8 @@
 # MakeItPlay - Football Go Player Client
 
+[![GoDoc](https://godoc.org/github.com/makeitplay/client-player-go?status.svg)](https://godoc.org/github.com/makeitplay/client-player-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/makeitplay/client-player-go)](https://goreportcard.com/report/github.com/makeitplay/client-player-go)
+
 Go Player Client is a [Go](http://golang.org/) implementation of a player (bot) for [MakeItPlay football](http://www.makeitplay.ai/football) game.
 
 This client implements a brainless player in the game. So, this library implements many methods that does not affect the player
@@ -9,9 +12,6 @@ and focusing in the player intelligence.
 Using this client, you just need to implement the Artificial Intelligence of your player and some other few methods to support
 your strategy (see the project [The Dummies](https://github.com/makeitplay/the-dummies-go) as an example). 
  
-[![GoDoc](https://godoc.org/github.com/makeitplay/client-player-go?status.svg)](https://godoc.org/github.com/makeitplay/client-player-go)
-[![Go Report Card](https://goreportcard.com/badge/github.com/makeitplay/client-player-go)](https://goreportcard.com/report/github.com/makeitplay/client-player-go)
-
 ### Documentation
 
 * [API Reference](http://godoc.org/github.com/makeitplay/client-player-go)
@@ -28,8 +28,7 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
 
 ### Kick start
 
-0. Copy the example directory as a new Golang project
-
+0. Copy [the example directory](./example) as a new Golang project
 0. Build your bot executing the command below inside the project directory
     ```bash 
     go build -o myAwesomeBot
