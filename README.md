@@ -3,7 +3,9 @@
 [![GoDoc](https://godoc.org/github.com/makeitplay/client-player-go?status.svg)](https://godoc.org/github.com/makeitplay/client-player-go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/makeitplay/client-player-go)](https://goreportcard.com/report/github.com/makeitplay/client-player-go)
 
-Go Player Client is a [Go](http://golang.org/) implementation of a player (bot) for [MakeItPlay football](http://www.makeitplay.ai/football) game.
+Go Player Client is a [Go](http://golang.org/) implementation of a client player for [MakeItPlay football](http://www.makeitplay.ai/football) game server. 
+
+It **is not a bot** that plays the game, it is only the client for the game server. 
 
 This client implements a brainless player in the game. So, this library implements many methods that does not affect the player
 intelligence/behaviour/decisions. It was meant to reduce the developer concerns on communication, protocols, attributes, etc,
