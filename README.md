@@ -70,7 +70,7 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
 
 After developing your bot, you may share it with other developers.
 
-Using this client you code will be compiled into a binary file. So you do not have to share the bot source code.
+Using this client your code will be compiled into a binary file. So you do not have to share the bot source code.
 
 There is a Dockerfile template in [the example directory](./example) to guide you how to create a container. After
 having customized (or not) your Dockerfile, you just need to build the container:
@@ -80,5 +80,5 @@ docker build -t [your username]/[your bot awesome name] .
 docker push
 ```
 
-If you are not familiar with Dockerfile, Docker composer, and so on. Please, consider spending 11 minutes to learn it 
+If you are not familiar with Dockerfile, Docker composer, and so on, consider spending 11 minutes to learn it 
 watching [this video](https://www.youtube.com/watch?v=YFl2mCHdv24). It is by far the best and simplest way to learn Docker. 

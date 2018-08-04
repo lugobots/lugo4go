@@ -4,11 +4,15 @@ import (
 	"github.com/makeitplay/client-player-go"
 	"github.com/makeitplay/commons/GameState"
 	"github.com/makeitplay/commons/Units"
+	"github.com/makeitplay/commons/Physics"
+	"math/rand"
+	"time"
 )
 
 var player *client.Player
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
 	// First we have to get the command line arguments to identify this bot in its game
 	serverConfig := new(client.Configuration)
 	serverConfig.LoadCmdArg()
@@ -17,6 +21,11 @@ func main() {
 	player = new(client.Player)
 	player.TeamPlace = serverConfig.TeamPlace
 	player.Number = serverConfig.PlayerNumber
+	// this will be our bot initial position
+	player.Coords = Physics.Point{
+		PosX: rand.Int() % Units.CourtWidth,
+		PosY: rand.Int() % Units.CourtHeight,
+	}
 
 	// we have to set the call back function that will process the player behaviour when the game state has been changed
 	player.OnAnnouncement = reactToNewState
