@@ -8,8 +8,8 @@ Go Player Client is a [Go](http://golang.org/) implementation of a client player
 It **is not a bot** that plays the game, it is only the client for the game server. 
 
 This client implements a brainless player in the game. So, this library implements many methods that does not affect the player
-intelligence/behaviour/decisions. It was meant to reduce the developer concerns on communication, protocols, attributes, etc,
-and focusing in the player intelligence.
+intelligence/behaviour/decisions. It is meant to reduce the developer concerns on communication, protocols, attributes, etc, and 
+focus in the player intelligence.
 
 Using this client, you just need to implement the Artificial Intelligence of your player and some other few methods to support
 your strategy (see the project [The Dummies](https://github.com/makeitplay/the-dummies-go) as an example). 
@@ -55,7 +55,7 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
     
     **or**
         
-    **Option B**: You may play against **The Dummies** executing the script `start-team-container.sh`
+    **Option B**: You may play against [**The Dummies** team](https://github.com/makeitplay/the-dummies-go) executing the script `start-team-container.sh`
     available in [the example directory](./example):     
     
     `./start-team-container.sh makeitplay/the-dummies-go away`
@@ -65,6 +65,11 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
     **Option C**: You may play against another team:
     `./start-team-container.sh [container image name] away` 
 
+### Next steps
+
+As you may have noticed, the bot player in the example directory does not play well. 
+Now, you may start your bot implementing its behaviour based on the game state after each message got by the function 
+`reactToNewState`.  
 
 ### Deploying you bots
 
