@@ -40,26 +40,29 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
     ```bash
     docker run -p 8080:8080  makeitplay/football:1.0.0-alpha
     ```
-0. Now you will need two teams to play. Each team must have 11 process (one for each player).
-    You may start your team players  manually executing the command `./myAwesomeBot -team=[home|away] -number=[1-11]`
-      
+0. Now you will need to start your team process. Each team must have 11 process (one for each player).
+    
+    **Option A**: You may start your team players manually executing the command `./myAwesomeBot -team=[home|away] -number=[1-11]`
+    eleven times. 
+          
     **or**
     
-    You can use the shell script in the example directory to do this automatically for you:
+    **Option B**: You can use the shell script in [the example directory](./example) to do this automatically for you:
     `./play.sh home`
 0. And finally you may do the same for the other team. 
-    You play against your own team repeating the last step, but in the `away` side: `./play.sh away`
+    
+    **Option A**: You play against your own team repeating the last step, but in the `away` side: `./play.sh away`
     
     **or**
         
-    You may play against **The Dummies** executing the script start-team-container.sh 
+    **Option B**: You may play against **The Dummies** executing the script start-team-container.sh 
     available in [the example directory](./example):     
     
     `./start-team-container.sh makeitplay/the-dummies-go away`
      
     **or**
     
-    You may play against another team:
+    **Option C**: You may play against another team:
     `./start-team-container.sh [container] away` 
 
 
