@@ -42,12 +42,12 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
     ```
 0. Now you will need to start your team process. Each team must have 11 process (one for each player).
     
-    **Option A**: You may start your team players manually executing the command `./myAwesomeBot -team=[home|away] -number=[1-11]`
+    **Option A**: You may start your team players manually executing the command `./myAwesomeBot -team=home -number=[1-11]`
     eleven times. 
           
     **or**
     
-    **Option B**: You can use the shell script in [the example directory](./example) to do this automatically for you:
+    **Option B**: You can use the script in [the example directory](./example) to do this automatically for you:
     `./play.sh home`
 0. And finally you may do the same for the other team. 
     
@@ -55,7 +55,7 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
     
     **or**
         
-    **Option B**: You may play against **The Dummies** executing the script start-team-container.sh 
+    **Option B**: You may play against **The Dummies** executing the script `start-team-container.sh`
     available in [the example directory](./example):     
     
     `./start-team-container.sh makeitplay/the-dummies-go away`
@@ -63,15 +63,22 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
     **or**
     
     **Option C**: You may play against another team:
-    `./start-team-container.sh [container] away` 
+    `./start-team-container.sh [container image name] away` 
 
 
-**Note:** In this example above, both teams will have the same bots. You may download another bot
-to play against your team (soon available at [MakeItPlay Docker Hub](https://hub.docker.com/r/makeitplay/))  
+### Deploying you bots
 
-### Deploying you bots (soon)
+After developing your bot, you may share it with other developers.
 
-You will be able to create a Docker container with your player bot and share it with another developers.
+Using this client you code will be compiled into a binary file. So you do not have to share the bot source code.
 
-See the Dockerfile template (not tested yet) in the example directory.
+There is a Dockerfile template in [the example directory](./example) to guide you how to create a container. After
+having customized (or not) your Dockerfile, you just need to build the container:
 
+```bash
+docker build -t [your username]/[your bot awesome name] .
+docker push
+```
+
+If you are not familiar with Dockerfile, Docker composer, and so on. Please, consider spending 11 minutes to learn it 
+watching [this video](https://www.youtube.com/watch?v=YFl2mCHdv24). It is by far the best and simplest way to learn Docker. 
