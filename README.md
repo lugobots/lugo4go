@@ -31,6 +31,7 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
 ### Kick start
 
 0. Copy [the example directory](./example) as a new Golang project
+
 0. Build your bot executing the command below inside the project directory
     ```bash 
     go build -o myAwesomeBot
@@ -39,13 +40,28 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
     ```bash
     docker run -p 8080:8080  makeitplay/football:1.0.0-alpha
     ```
-0. You will need to spin up 22 process (11 as the home team players, and 11 as the away team players). 
-
-    You can do this manually executing the command `./myAwesomeBot -team=[home|away] -number=[1-11]`
+0. Now you will need two teams to play. Each team must have 11 process (one for each player).
+    You may start your team players  manually executing the command `./myAwesomeBot -team=[home|away] -number=[1-11]`
       
     **or**
     
-    You can use the shell script in the example directory to do this automatically for you.
+    You can use the shell script in the example directory to do this automatically for you:
+    `./play.sh home`
+0. And finally you may do the same for the other team. 
+    You play against your own team repeating the last step, but in the `away` side: `./play.sh away`
+    
+    **or**
+        
+    You may play against **The Dummies** executing the script start-team-container.sh 
+    available in [the example directory](./example):     
+    
+    `./start-team-container.sh makeitplay/the-dummies-go away`
+     
+    **or**
+    
+    You may play against another team:
+    `./start-team-container.sh [container] away` 
+
 
 **Note:** In this example above, both teams will have the same bots. You may download another bot
 to play against your team (soon available at [MakeItPlay Docker Hub](https://hub.docker.com/r/makeitplay/))  

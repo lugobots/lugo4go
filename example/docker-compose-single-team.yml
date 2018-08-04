@@ -1,0 +1,120 @@
+version: '3.4'
+services:
+  game_server:
+    image: makeitplay/football:1.0.0-alpha
+    command:  -debug
+    networks:
+      - team_01
+      - team_02
+      - team_03
+      - team_04
+      - team_05
+      - team_06
+      - team_07
+      - team_08
+      - team_09
+      - team_10
+      - team_11
+      - default
+    ports:
+      - "8080:8080"
+  player_01:
+    image: ${team_image}
+    command:  -team=${team_place} -number=1 -wshost=game_server
+    networks:
+      - team_01
+    depends_on:
+      - game_server
+  player_02:
+    image: ${team_image}
+    command:  -team=${team_place} -number=2 -wshost=game_server
+    networks:
+      - team_02
+    depends_on:
+      - game_server
+  player_03:
+    image: ${team_image}
+    command:  -team=${team_place} -number=3 -wshost=game_server
+    networks:
+      - team_03
+    depends_on:
+      - game_server
+  player_04:
+    image: ${team_image}
+    command:  -team=${team_place} -number=4 -wshost=game_server
+    networks:
+      - team_04
+    depends_on:
+      - game_server
+  player_05:
+    image: ${team_image}
+    command:  -team=${team_place} -number=5 -wshost=game_server
+    networks:
+      - team_05
+    depends_on:
+      - game_server
+  player_06:
+    image: ${team_image}
+    command:  -team=${team_place} -number=6 -wshost=game_server
+    networks:
+      - team_06
+    depends_on:
+      - game_server
+  player_07:
+    image: ${team_image}
+    command:  -team=${team_place} -number=7 -wshost=game_server
+    networks:
+      - team_07
+    depends_on:
+      - game_server
+  player_08:
+    image: ${team_image}
+    command:  -team=${team_place} -number=8 -wshost=game_server
+    networks:
+      - team_08
+    depends_on:
+      - game_server
+  player_09:
+    image: ${team_image}
+    command:  -team=${team_place} -number=9 -wshost=game_server
+    networks:
+      - team_09
+    depends_on:
+      - game_server
+  player_10:
+    image: ${team_image}
+    command:  -team=${team_place} -number=10 -wshost=game_server
+    networks:
+      - team_10
+    depends_on:
+      - game_server
+  player_11:
+    image: ${team_image}
+    command:  -team=${team_place} -number=11 -wshost=game_server
+    networks:
+      - team_11
+    depends_on:
+      - game_server
+networks:
+  team_01:
+    internal: true
+  team_02:
+    internal: true
+  team_03:
+    internal: true
+  team_04:
+    internal: true
+  team_05:
+    internal: true
+  team_06:
+    internal: true
+  team_07:
+    internal: true
+  team_08:
+    internal: true
+  team_09:
+    internal: true
+  team_10:
+    internal: true
+  team_11:
+    internal: true
