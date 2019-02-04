@@ -18,8 +18,9 @@ func (p *Player) initializeCommunicator() bool {
 	uri.Host = fmt.Sprintf("%s:%s", p.config.WSHost, p.config.WSPort)
 	uri.Path = fmt.Sprintf("/announcements/%s/%s", p.config.UUID, p.TeamPlace)
 	p.talker = talk.NewTalkChannel(*uri, BasicTypes.PlayerSpecifications{
-		Number:        p.Number,
-		InitialCoords: p.Coords,
+		Number:          p.Number,
+		InitialCoords:   p.Coords,
+		ProtocolVersion: "1.0",
 	})
 
 	err := p.talker.OpenConnection(func(bytes []byte) {

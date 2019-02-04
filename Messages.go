@@ -14,10 +14,10 @@ type PlayerMessage struct {
 
 // GameMessage is the message sent from the game server to the player
 type GameMessage struct {
-	Type     BasicTypes.MsgType `json:"type"`
-	GameInfo GameInfo           `json:"info"`
-	State    BasicTypes.State   `json:"state"`
-	Data     map[string]string  `json:"data"`
+	Type     BasicTypes.MsgType     `json:"type"`
+	GameInfo GameInfo               `json:"info"`
+	State    BasicTypes.State       `json:"state"`
+	Data     map[string]interface{} `json:"data"`
 	// Message is quite useless, but could help the developers to debug the game server messages
 	Message string `json:"message"`
 }
