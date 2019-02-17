@@ -30,6 +30,4 @@ type GameInfo struct {
 	Ball     Ball `json:"ball"`
 	HomeTeam Team `json:"home"`
 	AwayTeam Team `json:"away"`
-	// RemainingSeconds is a estimation of how long the game will take. However it is not precise.
-	RemainingSeconds int `json:"time"`
 }
