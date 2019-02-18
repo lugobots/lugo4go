@@ -21,10 +21,12 @@ type Configuration struct {
 	WSHost string
 	// WSPort is the port used by the game server
 	WSPort string
+	// Token is passed to the game server to bind the player to specific process, and avoid cheating
+	Token string
 }
 
-// LoadCmdArg sets the flag that will allows us to change the default config
-func (c *Configuration) LoadCmdArg() {
+// ParseFromFlags sets the flag that will allows us to change the default config
+func (c *Configuration) ParseFromFlags() {
 	//mandatory
 	var name string
 	var number int
@@ -35,6 +37,8 @@ func (c *Configuration) LoadCmdArg() {
 
 	flag.StringVar(&c.WSHost, "wshost", "localhost", "Game server's websocket endpoint")
 	flag.StringVar(&c.WSPort, "wsport", "8080", "Port for the websocket endpoint")
+
+	flag.StringVar(&c.Token, "token", "", "Token used by the server to identify the right connection")
 
 	flag.Parse()
 

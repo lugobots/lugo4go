@@ -5,25 +5,21 @@ import (
 	"fmt"
 	"github.com/makeitplay/commons"
 	"github.com/makeitplay/commons/BasicTypes"
+	"github.com/makeitplay/commons/GameState"
 	"github.com/makeitplay/commons/talk"
+	"github.com/sirupsen/logrus"
 	"net/url"
-	"os"
 	"runtime/debug"
 )
 
 // initializeCommunicator initialize a communication with the game server
-func (p *Player) initializeCommunicator() bool {
+func (p *Player) initializeCommunicator(logger *logrus.Logger) bool {
 	uri := new(url.URL)
 	uri.Scheme = "ws"
 	uri.Host = fmt.Sprintf("%s:%s", p.config.WSHost, p.config.WSPort)
 	uri.Path = fmt.Sprintf("/announcements/%s/%s", p.config.UUID, p.TeamPlace)
-	p.talker = talk.NewTalkChannel(*uri, BasicTypes.PlayerSpecifications{
-		Number:          p.Number,
-		InitialCoords:   p.Coords,
-		ProtocolVersion: "1.0",
-	})
 
-	err := p.talker.OpenConnection(func(bytes []byte) {
+	p.talker = talk.NewTalker(logger, func(bytes []byte) {
 		var msg GameMessage
 		err := json.Unmarshal(bytes, &msg)
 		if err != nil {
@@ -31,15 +27,25 @@ func (p *Player) initializeCommunicator() bool {
 		} else {
 			p.onMessage(msg)
 		}
+	}, func() {
+		if GameState.State(p.LastMsg.State) != GameState.Over {
+			logger.Error("game interrrupted")
+		}
+		p.stopToPlay(true)
 	})
 
-	if err != nil {
-		commons.LogError("Fail on opening the websocket connection: %s", err)
+	playerSpec := BasicTypes.PlayerSpecifications{
+		Number:          p.Number,
+		InitialCoords:   p.Coords,
+		Token:           p.config.Token,
+		ProtocolVersion: "1.0",
+	}
+
+	var err error
+	if p.talkerCtx, err = p.talker.Connect(*uri, playerSpec); err != nil {
+		logger.Errorf("Fail on opening the websocket connection: %s", err)
 		return false
 	}
-	commons.RegisterCleaner("Websocket connection", func(interrupted bool) {
-		p.talker.CloseConnection()
-	})
 	return true
 }
 
@@ -65,7 +71,7 @@ func (p *Player) defaultOnMessage(msg GameMessage) {
 	switch msg.Type {
 	case BasicTypes.WELCOME:
 		commons.LogInfo("Accepted by the game server")
-		myStatus := p.FindMyStatus(msg.GameInfo)
+		myStatus := p.GetMyStatus(msg.GameInfo)
 		p.Number = myStatus.Number
 	case BasicTypes.ANNOUNCEMENT:
 		if p.OnAnnouncement == nil {
@@ -74,8 +80,6 @@ func (p *Player) defaultOnMessage(msg GameMessage) {
 			p.OnAnnouncement(msg)
 		}
 	case BasicTypes.RIP:
-		commons.LogError("The server has stopped :/")
-		commons.Cleanup(true)
-		os.Exit(0)
+		p.stopToPlay(true)
 	}
 }

@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/makeitplay/client-player-go"
 	"github.com/makeitplay/commons/GameState"
-	"github.com/makeitplay/commons/Units"
 	"github.com/makeitplay/commons/Physics"
+	"github.com/makeitplay/commons/Units"
 	"math/rand"
 	"time"
 )
@@ -15,7 +15,7 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 	// First we have to get the command line arguments to identify this bot in its game
 	serverConfig := new(client.Configuration)
-	serverConfig.LoadCmdArg()
+	serverConfig.ParseFromFlags()
 
 	// then we create a client that will handle the communication for us
 	player = new(client.Player)
