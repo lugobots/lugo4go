@@ -3,9 +3,9 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/makeitplay/commons/BasicTypes"
-	"github.com/makeitplay/commons/GameState"
-	"github.com/makeitplay/commons/talk"
+	"github.com/makeitplay/arena/BasicTypes"
+	"github.com/makeitplay/arena/GameState"
+	"github.com/makeitplay/arena/talk"
 	"github.com/sirupsen/logrus"
 	"net/url"
 	"runtime/debug"

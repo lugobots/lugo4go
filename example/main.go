@@ -1,10 +1,10 @@
 package main
 
 import (
+	"github.com/makeitplay/arena/GameState"
+	"github.com/makeitplay/arena/Physics"
+	"github.com/makeitplay/arena/Units"
 	"github.com/makeitplay/client-player-go"
-	"github.com/makeitplay/commons/GameState"
-	"github.com/makeitplay/commons/Physics"
-	"github.com/makeitplay/commons/Units"
 	"math/rand"
 	"time"
 )
@@ -23,8 +23,8 @@ func main() {
 	player.Number = serverConfig.PlayerNumber
 	// this will be our bot initial position
 	player.Coords = Physics.Point{
-		PosX: rand.Int() % Units.CourtWidth,
-		PosY: rand.Int() % Units.CourtHeight,
+		PosX: rand.Int() % units.CourtWidth,
+		PosY: rand.Int() % units.CourtHeight,
 	}
 
 	// we have to set the call back function that will process the player behaviour when the game state has been changed
@@ -41,7 +41,7 @@ func reactToNewState(msg client.GameMessage) {
 
 		// we are going to kick the ball as soon as we catch it
 		if player.IHoldTheBall() {
-			orderToKick := player.CreateKickOrder(player.OpponentGoal().Center, Units.BallMaxSpeed)
+			orderToKick := player.CreateKickOrder(player.OpponentGoal().Center, units.BallMaxSpeed)
 			player.SendOrders("Shoot!", orderToKick)
 			return
 		}

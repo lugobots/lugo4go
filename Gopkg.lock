@@ -14,7 +14,7 @@
   version = "v1.2.0"
 
 [[projects]]
-  name = "github.com/makeitplay/commons"
+  name = "github.com/makeitplay/arena"
   packages = [
     ".",
     "BasicTypes",

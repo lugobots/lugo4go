@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/makeitplay/commons"
-	"github.com/makeitplay/commons/BasicTypes"
-	"github.com/makeitplay/commons/Physics"
-	"github.com/makeitplay/commons/Units"
-	"github.com/makeitplay/commons/talk"
+	"github.com/makeitplay/arena"
+	"github.com/makeitplay/arena/BasicTypes"
+	"github.com/makeitplay/arena/Physics"
+	"github.com/makeitplay/arena/talk"
+	"github.com/makeitplay/arena/units"
 	"github.com/sirupsen/logrus"
 	"log"
 	"os"
@@ -22,7 +22,7 @@ type Player struct {
 	Physics.Element
 	Id             string                  `json:"id"`
 	Number         BasicTypes.PlayerNumber `json:"number"`
-	TeamPlace      Units.TeamPlace         `json:"team_place"`
+	TeamPlace      units.TeamPlace         `json:"team_place"`
 	OnMessage      func(msg GameMessage)
 	OnAnnouncement func(msg GameMessage)
 	config         *Configuration
@@ -48,7 +48,7 @@ func (p *Player) ID() string {
 func (p *Player) Start(logger *logrus.Logger, configuration *Configuration) {
 	p.config = configuration
 	playerCtx, stopPlayer = context.WithCancel(context.Background())
-	p.Size = Units.PlayerSize
+	p.Size = units.PlayerSize
 	if p.OnAnnouncement == nil {
 		log.Fatal("your player must implement the `OnAnnouncement` action")
 	}
@@ -133,7 +133,7 @@ func (p *Player) GetMyStatus(gameInfo GameInfo) *Player {
 
 // GetMyTeamStatus retrieve the player team status from the game server message
 func (p *Player) GetMyTeamStatus(gameInfo GameInfo) Team {
-	if p.TeamPlace == Units.HomeTeam {
+	if p.TeamPlace == units.HomeTeam {
 		return gameInfo.HomeTeam
 	}
 	return gameInfo.AwayTeam
@@ -141,7 +141,7 @@ func (p *Player) GetMyTeamStatus(gameInfo GameInfo) Team {
 
 // GetOpponentTeam retrieve the opponent team status from the game server message
 func (p *Player) GetOpponentTeam(status GameInfo) Team {
-	if p.TeamPlace == Units.HomeTeam {
+	if p.TeamPlace == units.HomeTeam {
 		return status.AwayTeam
 	}
 	return status.HomeTeam
@@ -180,7 +180,7 @@ func (p *Player) CreateJumpOrder(target Physics.Point, speed float64) BasicTypes
 
 // CreateMoveOrderMaxSpeed creates a move order with max speed allowed
 func (p *Player) CreateMoveOrderMaxSpeed(target Physics.Point) BasicTypes.Order {
-	return p.CreateMoveOrder(target, Units.PlayerMaxSpeed)
+	return p.CreateMoveOrder(target, units.PlayerMaxSpeed)
 }
 
 // CreateStopOrder creates a move order with speed zero
@@ -221,7 +221,7 @@ func (p *Player) IHoldTheBall() bool {
 
 // OpponentGoal returns the Goal os the opponent
 func (p *Player) OpponentGoal() BasicTypes.Goal {
-	if p.TeamPlace == Units.HomeTeam {
+	if p.TeamPlace == units.HomeTeam {
 		return commons.AwayTeamGoal
 	}
 	return commons.HomeTeamGoal
@@ -229,7 +229,7 @@ func (p *Player) OpponentGoal() BasicTypes.Goal {
 
 // DefenseGoal returns the player team goal
 func (p *Player) DefenseGoal() BasicTypes.Goal {
-	if p.TeamPlace == Units.HomeTeam {
+	if p.TeamPlace == units.HomeTeam {
 		return commons.HomeTeamGoal
 	}
 	return commons.AwayTeamGoal

@@ -3,8 +3,8 @@ package client
 import (
 	"flag"
 	"fmt"
-	"github.com/makeitplay/commons/BasicTypes"
-	"github.com/makeitplay/commons/Units"
+	"github.com/makeitplay/arena/BasicTypes"
+	"github.com/makeitplay/arena/units"
 	"log"
 	"strconv"
 )
@@ -12,7 +12,7 @@ import (
 // Configuration is the set of values expected as a initial configuration of the player
 type Configuration struct {
 	// TeamPlace must be "home" or "away" and identifies the side of the field that the team is going to play
-	TeamPlace Units.TeamPlace
+	TeamPlace units.TeamPlace
 	// PlayerNumber must be a number between 1-11 that identifies this player in his team
 	PlayerNumber BasicTypes.PlayerNumber
 	// UUID is the match UUID. It will be always local for local games
@@ -42,12 +42,12 @@ func (c *Configuration) ParseFromFlags() {
 
 	flag.Parse()
 
-	if name != string(Units.HomeTeam) && name != string(Units.AwayTeam) {
+	if name != string(units.HomeTeam) && name != string(units.AwayTeam) {
 		log.Fatal("Invalid team option {" + name + "}. Must be either home or away")
 	}
 	if number < 1 || number > 11 {
 		log.Fatal(fmt.Errorf("invalid player number {%d}. Must be 1 to 11", number))
 	}
 	c.PlayerNumber = BasicTypes.PlayerNumber(strconv.Itoa(number))
-	c.TeamPlace = Units.TeamPlace(name)
+	c.TeamPlace = units.TeamPlace(name)
 }

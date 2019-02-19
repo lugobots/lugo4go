@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/makeitplay/commons/Physics"
+	"github.com/makeitplay/arena/Physics"
 )
 
 // Ball is the ball :-)

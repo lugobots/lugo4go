@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/makeitplay/commons/BasicTypes"
+	"github.com/makeitplay/arena/BasicTypes"
 )
 
 // PlayerMessage is the message sent from a player to the game server
