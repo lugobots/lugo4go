@@ -222,20 +222,20 @@ func (p *Player) IHoldTheBall() bool {
 // OpponentGoal returns the Goal os the opponent
 func (p *Player) OpponentGoal() BasicTypes.Goal {
 	if p.TeamPlace == units.HomeTeam {
-		return commons.AwayTeamGoal
+		return arena.AwayTeamGoal
 	}
-	return commons.HomeTeamGoal
+	return arena.HomeTeamGoal
 }
 
 // DefenseGoal returns the player team goal
 func (p *Player) DefenseGoal() BasicTypes.Goal {
 	if p.TeamPlace == units.HomeTeam {
-		return commons.HomeTeamGoal
+		return arena.HomeTeamGoal
 	}
-	return commons.AwayTeamGoal
+	return arena.AwayTeamGoal
 }
 
 // IsGoalkeeper returns true if the player is the goalkeeper
 func (p *Player) IsGoalkeeper() bool {
-	return p.Number == commons.GoalkeeperNumber
+	return p.Number == arena.GoalkeeperNumber
 }
