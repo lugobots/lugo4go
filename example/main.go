@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/makeitplay/arena/GameState"
-	"github.com/makeitplay/arena/Physics"
 	"github.com/makeitplay/arena/Units"
+	"github.com/makeitplay/arena/physics"
 	"github.com/makeitplay/client-player-go"
 	"math/rand"
 	"time"
@@ -22,7 +22,7 @@ func main() {
 	player.TeamPlace = serverConfig.TeamPlace
 	player.Number = serverConfig.PlayerNumber
 	// this will be our bot initial position
-	player.Coords = Physics.Point{
+	player.Coords = physics.Point{
 		PosX: rand.Int() % units.CourtWidth,
 		PosY: rand.Int() % units.CourtHeight,
 	}

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/makeitplay/arena"
 	"github.com/makeitplay/arena/BasicTypes"
-	"github.com/makeitplay/arena/Physics"
+	"github.com/makeitplay/arena/physics"
 	"github.com/makeitplay/arena/talk"
 	"github.com/makeitplay/arena/units"
 	"github.com/sirupsen/logrus"
@@ -19,7 +19,7 @@ import (
 // intelligence/behaviour/decisions. So, it is meant to reduce the developer concerns about communication, protocols,
 // attributes, etc, and focusing in the player intelligence.
 type Player struct {
-	Physics.Element
+	physics.Element
 	Id             string                  `json:"id"`
 	Number         BasicTypes.PlayerNumber `json:"number"`
 	TeamPlace      units.TeamPlace         `json:"team_place"`
@@ -159,8 +159,8 @@ func (p *Player) FindOpponentPlayer(status GameInfo, playerNumber BasicTypes.Pla
 }
 
 // CreateMoveOrder creates a move order
-func (p *Player) CreateMoveOrder(target Physics.Point, speed float64) BasicTypes.Order {
-	vec := Physics.NewZeroedVelocity(*Physics.NewVector(p.Coords, target).Normalize())
+func (p *Player) CreateMoveOrder(target physics.Point, speed float64) BasicTypes.Order {
+	vec := physics.NewZeroedVelocity(*physics.NewVector(p.Coords, target).Normalize())
 	vec.Speed = speed
 	return BasicTypes.Order{
 		Type: BasicTypes.MOVE,
@@ -169,8 +169,8 @@ func (p *Player) CreateMoveOrder(target Physics.Point, speed float64) BasicTypes
 }
 
 // CreateJumpOrder creates a jump order (only allowed to goal keeper
-func (p *Player) CreateJumpOrder(target Physics.Point, speed float64) BasicTypes.Order {
-	vec := Physics.NewZeroedVelocity(*Physics.NewVector(p.Coords, target).Normalize())
+func (p *Player) CreateJumpOrder(target physics.Point, speed float64) BasicTypes.Order {
+	vec := physics.NewZeroedVelocity(*physics.NewVector(p.Coords, target).Normalize())
 	vec.Speed = speed
 	return BasicTypes.Order{
 		Type: BasicTypes.MOVE,
@@ -179,12 +179,12 @@ func (p *Player) CreateJumpOrder(target Physics.Point, speed float64) BasicTypes
 }
 
 // CreateMoveOrderMaxSpeed creates a move order with max speed allowed
-func (p *Player) CreateMoveOrderMaxSpeed(target Physics.Point) BasicTypes.Order {
+func (p *Player) CreateMoveOrderMaxSpeed(target physics.Point) BasicTypes.Order {
 	return p.CreateMoveOrder(target, units.PlayerMaxSpeed)
 }
 
 // CreateStopOrder creates a move order with speed zero
-func (p *Player) CreateStopOrder(direction Physics.Vector) BasicTypes.Order {
+func (p *Player) CreateStopOrder(direction physics.Vector) BasicTypes.Order {
 	vec := p.Velocity.Copy()
 	vec.Speed = 0
 	vec.Direction = &direction
@@ -195,10 +195,10 @@ func (p *Player) CreateStopOrder(direction Physics.Vector) BasicTypes.Order {
 }
 
 // CreateKickOrder creates a kick order and try to find the best vector to reach the target
-func (p *Player) CreateKickOrder(target Physics.Point, speed float64) BasicTypes.Order {
-	ballExpectedDirection := Physics.NewVector(p.LastMsg.GameInfo.Ball.Coords, target)
+func (p *Player) CreateKickOrder(target physics.Point, speed float64) BasicTypes.Order {
+	ballExpectedDirection := physics.NewVector(p.LastMsg.GameInfo.Ball.Coords, target)
 	diffVector := *ballExpectedDirection.Sub(p.LastMsg.GameInfo.Ball.Velocity.Direction)
-	vec := Physics.NewZeroedVelocity(diffVector)
+	vec := physics.NewZeroedVelocity(diffVector)
 	vec.Speed = speed
 	return BasicTypes.Order{
 		Type: BasicTypes.KICK,

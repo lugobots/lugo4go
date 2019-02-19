@@ -1,12 +1,12 @@
 package client
 
 import (
-	"github.com/makeitplay/arena/Physics"
+	"github.com/makeitplay/arena/physics"
 )
 
 // Ball is the ball :-)
 type Ball struct {
-	Physics.Element
+	physics.Element
 	// Holder identifies the player who is holding the ball
 	Holder *Player
 }
