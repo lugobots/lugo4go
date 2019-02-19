@@ -29,7 +29,7 @@ type Player struct {
 	talker         talk.Talker
 	talkerCtx      context.Context
 	LastMsg        GameMessage
-	readingWs      *commons.Task
+	logger         *logrus.Entry
 }
 
 // playerCtx is used to keep the process running while the player is playing
@@ -52,11 +52,10 @@ func (p *Player) Start(logger *logrus.Logger, configuration *Configuration) {
 	if p.OnAnnouncement == nil {
 		log.Fatal("your player must implement the `OnAnnouncement` action")
 	}
-	commons.NickName = fmt.Sprintf("%s-%s", p.TeamPlace, p.Number)
 
-	logger.Infof("Try to join to the team %s ", p.TeamPlace)
-	logger.WithField("player", commons.NickName)
-	if !p.initializeCommunicator(logger) {
+	p.logger = logger.WithField("player", fmt.Sprintf("%s-%s", p.TeamPlace, p.Number))
+	p.logger.Infof("Try to join to the team %s ", p.TeamPlace)
+	if !p.initializeCommunicator(p.logger) {
 		return
 	}
 
@@ -66,13 +65,13 @@ func (p *Player) Start(logger *logrus.Logger, configuration *Configuration) {
 	exitCode := 0
 	select {
 	case <-signalChan:
-		commons.Log("*********** INTERRUPTION SIGNAL ****************")
+		p.logger.Print("*********** INTERRUPTION SIGNAL ****************")
 		p.talker.Close()
 	case <-playerCtx.Done():
-		logger.Info("player stopped")
+		p.logger.Info("player stopped")
 		p.talker.Close()
 	case <-p.talkerCtx.Done():
-		logger.Warn("communication interrupted")
+		p.logger.Warn("communication interrupted")
 		exitCode = 1
 	}
 	os.Exit(exitCode)
@@ -92,13 +91,13 @@ func (p *Player) SendOrders(message string, orders ...BasicTypes.Order) {
 	}
 	stringed, err := json.Marshal(msg)
 	if err != nil {
-		commons.LogError("Fail generating JSON: %s", err.Error())
+		p.logger.Errorf("Fail generating JSON: %s", err.Error())
 		return
 	}
 
 	err = p.talker.Send(stringed)
 	if err != nil {
-		commons.LogError("Fail on sending message: %s", err.Error())
+		p.logger.Errorf("Fail on sending message: %s", err.Error())
 		return
 	}
 }

@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/makeitplay/commons"
 	"github.com/makeitplay/commons/BasicTypes"
 	"github.com/makeitplay/commons/GameState"
 	"github.com/makeitplay/commons/talk"
@@ -13,7 +12,7 @@ import (
 )
 
 // initializeCommunicator initialize a communication with the game server
-func (p *Player) initializeCommunicator(logger *logrus.Logger) bool {
+func (p *Player) initializeCommunicator(logger *logrus.Entry) bool {
 	uri := new(url.URL)
 	uri.Scheme = "ws"
 	uri.Host = fmt.Sprintf("%s:%s", p.config.WSHost, p.config.WSPort)
@@ -23,13 +22,13 @@ func (p *Player) initializeCommunicator(logger *logrus.Logger) bool {
 		var msg GameMessage
 		err := json.Unmarshal(bytes, &msg)
 		if err != nil {
-			commons.LogError("Fail on convert wb message: %s (%s)", err.Error(), bytes)
+			p.logger.Errorf("Fail on convert wb message: %s (%s)", err.Error(), bytes)
 		} else {
 			p.onMessage(msg)
 		}
 	}, func() {
-		if GameState.State(p.LastMsg.State) != GameState.Over {
-			logger.Error("game interrrupted")
+		if GameState.State(p.LastMsg.State) == GameState.Over {
+			logger.Info("game over")
 		}
 		p.stopToPlay(true)
 	})
@@ -53,7 +52,7 @@ func (p *Player) initializeCommunicator(logger *logrus.Logger) bool {
 func (p *Player) onMessage(msg GameMessage) {
 	defer func() {
 		if err := recover(); err != nil {
-			commons.LogError("Panic processing new game message: %s", err)
+			p.logger.Errorf("Panic processing new game message: %s", err)
 			debug.PrintStack()
 		}
 	}()
@@ -70,7 +69,7 @@ func (p *Player) onMessage(msg GameMessage) {
 func (p *Player) defaultOnMessage(msg GameMessage) {
 	switch msg.Type {
 	case BasicTypes.WELCOME:
-		commons.LogInfo("Accepted by the game server")
+		p.logger.Info("Accepted by the game server")
 		myStatus := p.GetMyStatus(msg.GameInfo)
 		p.Number = myStatus.Number
 	case BasicTypes.ANNOUNCEMENT:
@@ -80,6 +79,7 @@ func (p *Player) defaultOnMessage(msg GameMessage) {
 			p.OnAnnouncement(msg)
 		}
 	case BasicTypes.RIP:
+		p.logger.Warn("the server died")
 		p.stopToPlay(true)
 	}
 }
