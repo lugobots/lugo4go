@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/makeitplay/arena"
-	"github.com/makeitplay/arena/BasicTypes"
 	"github.com/makeitplay/arena/physics"
 	"github.com/makeitplay/arena/talk"
 	"github.com/makeitplay/arena/units"
@@ -20,9 +19,9 @@ import (
 // attributes, etc, and focusing in the player intelligence.
 type Player struct {
 	physics.Element
-	Id             string                  `json:"id"`
-	Number         BasicTypes.PlayerNumber `json:"number"`
-	TeamPlace      units.TeamPlace         `json:"team_place"`
+	Id             string             `json:"id"`
+	Number         arena.PlayerNumber `json:"number"`
+	TeamPlace      arena.TeamPlace    `json:"team_place"`
 	OnMessage      func(msg GameMessage)
 	OnAnnouncement func(msg GameMessage)
 	config         *Configuration
@@ -83,9 +82,9 @@ func (p *Player) LastServerMessage() GameMessage {
 }
 
 // SendOrders sends a list of orders to the game server, and includes a message to them (only displayed in the game server log)
-func (p *Player) SendOrders(message string, orders ...BasicTypes.Order) {
+func (p *Player) SendOrders(message string, orders ...arena.Order) {
 	msg := PlayerMessage{
-		BasicTypes.ORDER,
+		arena.ORDER,
 		orders,
 		message,
 	}
@@ -133,7 +132,7 @@ func (p *Player) GetMyStatus(gameInfo GameInfo) *Player {
 
 // GetMyTeamStatus retrieve the player team status from the game server message
 func (p *Player) GetMyTeamStatus(gameInfo GameInfo) Team {
-	if p.TeamPlace == units.HomeTeam {
+	if p.TeamPlace == arena.HomeTeam {
 		return gameInfo.HomeTeam
 	}
 	return gameInfo.AwayTeam
@@ -141,14 +140,14 @@ func (p *Player) GetMyTeamStatus(gameInfo GameInfo) Team {
 
 // GetOpponentTeam retrieve the opponent team status from the game server message
 func (p *Player) GetOpponentTeam(status GameInfo) Team {
-	if p.TeamPlace == units.HomeTeam {
+	if p.TeamPlace == arena.HomeTeam {
 		return status.AwayTeam
 	}
 	return status.HomeTeam
 }
 
 // FindOpponentPlayer retrieve a specific opponent player status from the game server message
-func (p *Player) FindOpponentPlayer(status GameInfo, playerNumber BasicTypes.PlayerNumber) *Player {
+func (p *Player) FindOpponentPlayer(status GameInfo, playerNumber arena.PlayerNumber) *Player {
 	teamInfo := p.GetOpponentTeam(status)
 	for _, playerInfo := range teamInfo.Players {
 		if playerInfo.Number == playerNumber {
@@ -159,57 +158,57 @@ func (p *Player) FindOpponentPlayer(status GameInfo, playerNumber BasicTypes.Pla
 }
 
 // CreateMoveOrder creates a move order
-func (p *Player) CreateMoveOrder(target physics.Point, speed float64) BasicTypes.Order {
+func (p *Player) CreateMoveOrder(target physics.Point, speed float64) arena.Order {
 	vec := physics.NewZeroedVelocity(*physics.NewVector(p.Coords, target).Normalize())
 	vec.Speed = speed
-	return BasicTypes.Order{
-		Type: BasicTypes.MOVE,
-		Data: BasicTypes.MoveOrderData{Velocity: vec},
+	return arena.Order{
+		Type: arena.MOVE,
+		Data: arena.MoveOrderData{Velocity: vec},
 	}
 }
 
 // CreateJumpOrder creates a jump order (only allowed to goal keeper
-func (p *Player) CreateJumpOrder(target physics.Point, speed float64) BasicTypes.Order {
+func (p *Player) CreateJumpOrder(target physics.Point, speed float64) arena.Order {
 	vec := physics.NewZeroedVelocity(*physics.NewVector(p.Coords, target).Normalize())
 	vec.Speed = speed
-	return BasicTypes.Order{
-		Type: BasicTypes.MOVE,
-		Data: BasicTypes.MoveOrderData{Velocity: vec},
+	return arena.Order{
+		Type: arena.MOVE,
+		Data: arena.MoveOrderData{Velocity: vec},
 	}
 }
 
 // CreateMoveOrderMaxSpeed creates a move order with max speed allowed
-func (p *Player) CreateMoveOrderMaxSpeed(target physics.Point) BasicTypes.Order {
+func (p *Player) CreateMoveOrderMaxSpeed(target physics.Point) arena.Order {
 	return p.CreateMoveOrder(target, units.PlayerMaxSpeed)
 }
 
 // CreateStopOrder creates a move order with speed zero
-func (p *Player) CreateStopOrder(direction physics.Vector) BasicTypes.Order {
+func (p *Player) CreateStopOrder(direction physics.Vector) arena.Order {
 	vec := p.Velocity.Copy()
 	vec.Speed = 0
 	vec.Direction = &direction
-	return BasicTypes.Order{
-		Type: BasicTypes.MOVE,
-		Data: BasicTypes.MoveOrderData{Velocity: vec},
+	return arena.Order{
+		Type: arena.MOVE,
+		Data: arena.MoveOrderData{Velocity: vec},
 	}
 }
 
 // CreateKickOrder creates a kick order and try to find the best vector to reach the target
-func (p *Player) CreateKickOrder(target physics.Point, speed float64) BasicTypes.Order {
+func (p *Player) CreateKickOrder(target physics.Point, speed float64) arena.Order {
 	ballExpectedDirection := physics.NewVector(p.LastMsg.GameInfo.Ball.Coords, target)
 	diffVector := *ballExpectedDirection.Sub(p.LastMsg.GameInfo.Ball.Velocity.Direction)
 	vec := physics.NewZeroedVelocity(diffVector)
 	vec.Speed = speed
-	return BasicTypes.Order{
-		Type: BasicTypes.KICK,
-		Data: BasicTypes.KickOrderData{Velocity: vec},
+	return arena.Order{
+		Type: arena.KICK,
+		Data: arena.KickOrderData{Velocity: vec},
 	}
 }
 
 // CreateCatchOrder creates the catch order
-func (p *Player) CreateCatchOrder() BasicTypes.Order {
-	return BasicTypes.Order{
-		Type: BasicTypes.CATCH,
+func (p *Player) CreateCatchOrder() arena.Order {
+	return arena.Order{
+		Type: arena.CATCH,
 		Data: map[string]interface{}{},
 	}
 }
@@ -220,16 +219,16 @@ func (p *Player) IHoldTheBall() bool {
 }
 
 // OpponentGoal returns the Goal os the opponent
-func (p *Player) OpponentGoal() BasicTypes.Goal {
-	if p.TeamPlace == units.HomeTeam {
+func (p *Player) OpponentGoal() arena.Goal {
+	if p.TeamPlace == arena.HomeTeam {
 		return arena.AwayTeamGoal
 	}
 	return arena.HomeTeamGoal
 }
 
 // DefenseGoal returns the player team goal
-func (p *Player) DefenseGoal() BasicTypes.Goal {
-	if p.TeamPlace == units.HomeTeam {
+func (p *Player) DefenseGoal() arena.Goal {
+	if p.TeamPlace == arena.HomeTeam {
 		return arena.HomeTeamGoal
 	}
 	return arena.AwayTeamGoal

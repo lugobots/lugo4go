@@ -1,10 +1,12 @@
 package client
 
-import "github.com/makeitplay/arena/units"
+import (
+	"github.com/makeitplay/arena"
+)
 
 // Team groups the player team info based on the status sent by the game server
 type Team struct {
-	Name    units.TeamPlace `json:"name"`
+	Name    arena.TeamPlace `json:"name"`
 	Score   int             `json:"score"`
 	Players []*Player       `json:"players"`
 }

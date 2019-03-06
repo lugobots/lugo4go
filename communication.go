@@ -3,8 +3,7 @@ package client
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/makeitplay/arena/BasicTypes"
-	"github.com/makeitplay/arena/GameState"
+	"github.com/makeitplay/arena"
 	"github.com/makeitplay/arena/talk"
 	"github.com/sirupsen/logrus"
 	"net/url"
@@ -27,13 +26,13 @@ func (p *Player) initializeCommunicator(logger *logrus.Entry) bool {
 			p.onMessage(msg)
 		}
 	}, func() {
-		if GameState.State(p.LastMsg.State) == GameState.Over {
+		if p.LastMsg.State == arena.Over {
 			logger.Info("game over")
 		}
 		p.stopToPlay(true)
 	})
 
-	playerSpec := BasicTypes.PlayerSpecifications{
+	playerSpec := arena.PlayerSpecifications{
 		Number:          p.Number,
 		InitialCoords:   p.Coords,
 		Token:           p.config.Token,
@@ -68,17 +67,17 @@ func (p *Player) onMessage(msg GameMessage) {
 // defaultOnMessage is the default callback to process the new messages got from the game server
 func (p *Player) defaultOnMessage(msg GameMessage) {
 	switch msg.Type {
-	case BasicTypes.WELCOME:
+	case arena.WELCOME:
 		p.logger.Info("Accepted by the game server")
 		myStatus := p.GetMyStatus(msg.GameInfo)
 		p.Number = myStatus.Number
-	case BasicTypes.ANNOUNCEMENT:
+	case arena.ANNOUNCEMENT:
 		if p.OnAnnouncement == nil {
 			panic("the player must implement the `OnAnnouncement` method")
 		} else {
 			p.OnAnnouncement(msg)
 		}
-	case BasicTypes.RIP:
+	case arena.RIP:
 		p.logger.Warn("the server died")
 		p.stopToPlay(true)
 	}

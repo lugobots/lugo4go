@@ -1,22 +1,22 @@
 package client
 
 import (
-	"github.com/makeitplay/arena/BasicTypes"
+	"github.com/makeitplay/arena"
 )
 
 // PlayerMessage is the message sent from a player to the game server
 type PlayerMessage struct {
-	Type   BasicTypes.MsgType `json:"type"`
-	Orders []BasicTypes.Order `json:"orders"`
+	Type   arena.MsgType `json:"type"`
+	Orders []arena.Order `json:"orders"`
 	// Debug is a message the will be only visible in the game server log (used for debugging purposes)
 	Debug string `json:"message"`
 }
 
 // GameMessage is the message sent from the game server to the player
 type GameMessage struct {
-	Type     BasicTypes.MsgType     `json:"type"`
+	Type     arena.MsgType          `json:"type"`
 	GameInfo GameInfo               `json:"info"`
-	State    BasicTypes.State       `json:"state"`
+	State    arena.GameState        `json:"state"`
 	Data     map[string]interface{} `json:"data"`
 	// Message is quite useless, but could help the developers to debug the game server messages
 	Message string `json:"message"`
@@ -24,7 +24,7 @@ type GameMessage struct {
 
 // GameInfo is the set of values that defines the current game state
 type GameInfo struct {
-	State BasicTypes.State `json:"state"`
+	State arena.GameState `json:"state"`
 	// Turn is the sequential number of turns. Read the game documentation to understand what a turn is
 	Turn     int  `json:"turn"`
 	Ball     Ball `json:"ball"`
