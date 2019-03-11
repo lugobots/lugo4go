@@ -6,6 +6,20 @@ import (
 	"github.com/makeitplay/arena/physics"
 )
 
+// Ball is the ball :-)
+type Ball struct {
+	physics.Element
+	// Holder identifies the player who is holding the ball
+	Holder *Player
+}
+
+// Team groups the player team info based on the status sent by the game server
+type Team struct {
+	Name    arena.TeamPlace `json:"name"`
+	Score   int             `json:"score"`
+	Players []*Player       `json:"players"`
+}
+
 // PlayerMessage is the message sent from a player to the game server
 type PlayerMessage struct {
 	Type   arena.MsgType  `json:"type"`

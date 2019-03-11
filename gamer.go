@@ -19,7 +19,6 @@ type Gamer struct {
 	config         *Configuration
 	Talker         talk.Talker
 	LastMsg        GameMessage
-	Player         *Player
 }
 
 func listenServerMessages(gamer *Gamer) {
@@ -36,10 +35,11 @@ func listenServerMessages(gamer *Gamer) {
 		case connError := <-gamer.Talker.ListenInterruption():
 			if gamer.LastMsg.State == arena.Over {
 				playerCtx.Logger().Info("game over")
+				gamer.stopToPlay(false)
 			} else {
 				playerCtx.Logger().Errorf("ws connection lost: %s", connError.Error())
+				gamer.stopToPlay(true)
 			}
-			gamer.stopToPlay(true)
 			return
 		}
 	}
@@ -61,7 +61,6 @@ func (p *Gamer) Play(initialPosition physics.Point, configuration *Configuration
 	// we have to set the call back function that will process the player behaviour when the game state has been changed
 	defer talker.Close()
 	p.Talker = talker
-	p.Player = &Player{Number: configuration.PlayerNumber, TeamPlace: configuration.TeamPlace}
 	go listenServerMessages(p)
 
 	signalChan := make(chan os.Signal, 1)
@@ -123,11 +122,6 @@ func (p *Gamer) defaultOnMessage(msg GameMessage) {
 		playerCtx.Logger().Warn("the server died")
 		p.stopToPlay(true)
 	}
-}
-
-// LastServerMessage returns the last message got from the server
-func (p *Gamer) LastServerMessage() GameMessage {
-	return p.LastMsg
 }
 
 // SendOrders sends a list of orders to the game server, and includes a message to them (only displayed in the game server log)

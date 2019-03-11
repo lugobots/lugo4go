@@ -44,7 +44,7 @@ func reactToNewState(ctx client.TurnContext) {
 			return
 		}
 		// otherwise, let's run towards the ball like kids
-		orderToMove, _ := player.CreateMoveOrderMaxSpeed(gamer.LastServerMessage().GameInfo.Ball.Coords)
+		orderToMove, _ := player.CreateMoveOrderMaxSpeed(ctx.GameMsg().GameInfo.Ball.Coords)
 		orderToCatch := player.CreateCatchOrder()
 		gamer.SendOrders("Catch the ball!", orderToMove, orderToCatch)
 	}
