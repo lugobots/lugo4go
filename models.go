@@ -3,6 +3,7 @@ package client
 import (
 	"github.com/makeitplay/arena"
 	"github.com/makeitplay/arena/orders"
+	"github.com/makeitplay/arena/physics"
 )
 
 // PlayerMessage is the message sent from a player to the game server
@@ -31,4 +32,11 @@ type GameInfo struct {
 	Ball     Ball `json:"ball"`
 	HomeTeam Team `json:"home"`
 	AwayTeam Team `json:"away"`
+}
+
+type Player struct {
+	physics.Element
+	Id        string             `json:"id"`
+	Number    arena.PlayerNumber `json:"number"`
+	TeamPlace arena.TeamPlace    `json:"team_place"`
 }

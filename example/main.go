@@ -7,7 +7,7 @@ import (
 	"github.com/makeitplay/client-player-go"
 )
 
-var player *client.Player
+var gamer *client.Gamer
 
 func main() {
 
@@ -18,29 +18,34 @@ func main() {
 		PosX: units.FieldWidth / 4,
 		PosY: units.FieldHeight / 2,
 	}
-
-	player := &client.Player{}
-	player.OnAnnouncement = reactToNewState
-	player.Play(initialPosition, serverConfig)
+	if serverConfig.TeamPlace == arena.AwayTeam {
+		initialPosition.PosX *= 2
+	}
+	gamer = &client.Gamer{}
+	gamer.OnAnnouncement = reactToNewState
+	gamer.Play(initialPosition, serverConfig)
 
 }
 
-func reactToNewState(msg client.GameMessage) {
-	// as soo we get the new game state, we have to update or position in the field
-	player.UpdatePosition(msg.GameInfo)
+func reactToNewState(ctx client.TurnContext) {
+	// there is a chance of receiving a msg before the user be add to the game state, so it can be nill at the very beginning
+	if ctx.Player() == nil {
+		return
+	}
 
+	player := ctx.Player()
 	// for this example, or smart player only reacts when the game server is listening for orders
-	if msg.State == arena.Listening {
+	if ctx.GameMsg().State == arena.Listening {
 
 		// we are going to kick the ball as soon as we catch it
-		if player.IHoldTheBall() {
-			orderToKick := player.CreateKickOrder(player.OpponentGoal().Center, units.BallMaxSpeed)
-			player.SendOrders("Shoot!", orderToKick)
+		if player.IHoldTheBall(ctx.GameMsg().GameInfo.Ball) {
+			orderToKick, _ := player.CreateKickOrder(ctx.GameMsg().GameInfo.Ball, player.OpponentGoal().Center, units.BallMaxSpeed)
+			gamer.SendOrders("Shoot!", orderToKick)
 			return
 		}
 		// otherwise, let's run towards the ball like kids
-		orderToMove := player.CreateMoveOrderMaxSpeed(player.LastServerMessage().GameInfo.Ball.Coords)
+		orderToMove, _ := player.CreateMoveOrderMaxSpeed(gamer.LastServerMessage().GameInfo.Ball.Coords)
 		orderToCatch := player.CreateCatchOrder()
-		player.SendOrders("Catch the ball!", orderToMove, orderToCatch)
+		gamer.SendOrders("Catch the ball!", orderToMove, orderToCatch)
 	}
 }
