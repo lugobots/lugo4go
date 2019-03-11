@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/makeitplay/arena"
+	"github.com/makeitplay/arena/orders"
 	"github.com/makeitplay/arena/physics"
 	"github.com/makeitplay/arena/talk"
 	"github.com/makeitplay/arena/units"
-	"github.com/sirupsen/logrus"
 	"log"
 	"os"
 	"os/signal"
@@ -25,15 +25,56 @@ type Player struct {
 	OnMessage      func(msg GameMessage)
 	OnAnnouncement func(msg GameMessage)
 	config         *Configuration
-	talker         talk.Talker
-	talkerCtx      context.Context
+	Talker         talk.Talker
 	LastMsg        GameMessage
-	logger         *logrus.Entry
 }
 
 // playerCtx is used to keep the process running while the player is playing
-var playerCtx context.Context
+var playerCtx GamerCtx
 var stopPlayer context.CancelFunc
+
+// Play make the player start to play
+func (p *Player) Play(initialPosition physics.Point, configuration *Configuration) {
+	playerCtx, stopPlayer = NewGamerContext(context.Background(), configuration)
+
+	p.config = configuration
+	p.TeamPlace = configuration.TeamPlace
+	p.Number = configuration.PlayerNumber
+	talkerCtx, talker, err := TalkerSetup(playerCtx, configuration, initialPosition)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// we have to set the call back function that will process the player behaviour when the game state has been changed
+	defer talker.Close()
+	p.Talker = talker
+
+	go listenServerMessages(p)
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt)
+
+	exitCode := 0
+	select {
+	case <-signalChan:
+		playerCtx.Logger().Print("*********** INTERRUPTION SIGNAL ****************")
+		talker.Close()
+		stopPlayer()
+		exitCode = 1
+	case <-talkerCtx.Done():
+		playerCtx.Logger().Printf("was connection lost: %s", talkerCtx.Err())
+		stopPlayer()
+		exitCode = 2
+	case <-playerCtx.Done():
+		playerCtx.Logger().Printf("player stopped: %s", playerCtx.Err())
+
+	}
+	os.Exit(exitCode)
+}
+
+// stopToPlay stop the player to play
+func (p *Player) stopToPlay(interrupted bool) {
+	stopPlayer()
+}
 
 // ID returns the player ID, that is the team place and it concatenated.
 func (p *Player) ID() string {
@@ -43,67 +84,29 @@ func (p *Player) ID() string {
 	return p.Id
 }
 
-// Start make the player start to play
-func (p *Player) Start(logger *logrus.Logger, configuration *Configuration) {
-	p.config = configuration
-	playerCtx, stopPlayer = context.WithCancel(context.Background())
-	p.Size = units.PlayerSize
-	if p.OnAnnouncement == nil {
-		log.Fatal("your player must implement the `OnAnnouncement` action")
-	}
-
-	p.logger = logger.WithField("player", fmt.Sprintf("%s-%s", p.TeamPlace, p.Number))
-	p.logger.Infof("Try to join to the team %s ", p.TeamPlace)
-	if !p.initializeCommunicator(p.logger) {
-		return
-	}
-
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt)
-
-	exitCode := 0
-	select {
-	case <-signalChan:
-		p.logger.Print("*********** INTERRUPTION SIGNAL ****************")
-		p.talker.Close()
-	case <-playerCtx.Done():
-		p.logger.Info("player stopped")
-		p.talker.Close()
-	case <-p.talkerCtx.Done():
-		p.logger.Warn("communication interrupted")
-		exitCode = 1
-	}
-	os.Exit(exitCode)
-}
-
 // LastServerMessage returns the last message got from the server
 func (p *Player) LastServerMessage() GameMessage {
 	return p.LastMsg
 }
 
 // SendOrders sends a list of orders to the game server, and includes a message to them (only displayed in the game server log)
-func (p *Player) SendOrders(message string, orders ...arena.Order) {
+func (p *Player) SendOrders(message string, ordersList ...orders.Order) {
 	msg := PlayerMessage{
-		arena.ORDER,
-		orders,
+		orders.ORDER,
+		ordersList,
 		message,
 	}
 	stringed, err := json.Marshal(msg)
 	if err != nil {
-		p.logger.Errorf("Fail generating JSON: %s", err.Error())
+		playerCtx.Logger().Errorf("Fail generating JSON: %s", err.Error())
 		return
 	}
 
-	err = p.talker.Send(stringed)
+	err = p.Talker.Send(stringed)
 	if err != nil {
-		p.logger.Errorf("Fail on sending message: %s", err.Error())
+		playerCtx.Logger().Errorf("Fail on sending message: %s", err.Error())
 		return
 	}
-}
-
-// stopToPlay stop the player to play
-func (p *Player) stopToPlay(interrupted bool) {
-	stopPlayer()
 }
 
 // UpdatePosition update the player status after the last game server message
@@ -158,59 +161,51 @@ func (p *Player) FindOpponentPlayer(status GameInfo, playerNumber arena.PlayerNu
 }
 
 // CreateMoveOrder creates a move order
-func (p *Player) CreateMoveOrder(target physics.Point, speed float64) arena.Order {
+func (p *Player) CreateMoveOrder(target physics.Point, speed float64) orders.Order {
 	vec := physics.NewZeroedVelocity(*physics.NewVector(p.Coords, target).Normalize())
 	vec.Speed = speed
-	return arena.Order{
-		Type: arena.MOVE,
-		Data: arena.MoveOrderData{Velocity: vec},
+	return orders.Order{
+		Type: orders.MOVE,
+		Data: orders.MoveOrderData{Velocity: vec},
 	}
 }
 
 // CreateJumpOrder creates a jump order (only allowed to goal keeper
-func (p *Player) CreateJumpOrder(target physics.Point, speed float64) arena.Order {
+func (p *Player) CreateJumpOrder(target physics.Point, speed float64) orders.Order {
 	vec := physics.NewZeroedVelocity(*physics.NewVector(p.Coords, target).Normalize())
 	vec.Speed = speed
-	return arena.Order{
-		Type: arena.MOVE,
-		Data: arena.MoveOrderData{Velocity: vec},
+	return orders.Order{
+		Type: orders.MOVE,
+		Data: orders.MoveOrderData{Velocity: vec},
 	}
 }
 
 // CreateMoveOrderMaxSpeed creates a move order with max speed allowed
-func (p *Player) CreateMoveOrderMaxSpeed(target physics.Point) arena.Order {
+func (p *Player) CreateMoveOrderMaxSpeed(target physics.Point) orders.Order {
 	return p.CreateMoveOrder(target, units.PlayerMaxSpeed)
 }
 
 // CreateStopOrder creates a move order with speed zero
-func (p *Player) CreateStopOrder(direction physics.Vector) arena.Order {
+func (p *Player) CreateStopOrder(direction physics.Vector) orders.Order {
 	vec := p.Velocity.Copy()
 	vec.Speed = 0
 	vec.Direction = &direction
-	return arena.Order{
-		Type: arena.MOVE,
-		Data: arena.MoveOrderData{Velocity: vec},
-	}
+	return orders.NewMoveOrder(vec)
 }
 
 // CreateKickOrder creates a kick order and try to find the best vector to reach the target
-func (p *Player) CreateKickOrder(target physics.Point, speed float64) arena.Order {
+func (p *Player) CreateKickOrder(target physics.Point, speed float64) orders.Order {
 	ballExpectedDirection := physics.NewVector(p.LastMsg.GameInfo.Ball.Coords, target)
 	diffVector := *ballExpectedDirection.Sub(p.LastMsg.GameInfo.Ball.Velocity.Direction)
 	vec := physics.NewZeroedVelocity(diffVector)
 	vec.Speed = speed
-	return arena.Order{
-		Type: arena.KICK,
-		Data: arena.KickOrderData{Velocity: vec},
-	}
+
+	return orders.NewKickOrder(vec)
 }
 
 // CreateCatchOrder creates the catch order
-func (p *Player) CreateCatchOrder() arena.Order {
-	return arena.Order{
-		Type: arena.CATCH,
-		Data: map[string]interface{}{},
-	}
+func (p *Player) CreateCatchOrder() orders.Order {
+	return orders.NewCatchOrder()
 }
 
 // IHoldTheBall returns true when the player is holding the ball

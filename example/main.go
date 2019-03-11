@@ -1,35 +1,28 @@
 package main
 
 import (
-	"github.com/makeitplay/arena/GameState"
-	"github.com/makeitplay/arena/Units"
+	"github.com/makeitplay/arena"
 	"github.com/makeitplay/arena/physics"
+	"github.com/makeitplay/arena/units"
 	"github.com/makeitplay/client-player-go"
-	"math/rand"
-	"time"
 )
 
 var player *client.Player
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
-	// First we have to get the command line arguments to identify this bot in its game
+
 	serverConfig := new(client.Configuration)
 	serverConfig.ParseFromFlags()
 
-	// then we create a client that will handle the communication for us
-	player = new(client.Player)
-	player.TeamPlace = serverConfig.TeamPlace
-	player.Number = serverConfig.PlayerNumber
-	// this will be our bot initial position
-	player.Coords = physics.Point{
-		PosX: rand.Int() % units.CourtWidth,
-		PosY: rand.Int() % units.CourtHeight,
+	initialPosition := physics.Point{
+		PosX: units.FieldWidth / 4,
+		PosY: units.FieldHeight / 2,
 	}
 
-	// we have to set the call back function that will process the player behaviour when the game state has been changed
+	player := &client.Player{}
 	player.OnAnnouncement = reactToNewState
-	player.Start(serverConfig)
+	player.Play(initialPosition, serverConfig)
+
 }
 
 func reactToNewState(msg client.GameMessage) {
@@ -37,7 +30,7 @@ func reactToNewState(msg client.GameMessage) {
 	player.UpdatePosition(msg.GameInfo)
 
 	// for this example, or smart player only reacts when the game server is listening for orders
-	if GameState.State(msg.State) == GameState.Listening {
+	if msg.State == arena.Listening {
 
 		// we are going to kick the ball as soon as we catch it
 		if player.IHoldTheBall() {

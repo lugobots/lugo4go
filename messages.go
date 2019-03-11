@@ -2,12 +2,13 @@ package client
 
 import (
 	"github.com/makeitplay/arena"
+	"github.com/makeitplay/arena/orders"
 )
 
 // PlayerMessage is the message sent from a player to the game server
 type PlayerMessage struct {
-	Type   arena.MsgType `json:"type"`
-	Orders []arena.Order `json:"orders"`
+	Type   arena.MsgType  `json:"type"`
+	Orders []orders.Order `json:"orders"`
 	// Debug is a message the will be only visible in the game server log (used for debugging purposes)
 	Debug string `json:"message"`
 }
