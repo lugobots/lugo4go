@@ -13,6 +13,10 @@ import (
 	"runtime/debug"
 )
 
+type Responser interface {
+	SendOrders(message string, ordersList ...orders.Order)
+}
+
 type Gamer struct {
 	OnMessage      func(msg GameMessage)
 	OnAnnouncement func(turnTx TurnContext)

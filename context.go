@@ -15,9 +15,10 @@ type GamerCtx interface {
 }
 
 type TurnContext interface {
-	GamerCtx
+	context.Context
+	Logger() *logrus.Entry
 	Player() *Player
-	GameMsg() GameMessage
+	GameMsg() *GameMessage
 }
 
 func NewGamerContext(ctx context.Context, config *Configuration) (GamerCtx, context.CancelFunc) {
@@ -70,7 +71,7 @@ func (o *gameCtx) CreateTurnContext(msg GameMessage) TurnContext {
 	return &turnCtx{
 		gameCtx: o,
 		log:     o.log.WithField("turn", msg.GameInfo.Turn),
-		msg:     msg,
+		msg:     &msg,
 		player:  player, //remember that this value can be nil at the very first msgs
 	}
 }
@@ -78,7 +79,7 @@ func (o *gameCtx) CreateTurnContext(msg GameMessage) TurnContext {
 type turnCtx struct {
 	*gameCtx
 	log    *logrus.Entry
-	msg    GameMessage
+	msg    *GameMessage
 	player *Player
 }
 
@@ -90,6 +91,6 @@ func (t *turnCtx) Player() *Player {
 	return t.player
 }
 
-func (t *turnCtx) GameMsg() GameMessage {
+func (t *turnCtx) GameMsg() *GameMessage {
 	return t.msg
 }

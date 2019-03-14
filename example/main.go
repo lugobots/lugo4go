@@ -33,6 +33,8 @@ func reactToNewState(ctx client.TurnContext) {
 		return
 	}
 
+	ctx.Logger().Info("I got a message")
+
 	player := ctx.Player()
 	// for this example, or smart player only reacts when the game server is listening for orders
 	if ctx.GameMsg().State == arena.Listening {

@@ -36,6 +36,13 @@ func (p *Player) GetOpponentTeam(status GameInfo) Team {
 	return status.HomeTeam
 }
 
+func (p *Player) GetOpponentPlace() arena.TeamPlace {
+	if p.TeamPlace == arena.HomeTeam {
+		return arena.AwayTeam
+	}
+	return arena.HomeTeam
+}
+
 // FindOpponentPlayer retrieve a specific opponent player status from the game server message
 func (p *Player) FindOpponentPlayer(status GameInfo, playerNumber arena.PlayerNumber) *Player {
 	teamInfo := p.GetOpponentTeam(status)

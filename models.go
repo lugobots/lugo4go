@@ -38,6 +38,28 @@ type GameMessage struct {
 	Message string `json:"message"`
 }
 
+func (g *GameMessage) Ball() Ball {
+	return g.GameInfo.Ball
+}
+
+func (g *GameMessage) Turn() int {
+	return g.GameInfo.Turn
+}
+
+func (g *GameMessage) GetTeam(place arena.TeamPlace) Team {
+	team := g.GameInfo.HomeTeam
+	if place == arena.AwayTeam {
+		team = g.GameInfo.AwayTeam
+	}
+	return team
+}
+
+func (g *GameMessage) ForEachPlayByTeam(place arena.TeamPlace, callback func(index int, player *Player)) {
+	for i, p := range g.GetTeam(place).Players {
+		callback(i, p)
+	}
+}
+
 // GameInfo is the set of values that defines the current game state
 type GameInfo struct {
 	State arena.GameState `json:"state"`
