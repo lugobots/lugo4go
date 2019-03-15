@@ -13,7 +13,7 @@ import (
 	"runtime/debug"
 )
 
-type Responser interface {
+type Responder interface {
 	SendOrders(message string, ordersList ...orders.Order)
 }
 
