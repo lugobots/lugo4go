@@ -39,7 +39,7 @@ func NewTestController(ctx context.Context, host, port, uuid string) (context.Co
 	ctrl := &controller{
 		talker: talker,
 	}
-	ctrl.ctrlServerListenner()
+	go ctrl.ctrlServerListenner()
 
 	return talkerCtx, ctrl, nil
 }
