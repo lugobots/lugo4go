@@ -7,9 +7,6 @@ import (
 	"github.com/makeitplay/arena/orders"
 	"github.com/makeitplay/arena/physics"
 	"github.com/makeitplay/arena/talk"
-	"log"
-	"os"
-	"os/signal"
 	"runtime/debug"
 )
 
@@ -23,6 +20,8 @@ type Gamer struct {
 	config         *Configuration
 	Talker         talk.Talker
 	LastMsg        GameMessage
+	stop           context.CancelFunc
+	ctx            GamerCtx
 }
 
 func listenServerMessages(gamer *Gamer) {
@@ -32,72 +31,60 @@ func listenServerMessages(gamer *Gamer) {
 			var msg GameMessage
 			err := json.Unmarshal(bytes, &msg)
 			if err != nil {
-				playerCtx.Logger().Errorf("Fail on convert wb message: %s (%s)", err.Error(), bytes)
+				gamer.ctx.Logger().Errorf("Fail on convert wb message: %s (%s)", err.Error(), bytes)
 			} else {
 				gamer.onMessage(msg)
 			}
 		case connError := <-gamer.Talker.ListenInterruption():
 			if gamer.LastMsg.State == arena.Over {
-				playerCtx.Logger().Info("game over")
-				gamer.stopToPlay(false)
+				gamer.ctx.Logger().Info("game over")
+				gamer.StopToPlay(false)
 			} else {
-				playerCtx.Logger().Errorf("ws connection lost: %s", connError.Error())
-				gamer.stopToPlay(true)
+				gamer.ctx.Logger().Errorf("ws connection lost: %s", connError.Error())
+				gamer.StopToPlay(true)
 			}
 			return
 		}
 	}
 }
 
-// playerCtx is used to keep the process running while the player is playing
-var playerCtx GamerCtx
-var stopPlayer context.CancelFunc
-
 // Play make the player start to play
-func (p *Gamer) Play(initialPosition physics.Point, configuration *Configuration) {
-	playerCtx, stopPlayer = NewGamerContext(context.Background(), configuration)
+func (p *Gamer) Play(initialPosition physics.Point, configuration *Configuration) error {
+	p.ctx, p.stop = NewGamerContext(context.Background(), configuration)
 
 	p.config = configuration
-	talkerCtx, talker, err := TalkerSetup(playerCtx, configuration, initialPosition)
+	talkerCtx, talker, err := TalkerSetup(p.ctx, configuration, initialPosition)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-	// we have to set the call back function that will process the player behaviour when the game state has been changed
-	defer talker.Close()
+
 	p.Talker = talker
 	go listenServerMessages(p)
 
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt)
+	go func() {
+		select {
+		case <-talkerCtx.Done():
+			p.ctx.Logger().Printf("was connection lost: %s", talkerCtx.Err())
+			p.stop()
+		case <-p.ctx.Done():
+			talker.Close()
+			p.ctx.Logger().Printf("player stopped: %s", p.ctx.Err())
 
-	exitCode := 0
-	select {
-	case <-signalChan:
-		playerCtx.Logger().Print("*********** INTERRUPTION SIGNAL ****************")
-		talker.Close()
-		stopPlayer()
-		exitCode = 1
-	case <-talkerCtx.Done():
-		playerCtx.Logger().Printf("was connection lost: %s", talkerCtx.Err())
-		stopPlayer()
-		exitCode = 2
-	case <-playerCtx.Done():
-		playerCtx.Logger().Printf("player stopped: %s", playerCtx.Err())
-
-	}
-	os.Exit(exitCode)
+		}
+	}()
+	return nil
 }
 
-// stopToPlay stop the player to play
-func (p *Gamer) stopToPlay(interrupted bool) {
-	stopPlayer()
+// StopToPlay stop the player to play
+func (p *Gamer) StopToPlay(interrupted bool) {
+	p.stop()
 }
 
 // onMessage is the callback function called when the game server sends a new message
 func (p *Gamer) onMessage(msg GameMessage) {
 	defer func() {
 		if err := recover(); err != nil {
-			playerCtx.Logger().Errorf("Panic processing new game message: %s", err)
+			p.ctx.Logger().Errorf("Panic processing new game message: %s", err)
 			debug.PrintStack()
 		}
 	}()
@@ -114,17 +101,17 @@ func (p *Gamer) onMessage(msg GameMessage) {
 func (p *Gamer) defaultOnMessage(msg GameMessage) {
 	switch msg.Type {
 	case orders.WELCOME:
-		playerCtx.Logger().Info("Accepted by the game server")
+		p.ctx.Logger().Info("Accepted by the game server")
 	case orders.ANNOUNCEMENT:
 		if p.OnAnnouncement == nil {
-			playerCtx.Logger().Fatal("the player must implement the `OnAnnouncement` method")
+			p.ctx.Logger().Fatal("the player must implement the `OnAnnouncement` method")
 		} else {
-			turnTx := playerCtx.CreateTurnContext(msg)
+			turnTx := p.ctx.CreateTurnContext(msg)
 			p.OnAnnouncement(turnTx)
 		}
 	case orders.RIP:
-		playerCtx.Logger().Warn("the server died")
-		p.stopToPlay(true)
+		p.ctx.Logger().Warn("the server died")
+		p.StopToPlay(true)
 	}
 }
 
@@ -137,13 +124,13 @@ func (p *Gamer) SendOrders(message string, ordersList ...orders.Order) {
 	}
 	stringed, err := json.Marshal(msg)
 	if err != nil {
-		playerCtx.Logger().Errorf("Fail generating JSON: %s", err.Error())
+		p.ctx.Logger().Errorf("Fail generating JSON: %s", err.Error())
 		return
 	}
 
 	err = p.Talker.Send(stringed)
 	if err != nil {
-		playerCtx.Logger().Errorf("Fail on sending message: %s", err.Error())
+		p.ctx.Logger().Errorf("Fail on sending message: %s", err.Error())
 		return
 	}
 }

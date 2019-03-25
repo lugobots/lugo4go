@@ -5,6 +5,10 @@ import (
 	"github.com/makeitplay/arena/physics"
 	"github.com/makeitplay/arena/units"
 	"github.com/makeitplay/client-player-go"
+	"github.com/sirupsen/logrus"
+	"log"
+	"os"
+	"os/signal"
 )
 
 var gamer *client.Gamer
@@ -23,7 +27,17 @@ func main() {
 	}
 	gamer = &client.Gamer{}
 	gamer.OnAnnouncement = reactToNewState
-	gamer.Play(initialPosition, serverConfig)
+	if err := gamer.Play(initialPosition, serverConfig); err != nil {
+		log.Fatal(err)
+	}
+
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, os.Interrupt)
+	select {
+	case <-signalChan:
+		logrus.Print("*********** INTERRUPTION SIGNAL ****************")
+		gamer.StopToPlay(true)
+	}
 
 }
 
