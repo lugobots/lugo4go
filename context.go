@@ -23,10 +23,13 @@ type TurnContext interface {
 
 func NewGamerContext(ctx context.Context, config *Configuration) (GamerCtx, context.CancelFunc) {
 	ctx, cancelFunc := context.WithCancel(ctx)
+	logger := logrus.New()
+	logger.SetLevel(config.LogLevel)
+
 	return &gameCtx{
 		config:  config,
 		mainCtx: ctx,
-		log:     logrus.WithField("player", fmt.Sprintf("%s-%s", config.TeamPlace, config.PlayerNumber)),
+		log:     logger.WithField("player", fmt.Sprintf("%s-%s", config.TeamPlace, config.PlayerNumber)),
 	}, cancelFunc
 }
 

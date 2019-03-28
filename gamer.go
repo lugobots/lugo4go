@@ -7,6 +7,7 @@ import (
 	"github.com/makeitplay/arena/orders"
 	"github.com/makeitplay/arena/physics"
 	"github.com/makeitplay/arena/talk"
+	"github.com/sirupsen/logrus"
 	"runtime/debug"
 )
 
@@ -17,6 +18,7 @@ type Responder interface {
 type Gamer struct {
 	OnMessage      func(msg GameMessage)
 	OnAnnouncement func(turnTx TurnContext)
+	LogLevel       logrus.Level
 	config         *Configuration
 	Talker         talk.Talker
 	LastMsg        GameMessage

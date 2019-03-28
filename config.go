@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/makeitplay/arena"
+	"github.com/sirupsen/logrus"
 	"log"
 	"strconv"
 )
@@ -14,6 +15,8 @@ type Configuration struct {
 	TeamPlace arena.TeamPlace
 	// PlayerNumber must be a number between 1-11 that identifies this player in his team
 	PlayerNumber arena.PlayerNumber
+
+	LogLevel logrus.Level
 	// UUID is the match UUID. It will be always local for local games
 	UUID string
 	// WSHost is the hostname of the game server (only HTTP for now)

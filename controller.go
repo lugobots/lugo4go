@@ -1,6 +1,7 @@
 package client
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -11,6 +12,8 @@ import (
 	"github.com/makeitplay/arena/units"
 	"github.com/makeitplay/commons/Units"
 	"github.com/sirupsen/logrus"
+	"io/ioutil"
+	"net/http"
 	"net/url"
 	"time"
 )
@@ -19,8 +22,11 @@ type Controller interface {
 	SendOrders(place arena.TeamPlace, number arena.PlayerNumber, orderList []orders.Order)
 	ToggleDebugMode()
 	NextTurn() (newState GameMessage, err error)
-	LoadArrangement(name string)
-	ResetGame() //score and time
+	LoadArrangement(name string) (newState GameMessage, err error)
+	SetBallProperties(v physics.Velocity, position physics.Point) (newState GameMessage, err error)
+	SetGameTurn(turn int) (newState GameMessage, err error)
+	ResetScore() (newState GameMessage, err error)
+	SetFrameInterval(time time.Duration)
 }
 
 type commandArgs map[string]interface{}
@@ -37,6 +43,8 @@ type controller struct {
 	teams           map[arena.TeamPlace]ctrlTeam
 	lastState       *GameMessage
 	listenerStopper context.CancelFunc
+	config          Configuration
+	intervalTime    time.Duration
 }
 
 func NewTestController(ctx context.Context, confg Configuration) (context.Context, Controller, error) {
@@ -62,8 +70,9 @@ func NewTestController(ctx context.Context, confg Configuration) (context.Contex
 		listenerStopper: func() {
 
 		},
+		intervalTime: 0,
+		config:       confg,
 	}
-	ctrl.ToggleDebugMode()
 	go ctrl.ctrlServerListenner()
 
 	for i := 1; i <= 11; i++ {
@@ -89,14 +98,82 @@ func (c *controller) ToggleDebugMode() {
 	c.browser.Send(jsonMsg)
 }
 
+func (c *controller) SetFrameInterval(time time.Duration) {
+	c.intervalTime = time
+}
 func (c *controller) NextTurn() (newState GameMessage, err error) {
 	nextTurnDebugMsg := debugCmd{
-		Cmd: "next-turn",
+		Cmd: "play",
 	}
 	jsonMsg, _ := json.Marshal(nextTurnDebugMsg)
 	c.lastState = nil
 	c.browser.Send(jsonMsg)
 	return c.waitListeningState()
+}
+func (c *controller) sendDebugMsg(msg debugCmd) (newState GameMessage, err error) {
+	uri := new(url.URL)
+	uri.Scheme = "http"
+	uri.Host = fmt.Sprintf("%s:%s", c.config.WSHost, c.config.WSPort)
+	uri.Path = fmt.Sprintf("/%s/debug", c.config.UUID)
+	jsonValue, _ := json.Marshal(msg)
+
+	resp, err := http.Post(uri.String(), "application/json", bytes.NewBuffer(jsonValue))
+	if err != nil {
+		return GameMessage{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		body, _ := ioutil.ReadAll(resp.Body)
+		fmt.Println(string(body))
+		var merda GameMessage
+		err := json.Unmarshal(body, &merda)
+		if err != nil {
+			return GameMessage{}, err
+		}
+		newState = merda
+	}
+	return
+}
+
+func (c *controller) SetGameTurn(turn int) (newState GameMessage, err error) {
+	setProps := debugCmd{
+		Cmd: "set-game-properties",
+	}
+	setProps.Args = map[string]commandArgs{
+		"props": map[string]interface{}{
+			"turn": turn,
+		},
+	}
+	return c.sendDebugMsg(setProps)
+}
+func (c *controller) SetBallProperties(v physics.Velocity, position physics.Point) (newState GameMessage, err error) {
+	setPos := debugCmd{
+		Cmd: "set-ball",
+	}
+	setPos.Args = map[string]commandArgs{
+		"coords": map[string]interface{}{
+			"x": position.PosX,
+			"y": position.PosY,
+		},
+	}
+
+	setVel := debugCmd{
+		Cmd: "set-ball",
+	}
+	setVel.Args = map[string]commandArgs{
+		"velocity": map[string]interface{}{
+			"v": v.Speed,
+			"x": v.Direction.GetX(),
+			"y": v.Direction.GetY(),
+		},
+	}
+
+	if newState, err := c.sendDebugMsg(setPos); err != nil {
+		return newState, err
+	}
+
+	return c.sendDebugMsg(setVel)
 }
 
 func (c *controller) SendOrders(place arena.TeamPlace, number arena.PlayerNumber, orderList []orders.Order) {
@@ -104,25 +181,39 @@ func (c *controller) SendOrders(place arena.TeamPlace, number arena.PlayerNumber
 	gamer.SendOrders("debug", orderList...)
 }
 
-func (c *controller) LoadArrangement(name string) {
-	panic("implement me")
+func (c *controller) LoadArrangement(name string) (newState GameMessage, err error) {
+	setProps := debugCmd{
+		Cmd: "load-positions",
+	}
+	setProps.Args = map[string]commandArgs{
+		"file": map[string]interface{}{
+			"name": name,
+		},
+	}
+	return c.sendDebugMsg(setProps)
 }
 
-func (c *controller) ResetGame() {
-	panic("implement me")
+func (c *controller) ResetScore() (newState GameMessage, err error) {
+	setProps := debugCmd{
+		Cmd: "set-game-properties",
+	}
+	setProps.Args = map[string]commandArgs{
+		"props": map[string]interface{}{
+			"score": map[string]int{"home": 0, "away": 0},
+		},
+	}
+	return c.sendDebugMsg(setProps)
 }
 
 func (c *controller) ctrlServerListenner() {
 	for {
 		select {
 		case bytes := <-c.browser.Listen():
-			logrus.WithTime(time.Now()).Infof("MSGSGS")
 			var msg GameMessage
 			err := json.Unmarshal(bytes, &msg)
 			if err != nil {
 				logrus.Errorf("Fail on convert wb message: %s (%s)", err.Error(), bytes)
 			} else {
-				logrus.WithTime(time.Now()).Infof("MSG %s", msg.State)
 				if msg.State == arena.Listening {
 					c.lastState = &msg
 					c.listenerStopper()
@@ -135,11 +226,10 @@ func (c *controller) ctrlServerListenner() {
 	}
 }
 func (c *controller) addPlayer(subCtx context.Context, confg Configuration, teamPlace arena.TeamPlace, playerNumber int) error {
-	logger := logrus.New()
-	logger.SetLevel(logrus.PanicLevel)
-
 	gamer := Gamer{}
 	gamer.OnAnnouncement = c.msgReceiver
+	//	gamer.LogLevel = logrus.PanicLevel
+
 	initialPosition := physics.Point{
 		PosX: arena.FieldCenter.PosX - (playerNumber * Units.PlayerSize),
 		PosY: 1,
@@ -170,10 +260,12 @@ func (c *controller) msgReceiver(turnTx TurnContext) {
 func (c *controller) waitListeningState() (GameMessage, error) {
 	var listennerCtx context.Context
 	listennerCtx, c.listenerStopper = context.WithTimeout(context.Background(), 10*time.Second)
-	logrus.WithTime(time.Now()).Info("WAIT")
 	<-listennerCtx.Done()
 	if listennerCtx.Err() == context.DeadlineExceeded {
 		return GameMessage{}, listennerCtx.Err()
+	}
+	if c.intervalTime > 0 {
+		time.Sleep(c.intervalTime)
 	}
 	return *c.lastState, nil
 }

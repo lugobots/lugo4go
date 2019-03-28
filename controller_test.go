@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/makeitplay/arena"
 	"github.com/makeitplay/arena/orders"
-	"github.com/sirupsen/logrus"
+	"github.com/makeitplay/arena/physics"
 	"testing"
 	"time"
 )
@@ -22,14 +22,13 @@ func TestController_NextTurn(t *testing.T) {
 		t.Fatal(err.Error())
 	}
 
-	logrus.Info("------------++++")
+	v := physics.NewZeroedVelocity(physics.North)
+	ctrl.SetBallProperties(v, arena.HomeTeamGoal.Center)
 
-	ctrl.SendOrders(arena.HomeTeam, arena.GoalkeeperNumber, []orders.Order{})
-	time.Sleep(2 * time.Second)
-	ctrl.NextTurn()
-
-	ctrl.SendOrders(arena.HomeTeam, arena.GoalkeeperNumber, []orders.Order{})
-	time.Sleep(2 * time.Second)
-	ctrl.NextTurn()
+	for i := 0; i < 5; i++ {
+		ctrl.SendOrders(arena.HomeTeam, arena.GoalkeeperNumber, []orders.Order{})
+		time.Sleep(2 * time.Second)
+		ctrl.NextTurn()
+	}
 
 }
