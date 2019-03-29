@@ -20,13 +20,15 @@ import (
 
 type Controller interface {
 	SendOrders(place arena.TeamPlace, number arena.PlayerNumber, orderList []orders.Order)
-	ToggleDebugMode()
+	//ToggleDebugMode()
 	NextTurn() (newState GameMessage, err error)
 	LoadArrangement(name string) (newState GameMessage, err error)
 	SetBallProperties(v physics.Velocity, position physics.Point) (newState GameMessage, err error)
+	SetPlayerPos(place arena.TeamPlace, number arena.PlayerNumber, position physics.Point) (newState GameMessage, err error)
 	SetGameTurn(turn int) (newState GameMessage, err error)
 	ResetScore() (newState GameMessage, err error)
 	SetFrameInterval(time time.Duration)
+	GetGamerCtx(place arena.TeamPlace, number arena.PlayerNumber) (ctx TurnContext, err error)
 }
 
 type commandArgs map[string]interface{}
@@ -45,6 +47,22 @@ type controller struct {
 	listenerStopper context.CancelFunc
 	config          Configuration
 	intervalTime    time.Duration
+}
+
+func (c *controller) GetGamerCtx(place arena.TeamPlace, number arena.PlayerNumber) (ctx TurnContext, err error) {
+	if c.lastState == nil {
+		return nil, fmt.Errorf("no game state available")
+	}
+
+	team, ok := c.teams[place]
+	if !ok {
+		return nil, fmt.Errorf("unknown team")
+	}
+	playerGamer, ok := team[number]
+	if !ok {
+		return nil, fmt.Errorf("unknown player")
+	}
+	return playerGamer.ctx.CreateTurnContext(*c.lastState), nil
 }
 
 func NewTestController(ctx context.Context, confg Configuration) (context.Context, Controller, error) {
@@ -75,16 +93,17 @@ func NewTestController(ctx context.Context, confg Configuration) (context.Contex
 	}
 	go ctrl.ctrlServerListenner()
 
-	for i := 1; i <= 11; i++ {
+	msg, err := ctrl.doAndWaitListening(func() {
+		for i := 1; i <= 11; i++ {
 
-		if err := ctrl.addPlayer(subCtx, confg, arena.HomeTeam, i); err != nil {
-			stop()
+			if err := ctrl.addPlayer(subCtx, confg, arena.HomeTeam, i); err != nil {
+				stop()
+			}
+			if err := ctrl.addPlayer(subCtx, confg, arena.AwayTeam, i); err != nil {
+				stop()
+			}
 		}
-		if err := ctrl.addPlayer(subCtx, confg, arena.AwayTeam, i); err != nil {
-			stop()
-		}
-	}
-	msg, err := ctrl.waitListeningState()
+	})
 	ctrl.lastState = &msg
 	return subCtx, ctrl, err
 }
@@ -105,11 +124,11 @@ func (c *controller) NextTurn() (newState GameMessage, err error) {
 	nextTurnDebugMsg := debugCmd{
 		Cmd: "play",
 	}
-	jsonMsg, _ := json.Marshal(nextTurnDebugMsg)
-	c.lastState = nil
-	c.browser.Send(jsonMsg)
-	return c.waitListeningState()
+	return c.doAndWaitListening(func() {
+		c.sendDebugMsg(nextTurnDebugMsg)
+	})
 }
+
 func (c *controller) sendDebugMsg(msg debugCmd) (newState GameMessage, err error) {
 	uri := new(url.URL)
 	uri.Scheme = "http"
@@ -147,6 +166,18 @@ func (c *controller) SetGameTurn(turn int) (newState GameMessage, err error) {
 	}
 	return c.sendDebugMsg(setProps)
 }
+func (c *controller) SetPlayerPos(place arena.TeamPlace, number arena.PlayerNumber, position physics.Point) (newState GameMessage, err error) {
+	setProps := debugCmd{
+		Cmd: "rearrange",
+	}
+	setProps.Args = map[string]commandArgs{
+		fmt.Sprintf("%s-%s", place, number): map[string]interface{}{
+			"x": position.PosX,
+			"y": position.PosY,
+		},
+	}
+	return c.sendDebugMsg(setProps)
+}
 func (c *controller) SetBallProperties(v physics.Velocity, position physics.Point) (newState GameMessage, err error) {
 	setPos := debugCmd{
 		Cmd: "set-ball",
@@ -179,6 +210,7 @@ func (c *controller) SetBallProperties(v physics.Velocity, position physics.Poin
 func (c *controller) SendOrders(place arena.TeamPlace, number arena.PlayerNumber, orderList []orders.Order) {
 	gamer := c.teams[place][number]
 	gamer.SendOrders("debug", orderList...)
+	time.Sleep(50 * time.Millisecond) //there is a little chance of the next instruction be executed before the message be sent
 }
 
 func (c *controller) LoadArrangement(name string) (newState GameMessage, err error) {
@@ -208,11 +240,11 @@ func (c *controller) ResetScore() (newState GameMessage, err error) {
 func (c *controller) ctrlServerListenner() {
 	for {
 		select {
-		case bytes := <-c.browser.Listen():
+		case msgInBytes := <-c.browser.Listen():
 			var msg GameMessage
-			err := json.Unmarshal(bytes, &msg)
+			err := json.Unmarshal(msgInBytes, &msg)
 			if err != nil {
-				logrus.Errorf("Fail on convert wb message: %s (%s)", err.Error(), bytes)
+				logrus.Errorf("Fail on convert wb message: %s (%s)", err.Error(), msgInBytes)
 			} else {
 				if msg.State == arena.Listening {
 					c.lastState = &msg
@@ -257,9 +289,15 @@ func (c *controller) msgReceiver(turnTx TurnContext) {
 	//logrus.Info(turnTx.GameMsg().State)
 	//logrus.WithTime(time.Now()).Infof("I got it: %s", turnTx.GameMsg().State)
 }
-func (c *controller) waitListeningState() (GameMessage, error) {
+
+// WARNING: if this method be called passing a cb that does not change the game server state, it can hang forever
+func (c *controller) doAndWaitListening(cb func()) (GameMessage, error) {
 	var listennerCtx context.Context
 	listennerCtx, c.listenerStopper = context.WithTimeout(context.Background(), 10*time.Second)
+
+	c.lastState = nil
+	cb()
+
 	<-listennerCtx.Done()
 	if listennerCtx.Err() == context.DeadlineExceeded {
 		return GameMessage{}, listennerCtx.Err()
