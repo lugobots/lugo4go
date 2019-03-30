@@ -73,7 +73,7 @@ func (p *Player) CreateJumpOrder(target physics.Point, speed float64) (orders.Or
 	}
 	vel := physics.NewZeroedVelocity(*vec.Normalize())
 	vel.Speed = speed
-	return orders.NewMoveOrder(vel), nil
+	return orders.NewJumpOrder(vel), nil
 }
 
 // CreateMoveOrderMaxSpeed creates a move order with max speed allowed
