@@ -272,7 +272,7 @@ func (c *controller) addPlayer(subCtx context.Context, confg Configuration, team
 	confg.PlayerNumber = arena.PlayerNumber(fmt.Sprintf("%d", playerNumber))
 	confg.TeamPlace = teamPlace
 
-	if err := gamer.Play(initialPosition, &confg); err != nil {
+	if _, err := gamer.Play(initialPosition, &confg); err != nil {
 		return err
 	}
 

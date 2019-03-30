@@ -51,13 +51,13 @@ func listenServerMessages(gamer *Gamer) {
 }
 
 // Play make the player start to play
-func (p *Gamer) Play(initialPosition physics.Point, configuration *Configuration) error {
+func (p *Gamer) Play(initialPosition physics.Point, configuration *Configuration) (GamerCtx, error) {
 	p.ctx, p.stop = NewGamerContext(context.Background(), configuration)
 
 	p.config = configuration
 	talkerCtx, talker, err := TalkerSetup(p.ctx, configuration, initialPosition)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	p.Talker = talker
@@ -74,7 +74,7 @@ func (p *Gamer) Play(initialPosition physics.Point, configuration *Configuration
 
 		}
 	}()
-	return nil
+	return p.ctx, nil
 }
 
 // StopToPlay stop the player to play

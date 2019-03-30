@@ -33,7 +33,8 @@ func main() {
 
 	gamer = &client.Gamer{}
 	gamer.OnAnnouncement = reactToNewState
-	if err := gamer.Play(initialPosition, serverConfig); err != nil {
+	gameCtx, err := gamer.Play(initialPosition, serverConfig)
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -43,6 +44,8 @@ func main() {
 	case <-signalChan:
 		logrus.Print("*********** INTERRUPTION SIGNAL ****************")
 		gamer.StopToPlay(true)
+	case <-gameCtx.Done():
+		logrus.Print("*********** Game stopped ****************")
 	}
 
 }
