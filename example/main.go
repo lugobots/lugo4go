@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/makeitplay/arena"
+	"github.com/makeitplay/arena/orders"
 	"github.com/makeitplay/arena/physics"
 	"github.com/makeitplay/arena/units"
 	"github.com/makeitplay/client-player-go"
@@ -9,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 )
 
 var gamer *client.Gamer
@@ -17,14 +19,18 @@ func main() {
 
 	serverConfig := new(client.Configuration)
 	serverConfig.ParseFromFlags()
+	serverConfig.LogLevel = logrus.DebugLevel
 
+	pos, _ := strconv.Atoi(string(serverConfig.PlayerNumber))
 	initialPosition := physics.Point{
 		PosX: units.FieldWidth / 4,
-		PosY: units.FieldHeight / 2,
+		PosY: pos * units.PlayerSize * 2, //(units.FieldHeight / 4) - (pos * units.PlayerSize),
 	}
+
 	if serverConfig.TeamPlace == arena.AwayTeam {
-		initialPosition.PosX *= 2
+		initialPosition.PosX = units.FieldWidth - initialPosition.PosX
 	}
+
 	gamer = &client.Gamer{}
 	gamer.OnAnnouncement = reactToNewState
 	if err := gamer.Play(initialPosition, serverConfig); err != nil {
@@ -59,9 +65,16 @@ func reactToNewState(ctx client.TurnContext) {
 			gamer.SendOrders("Shoot!", orderToKick)
 			return
 		}
+
+		var orderList []orders.Order
+		ctx.Logger().Infof("I am player %s", player.Number)
 		// otherwise, let's run towards the ball like kids
-		orderToMove, _ := player.CreateMoveOrderMaxSpeed(ctx.GameMsg().GameInfo.Ball.Coords)
+		if player.Number == arena.PlayerNumber("10") {
+			orderToMove, _ := player.CreateMoveOrderMaxSpeed(ctx.GameMsg().GameInfo.Ball.Coords)
+			orderList = append(orderList, orderToMove)
+		}
 		orderToCatch := player.CreateCatchOrder()
-		gamer.SendOrders("Catch the ball!", orderToMove, orderToCatch)
+		orderList = append(orderList, orderToCatch)
+		gamer.SendOrders("Catch the ball!", orderList...)
 	}
 }
