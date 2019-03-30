@@ -10,7 +10,6 @@ import (
 	"github.com/makeitplay/arena/physics"
 	"github.com/makeitplay/arena/talk"
 	"github.com/makeitplay/arena/units"
-	"github.com/makeitplay/commons/Units"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -263,7 +262,7 @@ func (c *controller) addPlayer(subCtx context.Context, confg Configuration, team
 	//	gamer.LogLevel = logrus.PanicLevel
 
 	initialPosition := physics.Point{
-		PosX: arena.FieldCenter.PosX - (playerNumber * Units.PlayerSize),
+		PosX: arena.FieldCenter.PosX - (playerNumber * units.PlayerSize),
 		PosY: 1,
 	}
 	if teamPlace == arena.AwayTeam {
