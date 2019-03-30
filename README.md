@@ -22,7 +22,7 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
 
 0. Docker >= 18.03 (https://docs.docker.com/install/)
 0. Docker Compose >= 1.21 (https://docs.docker.com/compose/install/)
-0. Go Lang >= 1.10 (https://golang.org/doc/install)
+0. Go Lang >= 1.12 (https://golang.org/doc/install)
 
 ### Installation
 
