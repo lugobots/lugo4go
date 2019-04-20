@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 if [ -z "$1" ]
   then
@@ -10,4 +10,5 @@ go build -o myAwesomeBot main.go || { echo "building has failed"; exit 1; }
 for i in `seq 1 11`
 do
   ./myAwesomeBot -team=$1 -number=$i -wshost=$2 &
+  sleep 0.1
 done

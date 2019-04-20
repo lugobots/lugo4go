@@ -17,10 +17,12 @@ var gamer *client.Gamer
 
 func main() {
 
+	// Loads the configuration
 	serverConfig := new(client.Configuration)
 	serverConfig.ParseFromFlags()
 	serverConfig.LogLevel = logrus.DebugLevel
 
+	// just creating a position based on the player number
 	pos, _ := strconv.Atoi(string(serverConfig.PlayerNumber))
 	initialPosition := physics.Point{
 		PosX: units.FieldWidth / 4,
@@ -31,6 +33,7 @@ func main() {
 		initialPosition.PosX = units.FieldWidth - initialPosition.PosX
 	}
 
+	// initialising the player
 	gamer = &client.Gamer{}
 	gamer.OnAnnouncement = reactToNewState
 	gameCtx, err := gamer.Play(initialPosition, serverConfig)
@@ -38,6 +41,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// keep the process alive
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 	select {
