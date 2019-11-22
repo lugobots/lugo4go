@@ -36,12 +36,12 @@ type Config struct {
 
 func NewClient(ctx context.Context, config Config) (Client, io.Closer, error) {
 	var err error
-	dialOps := make([]grpc.DialOption, 1)
+	var conn *grpc.ClientConn
 	if config.Insecure {
-		dialOps = append(dialOps, grpc.WithInsecure())
+		conn, err = grpc.Dial(config.GRPCHost, grpc.WithInsecure())
+	} else {
+		conn, err = grpc.Dial(config.GRPCHost)
 	}
-
-	conn, err := grpc.Dial(config.GRPCHost, dialOps...)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -67,5 +67,5 @@ func (c client) OnNewTurn(func(snapshot *lugo.GameSnapshot) DecisionMaker) {
 }
 
 func (c client) Stop() {
-	panic("implement me")
+	return
 }

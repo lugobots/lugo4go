@@ -3,6 +3,7 @@ module github.com/makeitplay/client-player-go
 go 1.12
 
 require (
+	github.com/golang/mock v1.3.1
 	github.com/golang/protobuf v1.3.2
 	github.com/makeitplay/arena v1.0.0
 	github.com/sirupsen/logrus v1.4.0
