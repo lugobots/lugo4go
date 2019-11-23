@@ -4,11 +4,11 @@ package lugo
 // The structs and interfaces generated from the protobuf files does not creates a common type that allows us
 // to set a type of argument. So this interface make it possible
 type PlayerOrder interface {
-	UnifierLugoOrders()
+	LugoOrdersUnifier()
 	isOrder_Action()
 }
 
-func (*Order_Move) UnifierLugoOrders()  {}
-func (*Order_Catch) UnifierLugoOrders() {}
-func (*Order_Kick) UnifierLugoOrders()  {}
-func (*Order_Jump) UnifierLugoOrders()  {}
+func (*Order_Move) LugoOrdersUnifier()  {}
+func (*Order_Catch) LugoOrdersUnifier() {}
+func (*Order_Kick) LugoOrdersUnifier()  {}
+func (*Order_Jump) LugoOrdersUnifier()  {}
