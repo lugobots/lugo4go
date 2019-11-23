@@ -32,3 +32,49 @@ func TestGetTeam_DoNotPanicInvalidSnapshot(t *testing.T) {
 		t.Errorf("Unexpedted value - Expected nil, got %v", got)
 	}
 }
+
+func TestIsBallHolder_ShouldBeTrue(t *testing.T) {
+	expectedHolder := Player{Number: 3, TeamSide: Team_AWAY}
+	ball := Ball{Holder: &expectedHolder}
+	snapshot := GameSnapshot{Ball: &ball}
+
+	if !IsBallHolder(&snapshot, &expectedHolder) {
+		t.Errorf("Unexpedted value - Expected true, got false")
+	}
+}
+
+func TestIsBallHolder_ShouldBeFalse_NoHolder(t *testing.T) {
+	expectedHolder := Player{Number: 3, TeamSide: Team_AWAY}
+	ball := Ball{}
+	snapshot := GameSnapshot{Ball: &ball}
+
+	if IsBallHolder(&snapshot, &expectedHolder) {
+		t.Errorf("Unexpedted value - Expected false, got true")
+	}
+}
+
+func TestIsBallHolder_ShouldBeFalse_OtherPlayerHolds(t *testing.T) {
+	expectedHolder := Player{Number: 3, TeamSide: Team_AWAY}
+	ball := Ball{Holder: &Player{Number: 2, TeamSide: Team_HOME}}
+	snapshot := GameSnapshot{Ball: &ball}
+
+	if IsBallHolder(&snapshot, &expectedHolder) {
+		t.Errorf("Unexpedted value - Expected false, got true")
+	}
+}
+
+func TestIsBallHolder_ShouldBeFalse_InvalidInputs(t *testing.T) {
+	expectedHolder := Player{Number: 3, TeamSide: Team_AWAY}
+	snapshot := GameSnapshot{}
+
+	if IsBallHolder(&snapshot, &expectedHolder) {
+		t.Errorf("Unexpedted value - Expected false, got true")
+	}
+
+	if IsBallHolder(nil, &expectedHolder) {
+		t.Errorf("Unexpedted value - Expected false, got true")
+	}
+	if IsBallHolder(&GameSnapshot{Ball: &Ball{Holder: &expectedHolder}}, nil) {
+		t.Errorf("Unexpedted value - Expected false, got true")
+	}
+}

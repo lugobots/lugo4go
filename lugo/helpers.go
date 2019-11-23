@@ -14,7 +14,7 @@ func IsBallHolder(s *GameSnapshot, player *Player) bool {
 	if s == nil {
 		return false
 	}
-	return s.Ball != nil &&
+	return s.Ball != nil && player != nil &&
 		s.Ball.Holder != nil &&
 		s.Ball.Holder.TeamSide == player.TeamSide &&
 		s.Ball.Holder.Number == player.Number
