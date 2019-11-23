@@ -1,10 +1,5 @@
 package lugo
 
-const (
-	// GoalkeeperNumber defines the goalkeeper number
-	GoalkeeperNumber = uint32(1)
-)
-
 // Goal is a set of value about a goal from a team
 type Goal struct {
 	// Center the is coordinate of the center of the goal
