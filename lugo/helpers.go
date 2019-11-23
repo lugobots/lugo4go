@@ -40,11 +40,11 @@ func GetPlayer(s *GameSnapshot, side Team_Side, number uint32) *Player {
 	return nil
 }
 
-func MakeOrder_MoveMaxSpeed(origin, target Point) (Order_Move, error) {
-	return MakeOrder_Move(origin, target, PlayerMaxSpeed)
+func MakeOrderMoveMaxSpeed(origin, target Point) (Order_Move, error) {
+	return MakeOrderMove(origin, target, PlayerMaxSpeed)
 }
 
-func MakeOrder_Move(origin, target Point, speed float64) (Order_Move, error) {
+func MakeOrderMove(origin, target Point, speed float64) (Order_Move, error) {
 	vec, err := NewVector(origin, target)
 	if err != nil {
 		return Order_Move{}, err
@@ -54,7 +54,17 @@ func MakeOrder_Move(origin, target Point, speed float64) (Order_Move, error) {
 	return Order_Move{Move: &Move{Velocity: &vel}}, nil
 }
 
-func MakeOrder_Kick(ball Ball, target Point, speed float64) (Order_Kick, error) {
+func MakeOrderJump(origin, target Point, speed float64) (Order_Jump, error) {
+	vec, err := NewVector(origin, target)
+	if err != nil {
+		return Order_Jump{}, err
+	}
+	vel := NewZeroedVelocity(*vec.Normalize())
+	vel.Speed = speed
+	return Order_Jump{Jump: &Jump{Velocity: &vel}}, nil
+}
+
+func MakeOrderKick(ball Ball, target Point, speed float64) (Order_Kick, error) {
 	ballExpectedDirection, err := NewVector(*ball.Position, target)
 	if err != nil {
 		return Order_Kick{}, err
@@ -69,16 +79,6 @@ func MakeOrder_Kick(ball Ball, target Point, speed float64) (Order_Kick, error) 
 	return Order_Kick{Kick: &Kick{Velocity: &vel}}, nil
 }
 
-func MakeOrder_Jump(origin, target Point, speed float64) (Order_Jump, error) {
-	vec, err := NewVector(origin, target)
-	if err != nil {
-		return Order_Jump{}, err
-	}
-	vel := NewZeroedVelocity(*vec.Normalize())
-	vel.Speed = speed
-	return Order_Jump{Jump: &Jump{Velocity: &vel}}, nil
-}
-
-func MakeOrder_Catch() (Order_Catch, error) {
+func MakeOrderCatch() (Order_Catch, error) {
 	return Order_Catch{Catch: &Catch{}}, nil
 }

@@ -96,7 +96,7 @@ func TestMakeOrder_Move(t *testing.T) {
 		},
 	}}
 
-	got, err := MakeOrder_Move(Point{}, Point{Y: 100}, 100)
+	got, err := MakeOrderMove(Point{}, Point{Y: 100}, 100)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOrderA, got)
 
@@ -106,7 +106,7 @@ func TestMakeOrder_Move(t *testing.T) {
 			Direction: South.Normalize(),
 		},
 	}}
-	got, err = MakeOrder_Move(Point{Y: 100}, Point{}, 40)
+	got, err = MakeOrderMove(Point{Y: 100}, Point{}, 40)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOrderB, got)
 
@@ -116,13 +116,52 @@ func TestMakeOrder_Move(t *testing.T) {
 			Direction: SouthEast.Normalize(),
 		},
 	}}
-	got, err = MakeOrder_Move(Point{Y: 100}, Point{X: 100}, 40)
+	got, err = MakeOrderMove(Point{Y: 100}, Point{X: 100}, 40)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOrderC, got)
 }
 
 func TestMakeOrder_Move_ShouldNotMakeInvalidMovement(t *testing.T) {
-	_, err := MakeOrder_Move(Point{X: 40, Y: 50}, Point{X: 40, Y: 50}, 100)
+	_, err := MakeOrderMove(Point{X: 40, Y: 50}, Point{X: 40, Y: 50}, 100)
+
+	assert.NotNil(t, err)
+}
+
+func TestMakeOrder_Jump(t *testing.T) {
+	expectedOrderA := Order_Jump{Jump: &Jump{
+		Velocity: &Velocity{
+			Speed:     100,
+			Direction: North.Normalize(),
+		},
+	}}
+
+	got, err := MakeOrderJump(Point{}, Point{Y: 100}, 100)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOrderA, got)
+
+	expectedOrderB := Order_Jump{Jump: &Jump{
+		Velocity: &Velocity{
+			Speed:     40,
+			Direction: South.Normalize(),
+		},
+	}}
+	got, err = MakeOrderJump(Point{Y: 100}, Point{}, 40)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOrderB, got)
+
+	expectedOrderC := Order_Jump{Jump: &Jump{
+		Velocity: &Velocity{
+			Speed:     40,
+			Direction: SouthEast.Normalize(),
+		},
+	}}
+	got, err = MakeOrderJump(Point{Y: 100}, Point{X: 100}, 40)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOrderC, got)
+}
+
+func TestMakeOrder_Jump_ShouldNotMakeInvalidMovement(t *testing.T) {
+	_, err := MakeOrderJump(Point{X: 40, Y: 50}, Point{X: 40, Y: 50}, 100)
 
 	assert.NotNil(t, err)
 }
