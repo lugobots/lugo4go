@@ -10,10 +10,10 @@ import (
 	"net"
 )
 
-func NewMockServer(ctx context.Context, ctr *gomock.Controller, port int16) (*MockFootballServer, error) {
-	mock := NewMockFootballServer(ctr)
+func NewMockServer(ctx context.Context, ctr *gomock.Controller, port int16) (*MockGameServer, error) {
+	mock := NewMockGameServer(ctr)
 	gRPCServer := grpc.NewServer()
-	lugo.RegisterFootballServer(gRPCServer, mock)
+	lugo.RegisterGameServer(gRPCServer, mock)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
