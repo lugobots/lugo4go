@@ -1,8 +1,10 @@
 package ops
 
-import "github.com/makeitplay/client-player-go/lugo"
+import (
+	"github.com/makeitplay/client-player-go/lugo"
+)
 
-type OrderSender func(in *lugo.OrderSet) (*lugo.OrderResponse, error)
+type OrderSender func(msg string, orders ...lugo.PlayerOrder) (*lugo.OrderResponse, error)
 type DecisionMaker func(snapshot *lugo.GameSnapshot, sender OrderSender)
 
 type Logger interface {

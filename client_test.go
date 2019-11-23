@@ -70,10 +70,14 @@ func TestClient_OnNewTurn(t *testing.T) {
 	defer ctrl.Finish() // checks all expected things for mocks
 
 	// defining expectations
+
 	expectedSnapshot := &lugo.GameSnapshot{Turn: 200}
+	expectedOrder := &lugo.Order_Catch{}
+	expectedDebugMsg := "a-important-msg"
 	expectedOrderSet := &lugo.OrderSet{
-		Turn:   200,
-		Orders: []*lugo.Order{{Action: &lugo.Order_Catch{}}},
+		Turn:         200,
+		DebugMessage: expectedDebugMsg,
+		Orders:       []*lugo.Order{{Action: expectedOrder}},
 	}
 	expectedResponse := &lugo.OrderResponse{
 		Code: lugo.OrderResponse_SUCCESS,
@@ -94,6 +98,9 @@ func TestClient_OnNewTurn(t *testing.T) {
 		stream:   mockStream,
 		gameConn: mockGameClient,
 		ctx:      context.Background(),
+		stopCtx: func() {
+
+		},
 	}
 
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
@@ -104,7 +111,7 @@ func TestClient_OnNewTurn(t *testing.T) {
 			t.Errorf("Unexpected snapshot - Expected %v, Got %v", expectedSnapshot, snapshot)
 			return
 		}
-		response, err := sender(expectedOrderSet)
+		response, err := sender(expectedDebugMsg, expectedOrder)
 		if err != nil {
 			t.Errorf("Unexpected erro - Expected nil, Got %v", err)
 		}

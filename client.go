@@ -67,7 +67,15 @@ func (c client) OnNewTurn(decider ops.DecisionMaker, log ops.Logger) {
 				return
 			}
 			log.Debugf("calling DecisionMaker for turn %d", snapshot.Turn)
-			decider(snapshot, func(orderSet *lugo.OrderSet) (response *lugo.OrderResponse, e error) {
+			decider(snapshot, func(msg string, orders ...lugo.PlayerOrder) (*lugo.OrderResponse, error) {
+				orderSet := &lugo.OrderSet{
+					Turn:         snapshot.Turn,
+					DebugMessage: msg,
+					Orders:       []*lugo.Order{},
+				}
+				for _, order := range orders {
+					orderSet.Orders = append(orderSet.Orders, &lugo.Order{Action: order})
+				}
 				log.Debugf("sending orders for turn %d", snapshot.Turn)
 				return c.gameConn.SendOrders(c.ctx, orderSet)
 			})
