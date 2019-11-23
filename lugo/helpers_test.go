@@ -1,33 +1,25 @@
 package lugo
 
-import "testing"
+import (
+	"github.com/stretchr/testify/assert"
+	"testing"
+)
 
 func TestGetTeam_GetsTheRightTeam(t *testing.T) {
 	expected := Team{Name: "MAY TEAM"}
 	snapshot := GameSnapshot{HomeTeam: &expected}
 
-	if got := GetTeam(&snapshot, Team_HOME); got != &expected {
-		t.Errorf("Unexpected Team - Expected %v, got %v", expected, got)
-	}
+	assert.Equal(t, &expected, GetTeam(&snapshot, Team_HOME))
 
 	expected = Team{Name: "Another Team"}
 	snapshot = GameSnapshot{AwayTeam: &expected}
 
-	if got := GetTeam(&snapshot, Team_AWAY); got != &expected {
-		t.Errorf("Unexpected Team - Expected %v, got %v", expected, got)
-	}
+	assert.Equal(t, &expected, GetTeam(&snapshot, Team_AWAY))
 }
 
 func TestGetTeam_DoNotPanicInvalidSnapshot(t *testing.T) {
-	snapshot := GameSnapshot{}
-
-	if got := GetTeam(&snapshot, Team_HOME); got != nil {
-		t.Errorf("Unexpected value - Expected nil, got %v", got)
-	}
-
-	if got := GetTeam(nil, Team_HOME); got != nil {
-		t.Errorf("Unexpected value - Expected nil, got %v", got)
-	}
+	assert.Nil(t, GetTeam(&GameSnapshot{}, Team_HOME))
+	assert.Nil(t, GetTeam(nil, Team_HOME))
 }
 
 func TestIsBallHolder_ShouldBeTrue(t *testing.T) {
@@ -35,9 +27,7 @@ func TestIsBallHolder_ShouldBeTrue(t *testing.T) {
 	ball := Ball{Holder: &expectedHolder}
 	snapshot := GameSnapshot{Ball: &ball}
 
-	if !IsBallHolder(&snapshot, &expectedHolder) {
-		t.Errorf("Unexpected value - Expected true, got false")
-	}
+	assert.True(t, IsBallHolder(&snapshot, &expectedHolder))
 }
 
 func TestIsBallHolder_ShouldBeFalse_NoHolder(t *testing.T) {
@@ -45,9 +35,7 @@ func TestIsBallHolder_ShouldBeFalse_NoHolder(t *testing.T) {
 	ball := Ball{}
 	snapshot := GameSnapshot{Ball: &ball}
 
-	if IsBallHolder(&snapshot, &expectedHolder) {
-		t.Errorf("Unexpected value - Expected false, got true")
-	}
+	assert.False(t, IsBallHolder(&snapshot, &expectedHolder))
 }
 
 func TestIsBallHolder_ShouldBeFalse_OtherPlayerHolds(t *testing.T) {
@@ -55,25 +43,15 @@ func TestIsBallHolder_ShouldBeFalse_OtherPlayerHolds(t *testing.T) {
 	ball := Ball{Holder: &Player{Number: 2, TeamSide: Team_HOME}}
 	snapshot := GameSnapshot{Ball: &ball}
 
-	if IsBallHolder(&snapshot, &expectedHolder) {
-		t.Errorf("Unexpected value - Expected false, got true")
-	}
+	assert.False(t, IsBallHolder(&snapshot, &expectedHolder))
 }
 
 func TestIsBallHolder_ShouldBeFalse_InvalidInputs(t *testing.T) {
 	expectedHolder := Player{Number: 3, TeamSide: Team_AWAY}
-	snapshot := GameSnapshot{}
 
-	if IsBallHolder(&snapshot, &expectedHolder) {
-		t.Errorf("Unexpected value - Expected false, got true")
-	}
-
-	if IsBallHolder(nil, &expectedHolder) {
-		t.Errorf("Unexpected value - Expected false, got true")
-	}
-	if IsBallHolder(&GameSnapshot{Ball: &Ball{Holder: &expectedHolder}}, nil) {
-		t.Errorf("Unexpected value - Expected false, got true")
-	}
+	assert.False(t, IsBallHolder(&GameSnapshot{}, &expectedHolder))
+	assert.False(t, IsBallHolder(nil, &expectedHolder))
+	assert.False(t, IsBallHolder(&GameSnapshot{Ball: &Ball{Holder: &expectedHolder}}, nil))
 }
 
 func TestGetPlayer(t *testing.T) {
@@ -83,10 +61,7 @@ func TestGetPlayer(t *testing.T) {
 			&expectedPlayer,
 		}},
 	}
-
-	if got := GetPlayer(&snapshot, Team_HOME, 11); got != &expectedPlayer {
-		t.Errorf("Unexpected value - Expected %v, got %v", expectedPlayer, got)
-	}
+	assert.Equal(t, &expectedPlayer, GetPlayer(&snapshot, Team_HOME, 11))
 }
 
 func TestGetPlayer_PlayerNotPresent(t *testing.T) {
@@ -96,9 +71,7 @@ func TestGetPlayer_PlayerNotPresent(t *testing.T) {
 		}},
 	}
 
-	if got := GetPlayer(&snapshot, Team_HOME, 11); got != nil {
-		t.Errorf("Unexpected value - Expected nil, got %v", got)
-	}
+	assert.Nil(t, GetPlayer(&snapshot, Team_HOME, 11))
 }
 
 func TestGetPlayer_TeamNotPresent(t *testing.T) {
@@ -108,13 +81,48 @@ func TestGetPlayer_TeamNotPresent(t *testing.T) {
 		}},
 	}
 
-	if got := GetPlayer(&snapshot, Team_AWAY, 10); got != nil {
-		t.Errorf("Unexpected value - Expected nil, got %v", got)
-	}
+	assert.Nil(t, GetPlayer(&snapshot, Team_AWAY, 10))
 }
 
 func TestGetPlayer_InvalidSnapshot(t *testing.T) {
-	if got := GetPlayer(nil, Team_AWAY, 11); got != nil {
-		t.Errorf("Unexpected value - Expected nil, got %v", got)
-	}
+	assert.Nil(t, GetPlayer(nil, Team_AWAY, 10))
+}
+
+func TestMakeOrder_Move(t *testing.T) {
+	expectedOrderA := Order_Move{Move: &Move{
+		Velocity: &Velocity{
+			Speed:     100,
+			Direction: North.Normalize(),
+		},
+	}}
+
+	got, err := MakeOrder_Move(Point{}, Point{Y: 100}, 100)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOrderA, got)
+
+	expectedOrderB := Order_Move{Move: &Move{
+		Velocity: &Velocity{
+			Speed:     40,
+			Direction: South.Normalize(),
+		},
+	}}
+	got, err = MakeOrder_Move(Point{Y: 100}, Point{}, 40)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOrderB, got)
+
+	expectedOrderC := Order_Move{Move: &Move{
+		Velocity: &Velocity{
+			Speed:     40,
+			Direction: SouthEast.Normalize(),
+		},
+	}}
+	got, err = MakeOrder_Move(Point{Y: 100}, Point{X: 100}, 40)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOrderC, got)
+}
+
+func TestMakeOrder_Move_ShouldNotMakeInvalidMovement(t *testing.T) {
+	_, err := MakeOrder_Move(Point{X: 40, Y: 50}, Point{X: 40, Y: 50}, 100)
+
+	assert.NotNil(t, err)
 }
