@@ -63,6 +63,7 @@ func (c client) OnNewTurn(decider ops.DecisionMaker, log ops.Logger) {
 				} else {
 					log.Errorf("gRPC stream error: %s", err)
 				}
+				c.stopCtx()
 				return
 			}
 			log.Debugf("calling DecisionMaker for turn %d", snapshot.Turn)

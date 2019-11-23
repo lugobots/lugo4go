@@ -126,3 +126,44 @@ func TestClient_OnNewTurn(t *testing.T) {
 		t.Errorf("Unexpected waiting - Expected %v, Got %v", context.Canceled, waiting.Err())
 	}
 }
+
+func TestClient_ShouldStopItsContext(t *testing.T) {
+	// initiates Mock controller
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish() // checks all expected things for mocks
+
+	// defining mocks and expected method calls
+	mockLogger := testdata.NewMockLogger(ctrl)
+	mockStream := testdata.NewMockGame_JoinATeamClient(ctrl)
+
+	mockLogger.EXPECT().Infof(gomock.Any(), gomock.Any()).AnyTimes()
+	mockStream.EXPECT().Recv().Return(nil, io.EOF)
+
+	wasClosed := false
+
+	c := &client{
+		stream: mockStream,
+		stopCtx: func() {
+			wasClosed = true
+		},
+	}
+
+	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
+	waiting, done := context.WithTimeout(context.Background(), 200*time.Millisecond)
+
+	c.OnNewTurn(func(snapshot *lugo.GameSnapshot, sender ops.OrderSender) {
+		t.Error("The DecisionMaker should not be called")
+		done()
+	}, mockLogger)
+
+	// This last lines may run really quickly, and the mock may not have ran the expected methods yet
+	// Let's give some time to the server run it before finish the test function
+	<-waiting.Done()
+	if waiting.Err() != context.DeadlineExceeded {
+		t.Errorf("Unexpected waiting - Expected %v, Got %v", context.DeadlineExceeded, waiting.Err())
+	}
+
+	if !wasClosed {
+		t.Error("Unexpected context to be closed")
+	}
+}
