@@ -53,7 +53,7 @@ func TestNewClient(t *testing.T) {
 	// Now we may create the client to connect to our fake server
 	_, playerClient, err := NewClient(config)
 
-	// This last lines may run really quickly, and the server may not have rnu the expected methods yet
+	// This last lines may run really quickly, and the server may not have ran the expected methods yet
 	// Let's give some time to the server run it before finish the test function
 	<-waiting.Done()
 	if err != nil {
@@ -69,6 +69,7 @@ func TestClient_OnNewTurn(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish() // checks all expected things for mocks
 
+	// defining expectations
 	expectedSnapshot := &lugo.GameSnapshot{Turn: 200}
 	expectedOrderSet := &lugo.OrderSet{
 		Turn:   200,
@@ -77,10 +78,17 @@ func TestClient_OnNewTurn(t *testing.T) {
 	expectedResponse := &lugo.OrderResponse{
 		Code: lugo.OrderResponse_SUCCESS,
 	}
+	receivedSnapshot := false
 
+	// defining mocks and expected method calls
 	mockLogger := testdata.NewMockLogger(ctrl)
 	mockStream := testdata.NewMockGame_JoinATeamClient(ctrl)
 	mockGameClient := testdata.NewMockGameClient(ctrl)
+	mockLogger.EXPECT().Debugf(gomock.Any(), gomock.Any()).AnyTimes()
+	mockLogger.EXPECT().Infof(gomock.Any(), gomock.Any()).AnyTimes()
+	mockStream.EXPECT().Recv().Return(expectedSnapshot, nil)
+	mockStream.EXPECT().Recv().Return(nil, io.EOF)
+	mockGameClient.EXPECT().SendOrders(gomock.Any(), expectedOrderSet).Return(expectedResponse, nil)
 
 	c := &client{
 		stream:   mockStream,
@@ -88,14 +96,7 @@ func TestClient_OnNewTurn(t *testing.T) {
 		ctx:      context.Background(),
 	}
 
-	mockLogger.EXPECT().Debugf(gomock.Any(), gomock.Any()).AnyTimes()
-	mockLogger.EXPECT().Infof(gomock.Any(), gomock.Any()).AnyTimes()
-	mockStream.EXPECT().Recv().Return(expectedSnapshot, nil)
-	mockStream.EXPECT().Recv().Return(nil, io.EOF)
-
-	mockGameClient.EXPECT().SendOrders(gomock.Any(), expectedOrderSet).Return(expectedResponse, nil)
-	receivedSnapshot := false
-
+	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
 
 	c.OnNewTurn(func(snapshot *lugo.GameSnapshot, sender ops.OrderSender) {
@@ -115,6 +116,8 @@ func TestClient_OnNewTurn(t *testing.T) {
 		done()
 	}, mockLogger)
 
+	// This last lines may run really quickly, and the mock may not have ran the expected methods yet
+	// Let's give some time to the server run it before finish the test function
 	<-waiting.Done()
 	if !receivedSnapshot {
 		t.Error("Expected has received msg")
