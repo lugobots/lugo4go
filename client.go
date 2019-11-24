@@ -10,23 +10,14 @@ import (
 
 const ProtocolVersion = "2.0"
 
-type Config struct {
-	// Full url to the gRPC server
-	GRPCHost        string
-	Insecure        bool
-	TeamSide        lugo.Team_Side
-	Number          uint32
-	InitialPosition *lugo.Point
-}
-
 func NewClient(config Config) (context.Context, ops.Client, error) {
 	var err error
 	c := &client{}
 
 	if config.Insecure {
-		c.grpcConn, err = grpc.Dial(config.GRPCHost, grpc.WithInsecure())
+		c.grpcConn, err = grpc.Dial(config.GRPCAddress, grpc.WithInsecure())
 	} else {
-		c.grpcConn, err = grpc.Dial(config.GRPCHost)
+		c.grpcConn, err = grpc.Dial(config.GRPCAddress)
 	}
 	if err != nil {
 		return nil, nil, err
@@ -35,8 +26,9 @@ func NewClient(config Config) (context.Context, ops.Client, error) {
 	c.gameConn = lugo.NewGameClient(c.grpcConn)
 	c.ctx, c.stopCtx = context.WithCancel(context.Background())
 	if c.stream, err = c.gameConn.JoinATeam(c.ctx, &lugo.JoinRequest{
+		Token:           config.Token,
 		Number:          config.Number,
-		InitPosition:    config.InitialPosition,
+		InitPosition:    &config.InitialPosition,
 		TeamSide:        config.TeamSide,
 		ProtocolVersion: ProtocolVersion,
 	}); err != nil {

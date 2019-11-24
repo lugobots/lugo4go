@@ -28,11 +28,11 @@ func TestNewClient(t *testing.T) {
 	}
 
 	config := Config{
-		GRPCHost:        fmt.Sprintf(":%d", testServerPort),
+		GRPCAddress:     fmt.Sprintf(":%d", testServerPort),
 		Insecure:        true,
 		TeamSide:        lugo.Team_HOME,
 		Number:          3,
-		InitialPosition: &lugo.Point{X: 4000, Y: 4000},
+		InitialPosition: lugo.Point{X: 4000, Y: 4000},
 	}
 
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
@@ -42,7 +42,7 @@ func TestNewClient(t *testing.T) {
 	srv.EXPECT().JoinATeam(testdata.NewMatcher(func(arg interface{}) bool {
 		expectedRequest := &lugo.JoinRequest{
 			Number:          config.Number,
-			InitPosition:    config.InitialPosition,
+			InitPosition:    &config.InitialPosition,
 			TeamSide:        config.TeamSide,
 			ProtocolVersion: ProtocolVersion,
 		}

@@ -1,55 +1,77 @@
 package client
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/makeitplay/arena"
-	"github.com/sirupsen/logrus"
-	"log"
-	"strconv"
+	"github.com/makeitplay/client-player-go/lugo"
+	"io/ioutil"
+	"strings"
 )
 
 // Configuration is the set of values expected as a initial configuration of the player
-type Configuration struct {
-	// TeamPlace must be "home" or "away" and identifies the side of the field that the team is going to play
-	TeamPlace arena.TeamPlace
-	// PlayerNumber must be a number between 1-11 that identifies this player in his team
-	PlayerNumber arena.PlayerNumber
-
-	LogLevel logrus.Level
-	// UUID is the match UUID. It will be always local for local games
-	UUID string
-	// WSHost is the hostname of the game server (only HTTP for now)
-	WSHost string
-	// WSPort is the port used by the game server
-	WSPort string
-	// Token is passed to the game server to bind the player to specific process, and avoid cheating
-	Token string
+type Config struct {
+	// Full url to the gRPC server
+	GRPCAddress     string `json:"grpc_address"`
+	Insecure        bool   `json:"insecure"`
+	Token           string `json:"token"`
+	TeamSide        lugo.Team_Side
+	Number          uint32     `json:"number"`
+	InitialPosition lugo.Point `json:"-"`
 }
 
-// ParseFromFlags sets the flag that will allows us to change the default config
-func (c *Configuration) ParseFromFlags() {
-	//mandatory
+type jsonConfig struct {
+	Config
+	Team string `json:"team"`
+}
+
+func LoadConfig(filepath string) (c Config, e error) {
+	content, err := ioutil.ReadFile(filepath)
+
+	config := jsonConfig{}
+	if err != nil {
+		e = fmt.Errorf("error loading the config file at %s: %s", filepath, err)
+	} else if err := json.Unmarshal(content, &config); err != nil {
+		e = fmt.Errorf("error parsing the config file at %s: %s", filepath, err)
+	} else if _, ok := lugo.Team_Side_name[int32(c.TeamSide)]; !ok {
+		e = fmt.Errorf("invalid team side in config file at %s", filepath)
+	} else if config.Number < 1 || config.Number > 11 {
+		e = fmt.Errorf("invalid player number in config file at %s: %d", filepath, config.Number)
+	}
+
+	side, ok := lugo.Team_Side_value[strings.ToUpper(config.Team)]
+	if !ok {
+		e = fmt.Errorf("invalid team option '%s'. Must be either HOME or AWAY", config.Team)
+	}
+	c = config.Config
+	c.TeamSide = lugo.Team_Side(side)
+	return
+}
+
+// ParseConfigFlags is a helper that sets flags to make the configuration be overwritten by command line.
+// Note that it won't be used in production, The config file is the only official way to configure it.
+func (c *Config) ParseConfigFlags() error {
 	var name string
 	var number int
 
-	flag.StringVar(&name, "team", "home", "Team (home or away)")
+	flag.StringVar(&name, "team_side", "home", "Team (home or away)")
 	flag.IntVar(&number, "number", 0, "Player's number")
-	flag.StringVar(&c.UUID, "uui", "local", "UUID for this player instance. (Auto-provided in production)")
-
-	flag.StringVar(&c.WSHost, "wshost", "localhost", "Game server's websocket endpoint")
-	flag.StringVar(&c.WSPort, "wsport", "8080", "Port for the websocket endpoint")
-
+	flag.StringVar(&c.GRPCAddress, "grpc_address", "localhost:8080", "Address to connect to the game server")
 	flag.StringVar(&c.Token, "token", "", "Token used by the server to identify the right connection")
+	flag.BoolVar(&c.Insecure, "insecure", true, "Allow insecure connections (important for development environments)")
 
 	flag.Parse()
 
-	if name != string(arena.HomeTeam) && name != string(arena.AwayTeam) {
-		log.Fatal("Invalid team option {" + name + "}. Must be either home or away")
+	side, ok := lugo.Team_Side_value[strings.ToUpper(name)]
+	if !ok {
+		return fmt.Errorf("invalid team option '%s'. Must be either HOME or AWAY", name)
 	}
+
 	if number < 1 || number > 11 {
-		log.Fatal(fmt.Errorf("invalid player number {%d}. Must be 1 to 11", number))
+		return fmt.Errorf("invalid player number '%d'. Must be 1 to 11", number)
 	}
-	c.PlayerNumber = arena.PlayerNumber(strconv.Itoa(number))
-	c.TeamPlace = arena.TeamPlace(name)
+
+	c.TeamSide = lugo.Team_Side(side)
+	c.Number = uint32(number)
+	return nil
 }

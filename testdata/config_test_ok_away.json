@@ -1,0 +1,7 @@
+{
+  "grpc_address": "localhost:1212",
+  "insecure": true,
+  "token": "UUID",
+  "team": "aWay",
+  "number": 4
+}

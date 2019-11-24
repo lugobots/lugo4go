@@ -1,0 +1,7 @@
+{
+  "grpc_address": "localhost:2121",
+  "insecure": true,
+  "token": "",
+  "team": "home",
+  "number": 1
+}
