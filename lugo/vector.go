@@ -6,16 +6,14 @@ import (
 	"math"
 )
 
-var (
-	North     = Vector{Y: 1}
-	South     = Vector{Y: -1}
-	East      = Vector{X: 1}
-	West      = Vector{X: -1}
-	NorthEast = Vector{Y: 1, X: 1}
-	SouthEast = Vector{Y: -1, X: 1}
-	NorthWest = Vector{Y: 1, X: -1}
-	SouthWest = Vector{Y: -1, X: -1}
-)
+func North() Vector     { return Vector{Y: 1} }
+func South() Vector     { return Vector{Y: -1} }
+func East() Vector      { return Vector{X: 1} }
+func West() Vector      { return Vector{X: -1} }
+func NorthEast() Vector { return Vector{Y: 1, X: 1} }
+func SouthEast() Vector { return Vector{Y: -1, X: 1} }
+func NorthWest() Vector { return Vector{Y: 1, X: -1} }
+func SouthWest() Vector { return Vector{Y: -1, X: -1} }
 
 func NewVector(from Point, to Point) (*Vector, error) {
 	v := new(Vector)

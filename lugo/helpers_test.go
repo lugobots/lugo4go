@@ -92,7 +92,7 @@ func TestMakeOrder_Move(t *testing.T) {
 	expectedOrderA := Order_Move{Move: &Move{
 		Velocity: &Velocity{
 			Speed:     100,
-			Direction: North.Normalize(),
+			Direction: North().Copy().Normalize(),
 		},
 	}}
 
@@ -103,7 +103,7 @@ func TestMakeOrder_Move(t *testing.T) {
 	expectedOrderB := Order_Move{Move: &Move{
 		Velocity: &Velocity{
 			Speed:     40,
-			Direction: South.Normalize(),
+			Direction: South().Copy().Normalize(),
 		},
 	}}
 	got, err = MakeOrderMove(Point{Y: 100}, Point{}, 40)
@@ -113,7 +113,7 @@ func TestMakeOrder_Move(t *testing.T) {
 	expectedOrderC := Order_Move{Move: &Move{
 		Velocity: &Velocity{
 			Speed:     40,
-			Direction: SouthEast.Normalize(),
+			Direction: SouthEast().Copy().Normalize(),
 		},
 	}}
 	got, err = MakeOrderMove(Point{Y: 100}, Point{X: 100}, 40)
@@ -128,10 +128,11 @@ func TestMakeOrder_Move_ShouldNotMakeInvalidMovement(t *testing.T) {
 }
 
 func TestMakeOrder_Jump(t *testing.T) {
+
 	expectedOrderA := Order_Jump{Jump: &Jump{
 		Velocity: &Velocity{
 			Speed:     100,
-			Direction: North.Normalize(),
+			Direction: North().Copy().Normalize(),
 		},
 	}}
 
@@ -142,7 +143,7 @@ func TestMakeOrder_Jump(t *testing.T) {
 	expectedOrderB := Order_Jump{Jump: &Jump{
 		Velocity: &Velocity{
 			Speed:     40,
-			Direction: South.Normalize(),
+			Direction: South().Copy().Normalize(),
 		},
 	}}
 	got, err = MakeOrderJump(Point{Y: 100}, Point{}, 40)
@@ -152,7 +153,7 @@ func TestMakeOrder_Jump(t *testing.T) {
 	expectedOrderC := Order_Jump{Jump: &Jump{
 		Velocity: &Velocity{
 			Speed:     40,
-			Direction: SouthEast.Normalize(),
+			Direction: SouthEast().Copy().Normalize(),
 		},
 	}}
 	got, err = MakeOrderJump(Point{Y: 100}, Point{X: 100}, 40)
@@ -164,4 +165,60 @@ func TestMakeOrder_Jump_ShouldNotMakeInvalidMovement(t *testing.T) {
 	_, err := MakeOrderJump(Point{X: 40, Y: 50}, Point{X: 40, Y: 50}, 100)
 
 	assert.NotNil(t, err)
+}
+
+func TestMakeOrder_Kick_SameDirection(t *testing.T) {
+	expectedOrderA := Order_Kick{Kick: &Kick{
+		Velocity: &Velocity{
+			Speed:     BallMaxSpeed,
+			Direction: North().Copy().Normalize(),
+		},
+	}}
+
+	origin := FieldCenter()
+	ball := Ball{Position: &origin, Velocity: NewZeroedVelocity(*North().Copy()).Copy()}
+
+	got, err := MakeOrderKick(ball, Point{X: origin.X, Y: origin.Y + 100}, BallMaxSpeed)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOrderA, got)
+}
+
+func TestMakeOrder_Kick_DiffDirection(t *testing.T) {
+	originPoint := Point{X: 1, Y: 1}
+	originVelocity := Velocity{
+		Speed: 100,
+		Direction: &Vector{ // Going east
+			X: 1,
+			Y: 0,
+		},
+	}
+
+	targetPoint := Point{X: 2, Y: 2} // this point is on northeast from the original potin
+
+	// this is the final direction we desire the ball goes in
+	desiredDirection, err := NewVector(originPoint, targetPoint)
+	if err != nil {
+		t.Fatalf("bad test: %s", err)
+	}
+
+	// However, remember that the velocity will be summed! So, we should send the complement
+	complementVector, err := desiredDirection.Sub(originVelocity.Direction)
+	if err != nil {
+		t.Fatalf("bad test: %s", err)
+	}
+
+	expectedOrderA := Order_Kick{Kick: &Kick{
+		Velocity: &Velocity{
+			Speed: BallMaxSpeed,
+			// we expect that the function created a complementary Vector,
+			// so we do not have to think about it during the development
+			Direction: complementVector.Normalize(),
+		},
+	}}
+
+	ball := Ball{Position: &originPoint, Velocity: &originVelocity}
+
+	got, err := MakeOrderKick(ball, targetPoint, BallMaxSpeed)
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOrderA, got)
 }

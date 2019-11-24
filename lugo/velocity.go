@@ -11,10 +11,10 @@ func NewZeroedVelocity(direction Vector) Velocity {
 }
 
 // Copy copies the object
-func (m *Velocity) Copy() Velocity {
+func (m Velocity) Copy() *Velocity {
 	copyS := NewZeroedVelocity(*m.Direction.Copy())
 	copyS.Speed = m.Speed
-	return copyS
+	return &copyS
 }
 
 // Add two velocities values. The direction will be a simple vector sum, so they will be affected by their magnitude.

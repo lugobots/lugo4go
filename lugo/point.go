@@ -21,6 +21,10 @@ func (m *Point) MiddlePointTo(target Point) Point {
 	}
 }
 
+func (m Point) Copy() *Point {
+	return &m
+}
+
 // FindIntersection finds the point where two lines intersect each other.
 // One line is define by the points a1 and a2, and the second line is defined by b1 and b2.
 // If the lines do not touch each other (e.g. they are parallel) it returns an error, otherwise the point will be

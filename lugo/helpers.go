@@ -69,11 +69,13 @@ func MakeOrderKick(ball Ball, target Point, speed float64) (Order_Kick, error) {
 	if err != nil {
 		return Order_Kick{}, err
 	}
+
 	diffVector, err := ballExpectedDirection.Sub(ball.Velocity.Direction)
 	if err != nil {
 		return Order_Kick{}, err
 	}
 	vel := NewZeroedVelocity(*diffVector)
+	vel.Direction.Normalize()
 	vel.Speed = speed
 
 	return Order_Kick{Kick: &Kick{Velocity: &vel}}, nil
