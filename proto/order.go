@@ -8,6 +8,8 @@ type PlayerOrder interface {
 	isOrder_Action()
 }
 
+// TROCAR NOME da library pra lugogrpc ou algo do tipo, e trocar o nome de ops para lugo
+
 func (*Order_Move) LugoOrdersUnifier()  {}
 func (*Order_Catch) LugoOrdersUnifier() {}
 func (*Order_Kick) LugoOrdersUnifier()  {}

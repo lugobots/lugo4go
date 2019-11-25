@@ -2,7 +2,7 @@ package client
 
 import (
 	"context"
-	"github.com/makeitplay/client-player-go/ops"
+	"github.com/makeitplay/client-player-go/lugo"
 	"github.com/makeitplay/client-player-go/proto"
 	"google.golang.org/grpc"
 	"io"
@@ -10,7 +10,7 @@ import (
 
 const ProtocolVersion = "2.0"
 
-func NewClient(config Config) (context.Context, ops.Client, error) {
+func NewClient(config Config) (context.Context, lugo.Client, error) {
 	var err error
 	c := &client{}
 
@@ -25,7 +25,7 @@ func NewClient(config Config) (context.Context, ops.Client, error) {
 
 	c.gameConn = proto.NewGameClient(c.grpcConn)
 
-	c.senderBuilder = func(snapshot *proto.GameSnapshot, logger ops.Logger) ops.OrderSender {
+	c.senderBuilder = func(snapshot *proto.GameSnapshot, logger lugo.Logger) lugo.OrderSender {
 		return &sender{
 			gameConn: c.gameConn,
 			snapshot: snapshot,
@@ -52,11 +52,11 @@ type client struct {
 	grpcConn      *grpc.ClientConn
 	ctx           context.Context
 	stopCtx       context.CancelFunc
-	senderBuilder func(snapshot *proto.GameSnapshot, logger ops.Logger) ops.OrderSender
-	sender        ops.OrderSender
+	senderBuilder func(snapshot *proto.GameSnapshot, logger lugo.Logger) lugo.OrderSender
+	sender        lugo.OrderSender
 }
 
-func (c client) OnNewTurn(decider ops.DecisionMaker, log ops.Logger) {
+func (c client) OnNewTurn(decider lugo.DecisionMaker, log lugo.Logger) {
 	go func() {
 		for {
 			snapshot, err := c.stream.Recv()
@@ -88,13 +88,13 @@ func (c client) GetServiceConn() proto.GameClient {
 	return c.gameConn
 }
 
-func (c client) SenderBuilder(builder func(snapshot *proto.GameSnapshot, logger ops.Logger) ops.OrderSender) {
+func (c client) SenderBuilder(builder func(snapshot *proto.GameSnapshot, logger lugo.Logger) lugo.OrderSender) {
 	c.senderBuilder = builder
 }
 
 type sender struct {
 	snapshot *proto.GameSnapshot
-	logger   ops.Logger
+	logger   lugo.Logger
 	gameConn proto.GameClient
 }
 

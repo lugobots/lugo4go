@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/golang/mock/gomock"
-	"github.com/makeitplay/client-player-go/ops"
+	"github.com/makeitplay/client-player-go/lugo"
 	"github.com/makeitplay/client-player-go/proto"
 	"github.com/makeitplay/client-player-go/testdata"
 	"github.com/stretchr/testify/assert"
@@ -92,7 +92,7 @@ func TestClient_OnNewTurn(t *testing.T) {
 
 	c := &client{
 		stream: mockStream,
-		senderBuilder: func(snapshot *proto.GameSnapshot, logger ops.Logger) ops.OrderSender {
+		senderBuilder: func(snapshot *proto.GameSnapshot, logger lugo.Logger) lugo.OrderSender {
 			return mockSender
 		},
 		ctx: context.Background(),
@@ -104,7 +104,7 @@ func TestClient_OnNewTurn(t *testing.T) {
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
 
-	c.OnNewTurn(func(snapshot *proto.GameSnapshot, sender ops.OrderSender) {
+	c.OnNewTurn(func(snapshot *proto.GameSnapshot, sender lugo.OrderSender) {
 		if snapshot != expectedSnapshot {
 			t.Errorf("Unexpected snapshot - Expected %v, Got %v", expectedSnapshot, snapshot)
 			return
@@ -156,7 +156,7 @@ func TestClient_ShouldStopItsContext(t *testing.T) {
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	waiting, done := context.WithTimeout(context.Background(), 200*time.Millisecond)
 
-	c.OnNewTurn(func(snapshot *proto.GameSnapshot, sender ops.OrderSender) {
+	c.OnNewTurn(func(snapshot *proto.GameSnapshot, sender lugo.OrderSender) {
 		t.Error("The DecisionMaker should not be called")
 		done()
 	}, mockLogger)

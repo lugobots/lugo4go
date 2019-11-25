@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/makeitplay/arena/units"
 	clientGo "github.com/makeitplay/client-player-go"
-	"github.com/makeitplay/client-player-go/ops"
+	"github.com/makeitplay/client-player-go/lugo"
 	"github.com/makeitplay/client-player-go/proto"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -15,7 +15,7 @@ import (
 )
 
 var logger *zap.SugaredLogger
-var playerClient ops.Client
+var playerClient lugo.Client
 var playerCtx context.Context
 var playerConfig clientGo.Config
 
@@ -75,7 +75,7 @@ func main() {
 	logger.Infof("process finished")
 }
 
-func myDecider(snapshot *proto.GameSnapshot, sender ops.OrderSender) {
+func myDecider(snapshot *proto.GameSnapshot, sender lugo.OrderSender) {
 	me := proto.GetPlayer(snapshot, playerConfig.TeamSide, playerConfig.Number)
 	if me == nil {
 		logger.Fatalf("i did not find my self in the game")
