@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/makeitplay/arena/units"
 	clientGo "github.com/makeitplay/client-player-go"
 	"github.com/makeitplay/client-player-go/lugo"
 	"github.com/makeitplay/client-player-go/proto"
@@ -26,8 +25,8 @@ func main() {
 
 	// just creating a position based on the player number
 	playerConfig.InitialPosition = proto.Point{
-		X: units.FieldWidth / 4,
-		Y: int32(playerConfig.Number) * lugo.PlayerSize * 2, //(units.FieldHeight / 4) - (pos * units.PlayerSize),
+		X: lugo.FieldWidth / 4,
+		Y: int32(playerConfig.Number) * lugo.PlayerSize * 2,
 	}
 
 	if playerConfig.TeamSide == proto.Team_AWAY {
@@ -64,7 +63,7 @@ func myDecider(snapshot *proto.GameSnapshot, sender lugo.OrderSender) {
 	var orders []proto.PlayerOrder
 	// we are going to kick the ball as soon as we catch it
 	if lugo.IsBallHolder(snapshot, me) {
-		orderToKick, err := lugo.MakeOrderKick(*snapshot.Ball, lugo.GetOpponentGoal(me.TeamSide).Center, units.BallMaxSpeed)
+		orderToKick, err := lugo.MakeOrderKick(*snapshot.Ball, lugo.GetOpponentGoal(me.TeamSide).Center, lugo.BallMaxSpeed)
 		if err != nil {
 			logger.Warnf("could not create kick order during turn %d: %s", snapshot.Turn, err)
 			return
