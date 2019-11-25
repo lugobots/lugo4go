@@ -7,6 +7,7 @@ import (
 	"github.com/makeitplay/client-player-go/lugo"
 	"github.com/makeitplay/client-player-go/ops"
 	"github.com/makeitplay/client-player-go/testdata"
+	"github.com/stretchr/testify/assert"
 	"io"
 	"testing"
 	"time"
@@ -74,11 +75,6 @@ func TestClient_OnNewTurn(t *testing.T) {
 	expectedSnapshot := &lugo.GameSnapshot{Turn: 200}
 	expectedOrder := &lugo.Order_Catch{}
 	expectedDebugMsg := "a-important-msg"
-	expectedOrderSet := &lugo.OrderSet{
-		Turn:         200,
-		DebugMessage: expectedDebugMsg,
-		Orders:       []*lugo.Order{{Action: expectedOrder}},
-	}
 	expectedResponse := &lugo.OrderResponse{
 		Code: lugo.OrderResponse_SUCCESS,
 	}
@@ -87,17 +83,19 @@ func TestClient_OnNewTurn(t *testing.T) {
 	// defining mocks and expected method calls
 	mockLogger := testdata.NewMockLogger(ctrl)
 	mockStream := testdata.NewMockGame_JoinATeamClient(ctrl)
-	mockGameClient := testdata.NewMockGameClient(ctrl)
+	mockSender := testdata.NewMockOrderSender(ctrl)
 	mockLogger.EXPECT().Debugf(gomock.Any(), gomock.Any()).AnyTimes()
 	mockLogger.EXPECT().Infof(gomock.Any(), gomock.Any()).AnyTimes()
 	mockStream.EXPECT().Recv().Return(expectedSnapshot, nil)
 	mockStream.EXPECT().Recv().Return(nil, io.EOF)
-	mockGameClient.EXPECT().SendOrders(gomock.Any(), expectedOrderSet).Return(expectedResponse, nil)
+	mockSender.EXPECT().Send(gomock.Any(), []lugo.PlayerOrder{expectedOrder}, expectedDebugMsg).Return(expectedResponse, nil)
 
 	c := &client{
-		stream:   mockStream,
-		gameConn: mockGameClient,
-		ctx:      context.Background(),
+		stream: mockStream,
+		senderBuilder: func(snapshot *lugo.GameSnapshot, logger ops.Logger) ops.OrderSender {
+			return mockSender
+		},
+		ctx: context.Background(),
 		stopCtx: func() {
 
 		},
@@ -111,7 +109,7 @@ func TestClient_OnNewTurn(t *testing.T) {
 			t.Errorf("Unexpected snapshot - Expected %v, Got %v", expectedSnapshot, snapshot)
 			return
 		}
-		response, err := sender(expectedDebugMsg, expectedOrder)
+		response, err := sender.Send(waiting, []lugo.PlayerOrder{expectedOrder}, expectedDebugMsg)
 		if err != nil {
 			t.Errorf("Unexpected erro - Expected nil, Got %v", err)
 		}
@@ -173,4 +171,51 @@ func TestClient_ShouldStopItsContext(t *testing.T) {
 	if !wasClosed {
 		t.Error("Unexpected context to be closed")
 	}
+}
+
+func TestSender_Send(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish() // checks all expected things for mocks
+
+	mockGameConn := testdata.NewMockGameClient(ctrl)
+	mockLogger := testdata.NewMockLogger(ctrl)
+
+	expectedSnapshot := &lugo.GameSnapshot{Turn: 321}
+	expectedContext := context.Background()
+
+	// this is the list that the developer should be concerned about while the bot is been built.
+	// the rest of the job will be abstracted by the sender.
+	expectedOrderSlice := []lugo.PlayerOrder{
+		&lugo.Order_Catch{}, &lugo.Order_Catch{},
+	}
+	expectedDebugMsg := "it's a nice debug message"
+
+	// The whole work done by the sender is converting a list of PlayerOrders into a more complex format expected
+	// by the server, that's the `OrderSet`. Since OrderSet also has a debug msg and the turn number, it also receive
+	// the snapshot.
+	expectedOrderSet := &lugo.OrderSet{
+		Turn:         expectedSnapshot.Turn,
+		DebugMessage: expectedDebugMsg,
+		Orders: []*lugo.Order{
+			{Action: &lugo.Order_Catch{}}, {Action: &lugo.Order_Catch{}},
+		},
+	}
+	expectedServerResponse := &lugo.OrderResponse{
+		Code:    lugo.OrderResponse_SUCCESS,
+		Details: "nonthing else to say",
+	}
+
+	mockGameConn.EXPECT().SendOrders(expectedContext, expectedOrderSet).Return(expectedServerResponse, nil)
+	mockLogger.EXPECT().Debugf(gomock.Any(), gomock.Any()).AnyTimes()
+
+	orderSender := &sender{
+		gameConn: mockGameConn,
+		snapshot: expectedSnapshot,
+		logger:   mockLogger,
+	}
+
+	serverResponse, err := orderSender.Send(expectedContext, expectedOrderSlice, expectedDebugMsg)
+
+	assert.Nil(t, err)
+	assert.Equal(t, expectedServerResponse, serverResponse)
 }
