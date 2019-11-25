@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/makeitplay/arena/units"
 	clientGo "github.com/makeitplay/client-player-go"
 	"github.com/makeitplay/client-player-go/lugo"
@@ -38,6 +39,11 @@ func init() {
 		logger.Fatalf("did not parsed well the flags for config: %s", err)
 	}
 
+	logger = logger.Named(fmt.Sprintf("%s-%d", playerConfig.TeamSide, playerConfig.Number))
+}
+
+func main() {
+	var err error
 	// just creating a position based on the player number
 	playerConfig.InitialPosition = lugo.Point{
 		X: units.FieldWidth / 4,
@@ -53,9 +59,7 @@ func init() {
 		logger.Fatalf("did not connected to the gRPC server at '%s': %s", playerConfig.GRPCAddress, err)
 	}
 	playerClient.OnNewTurn(myDecider, logger.Named("client"))
-}
 
-func main() {
 	// keep the process alive
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
@@ -72,7 +76,6 @@ func main() {
 }
 
 func myDecider(snapshot *lugo.GameSnapshot, sender ops.OrderSender) {
-
 	me := lugo.GetPlayer(snapshot, playerConfig.TeamSide, playerConfig.Number)
 	if me == nil {
 		logger.Fatalf("i did not find my self in the game")
@@ -99,7 +102,7 @@ func myDecider(snapshot *lugo.GameSnapshot, sender ops.OrderSender) {
 		orders = []lugo.PlayerOrder{lugo.MakeOrderCatch()}
 	}
 
-	resp, err := sender("", orders...)
+	resp, err := sender.Send(playerCtx, orders, "")
 	if err != nil {
 		logger.Warnf("could not send kick order during turn %d: %s", snapshot.Turn, err)
 	} else if resp.Code != lugo.OrderResponse_SUCCESS {

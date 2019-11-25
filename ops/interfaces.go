@@ -1,10 +1,11 @@
 package ops
 
 import (
+	"context"
 	"github.com/makeitplay/client-player-go/lugo"
+	"google.golang.org/grpc"
 )
 
-type OrderSender func(msg string, orders ...lugo.PlayerOrder) (*lugo.OrderResponse, error)
 type DecisionMaker func(snapshot *lugo.GameSnapshot, sender OrderSender)
 
 type Logger interface {
@@ -19,4 +20,11 @@ type Logger interface {
 type Client interface {
 	OnNewTurn(DecisionMaker, Logger)
 	Stop() error
+	GetGRPCConn() *grpc.ClientConn
+	GetServiceConn() lugo.GameClient
+	SenderBuilder(builder func(snapshot *lugo.GameSnapshot, logger Logger) OrderSender)
+}
+
+type OrderSender interface {
+	Send(ctx context.Context, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error)
 }
