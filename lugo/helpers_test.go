@@ -89,7 +89,7 @@ func TestGetPlayer_InvalidSnapshot(t *testing.T) {
 }
 
 func TestMakeOrder_Move(t *testing.T) {
-	expectedOrderA := Order_Move{Move: &Move{
+	expectedOrderA := &Order_Move{Move: &Move{
 		Velocity: &Velocity{
 			Speed:     100,
 			Direction: North().Copy().Normalize(),
@@ -100,7 +100,7 @@ func TestMakeOrder_Move(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOrderA, got)
 
-	expectedOrderB := Order_Move{Move: &Move{
+	expectedOrderB := &Order_Move{Move: &Move{
 		Velocity: &Velocity{
 			Speed:     40,
 			Direction: South().Copy().Normalize(),
@@ -110,7 +110,7 @@ func TestMakeOrder_Move(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOrderB, got)
 
-	expectedOrderC := Order_Move{Move: &Move{
+	expectedOrderC := &Order_Move{Move: &Move{
 		Velocity: &Velocity{
 			Speed:     40,
 			Direction: SouthEast().Copy().Normalize(),
@@ -122,14 +122,15 @@ func TestMakeOrder_Move(t *testing.T) {
 }
 
 func TestMakeOrder_Move_ShouldNotMakeInvalidMovement(t *testing.T) {
-	_, err := MakeOrderMove(Point{X: 40, Y: 50}, Point{X: 40, Y: 50}, 100)
+	order, err := MakeOrderMove(Point{X: 40, Y: 50}, Point{X: 40, Y: 50}, 100)
 
 	assert.NotNil(t, err)
+	assert.Nil(t, order)
 }
 
 func TestMakeOrder_Jump(t *testing.T) {
 
-	expectedOrderA := Order_Jump{Jump: &Jump{
+	expectedOrderA := &Order_Jump{Jump: &Jump{
 		Velocity: &Velocity{
 			Speed:     100,
 			Direction: North().Copy().Normalize(),
@@ -140,7 +141,7 @@ func TestMakeOrder_Jump(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOrderA, got)
 
-	expectedOrderB := Order_Jump{Jump: &Jump{
+	expectedOrderB := &Order_Jump{Jump: &Jump{
 		Velocity: &Velocity{
 			Speed:     40,
 			Direction: South().Copy().Normalize(),
@@ -150,7 +151,7 @@ func TestMakeOrder_Jump(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOrderB, got)
 
-	expectedOrderC := Order_Jump{Jump: &Jump{
+	expectedOrderC := &Order_Jump{Jump: &Jump{
 		Velocity: &Velocity{
 			Speed:     40,
 			Direction: SouthEast().Copy().Normalize(),
@@ -162,13 +163,14 @@ func TestMakeOrder_Jump(t *testing.T) {
 }
 
 func TestMakeOrder_Jump_ShouldNotMakeInvalidMovement(t *testing.T) {
-	_, err := MakeOrderJump(Point{X: 40, Y: 50}, Point{X: 40, Y: 50}, 100)
+	order, err := MakeOrderJump(Point{X: 40, Y: 50}, Point{X: 40, Y: 50}, 100)
 
 	assert.NotNil(t, err)
+	assert.Nil(t, order)
 }
 
 func TestMakeOrder_Kick_SameDirection(t *testing.T) {
-	expectedOrderA := Order_Kick{Kick: &Kick{
+	expectedOrderA := &Order_Kick{Kick: &Kick{
 		Velocity: &Velocity{
 			Speed:     BallMaxSpeed,
 			Direction: North().Copy().Normalize(),
@@ -207,7 +209,7 @@ func TestMakeOrder_Kick_DiffDirection(t *testing.T) {
 		t.Fatalf("bad test: %s", err)
 	}
 
-	expectedOrderA := Order_Kick{Kick: &Kick{
+	expectedOrderA := &Order_Kick{Kick: &Kick{
 		Velocity: &Velocity{
 			Speed: BallMaxSpeed,
 			// we expect that the function created a complementary Vector,

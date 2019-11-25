@@ -1,9 +1,9 @@
-# MakeItPlay - Football Go Player Client
+# Lugo - Go Player Client
 
-[![GoDoc](https://godoc.org/github.com/makeitplay/client-player-go?status.svg)](https://godoc.org/github.com/makeitplay/client-player-go)
-[![Go Report Card](https://goreportcard.com/badge/github.com/makeitplay/client-player-go)](https://goreportcard.com/report/github.com/makeitplay/client-player-go)
+[![GoDoc](https://godoc.org/github.com/lugobots/client-player-go?status.svg)](https://godoc.org/github.com/lugobots/client-player-go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/lugobots/client-player-go)](https://goreportcard.com/report/github.com/lugobots/client-player-go)
 
-Go Player Client is a [Go](http://golang.org/) implementation of a client player for [MakeItPlay football](http://www.makeitplay.ai/football) game server. 
+Go Player Client is a [Go](http://golang.org/) implementation of a client player for [Lugo](https://lugobots.dev/) game. 
 
 It **is not a bot** that plays the game, it is only the client for the game server. 
 
@@ -12,11 +12,11 @@ intelligence/behaviour/decisions. It is meant to reduce the developer concerns o
 focus in the player intelligence.
 
 Using this client, you just need to implement the Artificial Intelligence of your player and some other few methods to support
-your strategy (see the project [The Dummies](https://github.com/makeitplay/the-dummies-go) as an example). 
+your strategy (see the project [The Dummies](https://github.com/lugobots/the-dummies-go) as an example). 
  
 ### Documentation
 
-* [API Reference](http://godoc.org/github.com/makeitplay/client-player-go)
+* [API Reference](http://godoc.org/github.com/lugobots/client-player-go)
 
 ### Requirements
 
@@ -26,7 +26,7 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
 
 ### Installation
 
-    go get github.com/makeitplay/client-player-go
+    git clone https://github.com/lugobots/client-player-go.git
 
 ### Kick start
 
@@ -38,9 +38,15 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
     ```
 0. Run the game server using the command 
     ```bash
-    docker run -p 8080:8080  makeitplay/football:1.0.0-alpha
+    docker run -p 8080:8080  lugobots/server:v1.1 play --dev-mode
     ```
-0. Now you will need to start your team process. Each team must have 11 process (one for each player).
+    **or**
+    
+    Start the Docker compose file present in this project. The Docker compose will also start the **away** team.
+   ```bash
+   docker-compose up
+   ```
+0. Now you will need to start your team processes. Each team must have 11 process (one for each player).
     
     **Option A**: You may start your team players manually executing the command `./myAwesomeBot -team=home -number=[1-11]`
     eleven times. 
@@ -49,21 +55,13 @@ your strategy (see the project [The Dummies](https://github.com/makeitplay/the-d
     
     **Option B**: You can use the script in [the example directory](./example) to do this automatically for you:
     `./play.sh home`
-0. And finally you may do the same for the other team. 
+0. And, **if your have not started the away team**, you may do the same for the other team. 
     
-    **Option A**: You play against your own team repeating the last step, but in the `away` side: `./play.sh away`
+    You play against your own team repeating the last step, but in the `away` side: 
+    ```
+    ./play.sh away
+   ```
     
-    **or**
-        
-    **Option B**: You may play against [**The Dummies** team](https://github.com/makeitplay/the-dummies-go) executing the script `start-team-container.sh`
-    available in [the example directory](./example):     
-    
-    `./start-team-container.sh makeitplay/the-dummies-go away`
-     
-    **or**
-    
-    **Option C**: You may play against another team:
-    `./start-team-container.sh [container image name] away` 
 
 ### Next steps
 

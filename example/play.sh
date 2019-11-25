@@ -9,6 +9,6 @@ fi
 go build -o myAwesomeBot main.go || { echo "building has failed"; exit 1; }
 for i in `seq 1 11`
 do
-  ./myAwesomeBot -team=$1 -number=$i -wshost=$2 &
+  ./myAwesomeBot -team=$1 -number=$i &
   sleep 0.1
 done

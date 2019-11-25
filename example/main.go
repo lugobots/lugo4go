@@ -1,87 +1,108 @@
 package main
 
 import (
-	"github.com/makeitplay/arena"
-	"github.com/makeitplay/arena/orders"
-	"github.com/makeitplay/arena/physics"
+	"context"
 	"github.com/makeitplay/arena/units"
-	"github.com/makeitplay/client-player-go"
-	"github.com/sirupsen/logrus"
+	clientGo "github.com/makeitplay/client-player-go"
+	"github.com/makeitplay/client-player-go/lugo"
+	"github.com/makeitplay/client-player-go/ops"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"log"
 	"os"
 	"os/signal"
-	"strconv"
 )
 
-var gamer *client.Gamer
+var logger *zap.SugaredLogger
+var playerClient ops.Client
+var playerCtx context.Context
+var playerConfig clientGo.Config
 
-func main() {
+func init() {
+	configZap := zap.NewDevelopmentConfig()
+	configZap.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	zapLog, err := configZap.Build()
+	if err != nil {
+		log.Fatalf("could not initiliase looger: %s", err)
+	}
+	logger = zapLog.Sugar()
+}
 
-	// Loads the configuration
-	serverConfig := new(client.Configuration)
-	serverConfig.ParseFromFlags()
-	serverConfig.LogLevel = logrus.DebugLevel
+func init() {
+	var err error
+	playerConfig, err = clientGo.LoadConfig("./config.json")
+	if err != nil {
+		logger.Fatalf("did not load the config: %s", err)
+	}
+	if err := playerConfig.ParseConfigFlags(); err != nil {
+		logger.Fatalf("did not parsed well the flags for config: %s", err)
+	}
 
 	// just creating a position based on the player number
-	pos, _ := strconv.Atoi(string(serverConfig.PlayerNumber))
-	initialPosition := physics.Point{
-		PosX: units.FieldWidth / 4,
-		PosY: pos * units.PlayerSize * 2, //(units.FieldHeight / 4) - (pos * units.PlayerSize),
+	playerConfig.InitialPosition = lugo.Point{
+		X: units.FieldWidth / 4,
+		Y: int32(playerConfig.Number) * lugo.PlayerSize * 2, //(units.FieldHeight / 4) - (pos * units.PlayerSize),
 	}
 
-	if serverConfig.TeamPlace == arena.AwayTeam {
-		initialPosition.PosX = units.FieldWidth - initialPosition.PosX
+	if playerConfig.TeamSide == lugo.Team_AWAY {
+		playerConfig.InitialPosition.X = lugo.FieldWidth - playerConfig.InitialPosition.X
 	}
 
-	// initialising the player
-	gamer = &client.Gamer{}
-	gamer.OnAnnouncement = reactToNewState
-	gameCtx, err := gamer.Play(initialPosition, serverConfig)
+	playerCtx, playerClient, err = clientGo.NewClient(playerConfig)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatalf("did not connected to the gRPC server at '%s': %s", playerConfig.GRPCAddress, err)
 	}
+	playerClient.OnNewTurn(myDecider, logger.Named("client"))
+}
 
+func main() {
 	// keep the process alive
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 	select {
 	case <-signalChan:
-		logrus.Print("*********** INTERRUPTION SIGNAL ****************")
-		gamer.StopToPlay(true)
-	case <-gameCtx.Done():
-		logrus.Print("*********** Game stopped ****************")
+		logger.Warn("got interruption signal")
+		if err := playerClient.Stop(); err != nil {
+			logger.Errorf("error stopping the player client: %s", err)
+		}
+	case <-playerCtx.Done():
+		logger.Infof("player client stopped")
 	}
-
+	logger.Infof("process finished")
 }
 
-func reactToNewState(ctx client.TurnContext) {
-	// there is a chance of receiving a msg before the user be add to the game state, so it can be nill at the very beginning
-	if ctx.Player() == nil {
+func myDecider(snapshot *lugo.GameSnapshot, sender ops.OrderSender) {
+
+	me := lugo.GetPlayer(snapshot, playerConfig.TeamSide, playerConfig.Number)
+	if me == nil {
+		logger.Fatalf("i did not find my self in the game")
 		return
 	}
-
-	ctx.Logger().Info("I got a message")
-
-	player := ctx.Player()
-	// for this example, or smart player only reacts when the game server is listening for orders
-	if ctx.GameMsg().State == arena.Listening {
-
-		// we are going to kick the ball as soon as we catch it
-		if player.IHoldTheBall(ctx.GameMsg().GameInfo.Ball) {
-			orderToKick, _ := player.CreateKickOrder(ctx.GameMsg().GameInfo.Ball, player.OpponentGoal().Center, units.BallMaxSpeed)
-			gamer.SendOrders("Shoot!", orderToKick)
+	var orders []lugo.PlayerOrder
+	// we are going to kick the ball as soon as we catch it
+	if lugo.IsBallHolder(snapshot, me) {
+		orderToKick, err := lugo.MakeOrderKick(*snapshot.Ball, lugo.GetOpponentGoal(me.TeamSide).Center, units.BallMaxSpeed)
+		if err != nil {
+			logger.Warnf("could not create kick order during turn %d: %s", snapshot.Turn, err)
 			return
 		}
-
-		var orderList []orders.Order
-		ctx.Logger().Infof("I am player %s", player.Number)
+		orders = []lugo.PlayerOrder{orderToKick}
+	} else if me.Number == 10 {
 		// otherwise, let's run towards the ball like kids
-		if player.Number == arena.PlayerNumber("10") {
-			orderToMove, _ := player.CreateMoveOrderMaxSpeed(ctx.GameMsg().GameInfo.Ball.Coords)
-			orderList = append(orderList, orderToMove)
+		orderToMove, err := lugo.MakeOrderMoveMaxSpeed(*me.Position, *snapshot.Ball.Position)
+		if err != nil {
+			logger.Warnf("could not create move order during turn %d: %s", snapshot.Turn, err)
+			return
 		}
-		orderToCatch := player.CreateCatchOrder()
-		orderList = append(orderList, orderToCatch)
-		gamer.SendOrders("Catch the ball!", orderList...)
+		orders = []lugo.PlayerOrder{orderToMove, lugo.MakeOrderCatch()}
+	} else {
+		orders = []lugo.PlayerOrder{lugo.MakeOrderCatch()}
+	}
+
+	resp, err := sender("", orders...)
+	if err != nil {
+		logger.Warnf("could not send kick order during turn %d: %s", snapshot.Turn, err)
+	} else if resp.Code != lugo.OrderResponse_SUCCESS {
+		logger.Warnf("order sent not  order during turn %d: %s", snapshot.Turn, err)
 	}
 }

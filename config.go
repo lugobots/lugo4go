@@ -54,7 +54,7 @@ func (c *Config) ParseConfigFlags() error {
 	var name string
 	var number int
 
-	flag.StringVar(&name, "team_side", "home", "Team (home or away)")
+	flag.StringVar(&name, "team", "home", "Team (home or away)")
 	flag.IntVar(&number, "number", 0, "Player's number")
 	flag.StringVar(&c.GRPCAddress, "grpc_address", "localhost:8080", "Address to connect to the game server")
 	flag.StringVar(&c.Token, "token", "", "Token used by the server to identify the right connection")
