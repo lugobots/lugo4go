@@ -2,48 +2,28 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/makeitplay/arena/units"
 	clientGo "github.com/makeitplay/client-player-go"
 	"github.com/makeitplay/client-player-go/lugo"
 	"github.com/makeitplay/client-player-go/proto"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"log"
 	"os"
 	"os/signal"
 )
 
-var logger *zap.SugaredLogger
+var logger lugo.Logger
 var playerClient lugo.Client
 var playerCtx context.Context
 var playerConfig clientGo.Config
 
-func init() {
-	configZap := zap.NewDevelopmentConfig()
-	configZap.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	zapLog, err := configZap.Build()
-	if err != nil {
-		log.Fatalf("could not initiliase looger: %s", err)
-	}
-	logger = zapLog.Sugar()
-}
-
-func init() {
-	var err error
-	playerConfig, err = clientGo.LoadConfig("./config.json")
-	if err != nil {
-		logger.Fatalf("did not load the config: %s", err)
-	}
-	if err := playerConfig.ParseConfigFlags(); err != nil {
-		logger.Fatalf("did not parsed well the flags for config: %s", err)
-	}
-
-	logger = logger.Named(fmt.Sprintf("%s-%d", playerConfig.TeamSide, playerConfig.Number))
-}
-
 func main() {
 	var err error
+	// DefaultBundle is a shot cut for stuff that usually we define in init functions
+	playerConfig, logger, err = clientGo.DefaultBundle()
+	if err != nil {
+		log.Fatalf("could not init default config or logger: %s", err)
+	}
+
 	// just creating a position based on the player number
 	playerConfig.InitialPosition = proto.Point{
 		X: units.FieldWidth / 4,
@@ -58,14 +38,14 @@ func main() {
 	if err != nil {
 		logger.Fatalf("did not connected to the gRPC server at '%s': %s", playerConfig.GRPCAddress, err)
 	}
-	playerClient.OnNewTurn(myDecider, logger.Named("client"))
+	playerClient.OnNewTurn(myDecider, logger)
 
 	// keep the process alive
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 	select {
 	case <-signalChan:
-		logger.Warn("got interruption signal")
+		logger.Warnf("got interruption signal")
 		if err := playerClient.Stop(); err != nil {
 			logger.Errorf("error stopping the player client: %s", err)
 		}
