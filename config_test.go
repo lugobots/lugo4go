@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/makeitplay/client-player-go/lugo"
+	"github.com/makeitplay/client-player-go/proto"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -17,11 +17,11 @@ func TestLoadConfig(t *testing.T) {
 		GRPCAddress: "localhost:1212",
 		Insecure:    true,
 		Token:       "UUID",
-		TeamSide:    lugo.Team_HOME,
+		TeamSide:    proto.Team_HOME,
 		Number:      4,
 	}
 	okAway := okHome
-	okAway.TeamSide = lugo.Team_AWAY
+	okAway.TeamSide = proto.Team_AWAY
 	caseList := map[string]testCase{
 		"ok": {
 			path:           "testdata/config_test_ok.json",

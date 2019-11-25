@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/makeitplay/arena/units"
 	clientGo "github.com/makeitplay/client-player-go"
-	"github.com/makeitplay/client-player-go/lugo"
 	"github.com/makeitplay/client-player-go/ops"
+	"github.com/makeitplay/client-player-go/proto"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"log"
@@ -45,13 +45,13 @@ func init() {
 func main() {
 	var err error
 	// just creating a position based on the player number
-	playerConfig.InitialPosition = lugo.Point{
+	playerConfig.InitialPosition = proto.Point{
 		X: units.FieldWidth / 4,
-		Y: int32(playerConfig.Number) * lugo.PlayerSize * 2, //(units.FieldHeight / 4) - (pos * units.PlayerSize),
+		Y: int32(playerConfig.Number) * proto.PlayerSize * 2, //(units.FieldHeight / 4) - (pos * units.PlayerSize),
 	}
 
-	if playerConfig.TeamSide == lugo.Team_AWAY {
-		playerConfig.InitialPosition.X = lugo.FieldWidth - playerConfig.InitialPosition.X
+	if playerConfig.TeamSide == proto.Team_AWAY {
+		playerConfig.InitialPosition.X = proto.FieldWidth - playerConfig.InitialPosition.X
 	}
 
 	playerCtx, playerClient, err = clientGo.NewClient(playerConfig)
@@ -75,37 +75,37 @@ func main() {
 	logger.Infof("process finished")
 }
 
-func myDecider(snapshot *lugo.GameSnapshot, sender ops.OrderSender) {
-	me := lugo.GetPlayer(snapshot, playerConfig.TeamSide, playerConfig.Number)
+func myDecider(snapshot *proto.GameSnapshot, sender ops.OrderSender) {
+	me := proto.GetPlayer(snapshot, playerConfig.TeamSide, playerConfig.Number)
 	if me == nil {
 		logger.Fatalf("i did not find my self in the game")
 		return
 	}
-	var orders []lugo.PlayerOrder
+	var orders []proto.PlayerOrder
 	// we are going to kick the ball as soon as we catch it
-	if lugo.IsBallHolder(snapshot, me) {
-		orderToKick, err := lugo.MakeOrderKick(*snapshot.Ball, lugo.GetOpponentGoal(me.TeamSide).Center, units.BallMaxSpeed)
+	if proto.IsBallHolder(snapshot, me) {
+		orderToKick, err := proto.MakeOrderKick(*snapshot.Ball, proto.GetOpponentGoal(me.TeamSide).Center, units.BallMaxSpeed)
 		if err != nil {
 			logger.Warnf("could not create kick order during turn %d: %s", snapshot.Turn, err)
 			return
 		}
-		orders = []lugo.PlayerOrder{orderToKick}
+		orders = []proto.PlayerOrder{orderToKick}
 	} else if me.Number == 10 {
 		// otherwise, let's run towards the ball like kids
-		orderToMove, err := lugo.MakeOrderMoveMaxSpeed(*me.Position, *snapshot.Ball.Position)
+		orderToMove, err := proto.MakeOrderMoveMaxSpeed(*me.Position, *snapshot.Ball.Position)
 		if err != nil {
 			logger.Warnf("could not create move order during turn %d: %s", snapshot.Turn, err)
 			return
 		}
-		orders = []lugo.PlayerOrder{orderToMove, lugo.MakeOrderCatch()}
+		orders = []proto.PlayerOrder{orderToMove, proto.MakeOrderCatch()}
 	} else {
-		orders = []lugo.PlayerOrder{lugo.MakeOrderCatch()}
+		orders = []proto.PlayerOrder{proto.MakeOrderCatch()}
 	}
 
 	resp, err := sender.Send(playerCtx, orders, "")
 	if err != nil {
 		logger.Warnf("could not send kick order during turn %d: %s", snapshot.Turn, err)
-	} else if resp.Code != lugo.OrderResponse_SUCCESS {
+	} else if resp.Code != proto.OrderResponse_SUCCESS {
 		logger.Warnf("order sent not  order during turn %d: %s", snapshot.Turn, err)
 	}
 }

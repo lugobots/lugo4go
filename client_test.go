@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/golang/mock/gomock"
-	"github.com/makeitplay/client-player-go/lugo"
 	"github.com/makeitplay/client-player-go/ops"
+	"github.com/makeitplay/client-player-go/proto"
 	"github.com/makeitplay/client-player-go/testdata"
 	"github.com/stretchr/testify/assert"
 	"io"
@@ -31,9 +31,9 @@ func TestNewClient(t *testing.T) {
 	config := Config{
 		GRPCAddress:     fmt.Sprintf(":%d", testServerPort),
 		Insecure:        true,
-		TeamSide:        lugo.Team_HOME,
+		TeamSide:        proto.Team_HOME,
 		Number:          3,
-		InitialPosition: lugo.Point{X: 4000, Y: 4000},
+		InitialPosition: proto.Point{X: 4000, Y: 4000},
 	}
 
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
@@ -41,7 +41,7 @@ func TestNewClient(t *testing.T) {
 
 	// the client will try to join to a team, so our server need to expect it happens
 	srv.EXPECT().JoinATeam(testdata.NewMatcher(func(arg interface{}) bool {
-		expectedRequest := &lugo.JoinRequest{
+		expectedRequest := &proto.JoinRequest{
 			Number:          config.Number,
 			InitPosition:    &config.InitialPosition,
 			TeamSide:        config.TeamSide,
@@ -72,11 +72,11 @@ func TestClient_OnNewTurn(t *testing.T) {
 
 	// defining expectations
 
-	expectedSnapshot := &lugo.GameSnapshot{Turn: 200}
-	expectedOrder := &lugo.Order_Catch{}
+	expectedSnapshot := &proto.GameSnapshot{Turn: 200}
+	expectedOrder := &proto.Order_Catch{}
 	expectedDebugMsg := "a-important-msg"
-	expectedResponse := &lugo.OrderResponse{
-		Code: lugo.OrderResponse_SUCCESS,
+	expectedResponse := &proto.OrderResponse{
+		Code: proto.OrderResponse_SUCCESS,
 	}
 	receivedSnapshot := false
 
@@ -88,11 +88,11 @@ func TestClient_OnNewTurn(t *testing.T) {
 	mockLogger.EXPECT().Infof(gomock.Any(), gomock.Any()).AnyTimes()
 	mockStream.EXPECT().Recv().Return(expectedSnapshot, nil)
 	mockStream.EXPECT().Recv().Return(nil, io.EOF)
-	mockSender.EXPECT().Send(gomock.Any(), []lugo.PlayerOrder{expectedOrder}, expectedDebugMsg).Return(expectedResponse, nil)
+	mockSender.EXPECT().Send(gomock.Any(), []proto.PlayerOrder{expectedOrder}, expectedDebugMsg).Return(expectedResponse, nil)
 
 	c := &client{
 		stream: mockStream,
-		senderBuilder: func(snapshot *lugo.GameSnapshot, logger ops.Logger) ops.OrderSender {
+		senderBuilder: func(snapshot *proto.GameSnapshot, logger ops.Logger) ops.OrderSender {
 			return mockSender
 		},
 		ctx: context.Background(),
@@ -104,12 +104,12 @@ func TestClient_OnNewTurn(t *testing.T) {
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
 
-	c.OnNewTurn(func(snapshot *lugo.GameSnapshot, sender ops.OrderSender) {
+	c.OnNewTurn(func(snapshot *proto.GameSnapshot, sender ops.OrderSender) {
 		if snapshot != expectedSnapshot {
 			t.Errorf("Unexpected snapshot - Expected %v, Got %v", expectedSnapshot, snapshot)
 			return
 		}
-		response, err := sender.Send(waiting, []lugo.PlayerOrder{expectedOrder}, expectedDebugMsg)
+		response, err := sender.Send(waiting, []proto.PlayerOrder{expectedOrder}, expectedDebugMsg)
 		if err != nil {
 			t.Errorf("Unexpected erro - Expected nil, Got %v", err)
 		}
@@ -156,7 +156,7 @@ func TestClient_ShouldStopItsContext(t *testing.T) {
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	waiting, done := context.WithTimeout(context.Background(), 200*time.Millisecond)
 
-	c.OnNewTurn(func(snapshot *lugo.GameSnapshot, sender ops.OrderSender) {
+	c.OnNewTurn(func(snapshot *proto.GameSnapshot, sender ops.OrderSender) {
 		t.Error("The DecisionMaker should not be called")
 		done()
 	}, mockLogger)
@@ -180,28 +180,28 @@ func TestSender_Send(t *testing.T) {
 	mockGameConn := testdata.NewMockGameClient(ctrl)
 	mockLogger := testdata.NewMockLogger(ctrl)
 
-	expectedSnapshot := &lugo.GameSnapshot{Turn: 321}
+	expectedSnapshot := &proto.GameSnapshot{Turn: 321}
 	expectedContext := context.Background()
 
 	// this is the list that the developer should be concerned about while the bot is been built.
 	// the rest of the job will be abstracted by the sender.
-	expectedOrderSlice := []lugo.PlayerOrder{
-		&lugo.Order_Catch{}, &lugo.Order_Catch{},
+	expectedOrderSlice := []proto.PlayerOrder{
+		&proto.Order_Catch{}, &proto.Order_Catch{},
 	}
 	expectedDebugMsg := "it's a nice debug message"
 
 	// The whole work done by the sender is converting a list of PlayerOrders into a more complex format expected
 	// by the server, that's the `OrderSet`. Since OrderSet also has a debug msg and the turn number, it also receive
 	// the snapshot.
-	expectedOrderSet := &lugo.OrderSet{
+	expectedOrderSet := &proto.OrderSet{
 		Turn:         expectedSnapshot.Turn,
 		DebugMessage: expectedDebugMsg,
-		Orders: []*lugo.Order{
-			{Action: &lugo.Order_Catch{}}, {Action: &lugo.Order_Catch{}},
+		Orders: []*proto.Order{
+			{Action: &proto.Order_Catch{}}, {Action: &proto.Order_Catch{}},
 		},
 	}
-	expectedServerResponse := &lugo.OrderResponse{
-		Code:    lugo.OrderResponse_SUCCESS,
+	expectedServerResponse := &proto.OrderResponse{
+		Code:    proto.OrderResponse_SUCCESS,
 		Details: "nonthing else to say",
 	}
 

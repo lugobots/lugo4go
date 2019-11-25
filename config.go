@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/makeitplay/client-player-go/lugo"
+	"github.com/makeitplay/client-player-go/proto"
 	"io/ioutil"
 	"strings"
 )
@@ -15,9 +15,9 @@ type Config struct {
 	GRPCAddress     string `json:"grpc_address"`
 	Insecure        bool   `json:"insecure"`
 	Token           string `json:"token"`
-	TeamSide        lugo.Team_Side
-	Number          uint32     `json:"number"`
-	InitialPosition lugo.Point `json:"-"`
+	TeamSide        proto.Team_Side
+	Number          uint32      `json:"number"`
+	InitialPosition proto.Point `json:"-"`
 }
 
 type jsonConfig struct {
@@ -33,18 +33,18 @@ func LoadConfig(filepath string) (c Config, e error) {
 		e = fmt.Errorf("error loading the config file at %s: %s", filepath, err)
 	} else if err := json.Unmarshal(content, &config); err != nil {
 		e = fmt.Errorf("error parsing the config file at %s: %s", filepath, err)
-	} else if _, ok := lugo.Team_Side_name[int32(c.TeamSide)]; !ok {
+	} else if _, ok := proto.Team_Side_name[int32(c.TeamSide)]; !ok {
 		e = fmt.Errorf("invalid team side in config file at %s", filepath)
 	} else if config.Number < 1 || config.Number > 11 {
 		e = fmt.Errorf("invalid player number in config file at %s: %d", filepath, config.Number)
 	}
 
-	side, ok := lugo.Team_Side_value[strings.ToUpper(config.Team)]
+	side, ok := proto.Team_Side_value[strings.ToUpper(config.Team)]
 	if !ok {
 		e = fmt.Errorf("invalid team option '%s'. Must be either HOME or AWAY", config.Team)
 	}
 	c = config.Config
-	c.TeamSide = lugo.Team_Side(side)
+	c.TeamSide = proto.Team_Side(side)
 	return
 }
 
@@ -62,7 +62,7 @@ func (c *Config) ParseConfigFlags() error {
 
 	flag.Parse()
 
-	side, ok := lugo.Team_Side_value[strings.ToUpper(name)]
+	side, ok := proto.Team_Side_value[strings.ToUpper(name)]
 	if !ok {
 		return fmt.Errorf("invalid team option '%s'. Must be either HOME or AWAY", name)
 	}
@@ -71,7 +71,7 @@ func (c *Config) ParseConfigFlags() error {
 		return fmt.Errorf("invalid player number '%d'. Must be 1 to 11", number)
 	}
 
-	c.TeamSide = lugo.Team_Side(side)
+	c.TeamSide = proto.Team_Side(side)
 	c.Number = uint32(number)
 	return nil
 }

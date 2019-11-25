@@ -1,4 +1,4 @@
-package lugo
+package proto
 
 import "time"
 

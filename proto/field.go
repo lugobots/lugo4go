@@ -1,4 +1,4 @@
-package lugo
+package proto
 
 // Goal is a set of value about a goal from a team
 type Goal struct {

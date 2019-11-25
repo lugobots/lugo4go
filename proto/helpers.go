@@ -1,4 +1,4 @@
-package lugo
+package proto
 
 func GetTeam(s *GameSnapshot, side Team_Side) *Team {
 	if s == nil {

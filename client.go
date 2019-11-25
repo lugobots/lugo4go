@@ -2,8 +2,8 @@ package client
 
 import (
 	"context"
-	"github.com/makeitplay/client-player-go/lugo"
 	"github.com/makeitplay/client-player-go/ops"
+	"github.com/makeitplay/client-player-go/proto"
 	"google.golang.org/grpc"
 	"io"
 )
@@ -23,9 +23,9 @@ func NewClient(config Config) (context.Context, ops.Client, error) {
 		return nil, nil, err
 	}
 
-	c.gameConn = lugo.NewGameClient(c.grpcConn)
+	c.gameConn = proto.NewGameClient(c.grpcConn)
 
-	c.senderBuilder = func(snapshot *lugo.GameSnapshot, logger ops.Logger) ops.OrderSender {
+	c.senderBuilder = func(snapshot *proto.GameSnapshot, logger ops.Logger) ops.OrderSender {
 		return &sender{
 			gameConn: c.gameConn,
 			snapshot: snapshot,
@@ -34,7 +34,7 @@ func NewClient(config Config) (context.Context, ops.Client, error) {
 	}
 
 	c.ctx, c.stopCtx = context.WithCancel(context.Background())
-	if c.stream, err = c.gameConn.JoinATeam(c.ctx, &lugo.JoinRequest{
+	if c.stream, err = c.gameConn.JoinATeam(c.ctx, &proto.JoinRequest{
 		Token:           config.Token,
 		Number:          config.Number,
 		InitPosition:    &config.InitialPosition,
@@ -47,12 +47,12 @@ func NewClient(config Config) (context.Context, ops.Client, error) {
 }
 
 type client struct {
-	stream        lugo.Game_JoinATeamClient
-	gameConn      lugo.GameClient
+	stream        proto.Game_JoinATeamClient
+	gameConn      proto.GameClient
 	grpcConn      *grpc.ClientConn
 	ctx           context.Context
 	stopCtx       context.CancelFunc
-	senderBuilder func(snapshot *lugo.GameSnapshot, logger ops.Logger) ops.OrderSender
+	senderBuilder func(snapshot *proto.GameSnapshot, logger ops.Logger) ops.OrderSender
 	sender        ops.OrderSender
 }
 
@@ -84,28 +84,28 @@ func (c client) GetGRPCConn() *grpc.ClientConn {
 	return c.grpcConn
 }
 
-func (c client) GetServiceConn() lugo.GameClient {
+func (c client) GetServiceConn() proto.GameClient {
 	return c.gameConn
 }
 
-func (c client) SenderBuilder(builder func(snapshot *lugo.GameSnapshot, logger ops.Logger) ops.OrderSender) {
+func (c client) SenderBuilder(builder func(snapshot *proto.GameSnapshot, logger ops.Logger) ops.OrderSender) {
 	c.senderBuilder = builder
 }
 
 type sender struct {
-	snapshot *lugo.GameSnapshot
+	snapshot *proto.GameSnapshot
 	logger   ops.Logger
-	gameConn lugo.GameClient
+	gameConn proto.GameClient
 }
 
-func (s sender) Send(ctx context.Context, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error) {
-	orderSet := &lugo.OrderSet{
+func (s sender) Send(ctx context.Context, orders []proto.PlayerOrder, debugMsg string) (*proto.OrderResponse, error) {
+	orderSet := &proto.OrderSet{
 		Turn:         s.snapshot.Turn,
 		DebugMessage: debugMsg,
-		Orders:       []*lugo.Order{},
+		Orders:       []*proto.Order{},
 	}
 	for _, order := range orders {
-		orderSet.Orders = append(orderSet.Orders, &lugo.Order{Action: order})
+		orderSet.Orders = append(orderSet.Orders, &proto.Order{Action: order})
 	}
 	s.logger.Debugf("sending orders for turn %d", s.snapshot.Turn)
 	return s.gameConn.SendOrders(ctx, orderSet)

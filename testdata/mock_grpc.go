@@ -7,8 +7,8 @@ package testdata
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	lugo "github.com/makeitplay/client-player-go/lugo"
 	ops "github.com/makeitplay/client-player-go/ops"
+	proto "github.com/makeitplay/client-player-go/proto"
 	grpc "google.golang.org/grpc"
 	reflect "reflect"
 )
@@ -51,10 +51,10 @@ func (mr *MockClientMockRecorder) GetGRPCConn() *gomock.Call {
 }
 
 // GetServiceConn mocks base method
-func (m *MockClient) GetServiceConn() lugo.GameClient {
+func (m *MockClient) GetServiceConn() proto.GameClient {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetServiceConn")
-	ret0, _ := ret[0].(lugo.GameClient)
+	ret0, _ := ret[0].(proto.GameClient)
 	return ret0
 }
 
@@ -77,7 +77,7 @@ func (mr *MockClientMockRecorder) OnNewTurn(arg0, arg1 interface{}) *gomock.Call
 }
 
 // SenderBuilder mocks base method
-func (m *MockClient) SenderBuilder(arg0 func(*lugo.GameSnapshot, ops.Logger) ops.OrderSender) {
+func (m *MockClient) SenderBuilder(arg0 func(*proto.GameSnapshot, ops.Logger) ops.OrderSender) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "SenderBuilder", arg0)
 }
@@ -250,10 +250,10 @@ func (m *MockOrderSender) EXPECT() *MockOrderSenderMockRecorder {
 }
 
 // Send mocks base method
-func (m *MockOrderSender) Send(arg0 context.Context, arg1 []lugo.PlayerOrder, arg2 string) (*lugo.OrderResponse, error) {
+func (m *MockOrderSender) Send(arg0 context.Context, arg1 []proto.PlayerOrder, arg2 string) (*proto.OrderResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Send", arg0, arg1, arg2)
-	ret0, _ := ret[0].(*lugo.OrderResponse)
+	ret0, _ := ret[0].(*proto.OrderResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
