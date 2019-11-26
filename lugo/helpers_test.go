@@ -1,7 +1,7 @@
 package lugo
 
 import (
-	"github.com/makeitplay/client-player-go/proto"
+	"github.com/lugobots/client-player-go/proto"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

@@ -2,8 +2,8 @@ package client
 
 import (
 	"context"
-	"github.com/makeitplay/client-player-go/lugo"
-	"github.com/makeitplay/client-player-go/proto"
+	"github.com/lugobots/client-player-go/lugo"
+	"github.com/lugobots/client-player-go/proto"
 	"google.golang.org/grpc"
 	"io"
 )

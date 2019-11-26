@@ -2,7 +2,7 @@ package client
 
 import (
 	"fmt"
-	"github.com/makeitplay/client-player-go/lugo"
+	"github.com/lugobots/client-player-go/lugo"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

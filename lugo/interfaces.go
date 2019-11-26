@@ -2,7 +2,7 @@ package lugo
 
 import (
 	"context"
-	"github.com/makeitplay/client-player-go/proto"
+	"github.com/lugobots/client-player-go/proto"
 	"google.golang.org/grpc"
 )
 

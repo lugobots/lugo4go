@@ -1,4 +1,4 @@
-module github.com/makeitplay/client-player-go
+module github.com/lugobots/client-player-go
 
 go 1.12
 

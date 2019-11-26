@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/makeitplay/client-player-go/proto"
+	"github.com/lugobots/client-player-go/proto"
 	"io/ioutil"
 	"strings"
 )

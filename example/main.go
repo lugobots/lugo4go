@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	clientGo "github.com/makeitplay/client-player-go"
-	"github.com/makeitplay/client-player-go/lugo"
-	"github.com/makeitplay/client-player-go/proto"
+	clientGo "github.com/lugobots/client-player-go"
+	"github.com/lugobots/client-player-go/lugo"
+	"github.com/lugobots/client-player-go/proto"
 	"log"
 	"os"
 	"os/signal"
