@@ -1,6 +1,6 @@
 package lugo
 
-import "github.com/lugobots/client-player-go/proto"
+import "github.com/lugobots/client-player-go/v2/proto"
 
 // Goal is a set of value about a goal from a team
 type Goal struct {

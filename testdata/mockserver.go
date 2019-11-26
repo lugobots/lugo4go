@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/golang/mock/gomock"
-	"github.com/lugobots/client-player-go/proto"
+	"github.com/lugobots/client-player-go/v2/proto"
 	"google.golang.org/grpc"
 	"log"
 	"net"
