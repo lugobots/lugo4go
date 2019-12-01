@@ -80,6 +80,18 @@ func TestVector_AngleWith_ZeroDegree(t *testing.T) {
 	caseSample.ang = 90
 	testTable["90 both not zero"] = caseSample
 
+	caseSample = tTable{}
+	caseSample.vecA, _ = NewVector(Point{X: 0, Y: 0}, Point{X: 0, Y: 1})
+	caseSample.vecB, _ = NewVector(Point{X: 0, Y: 0}, Point{X: 1, Y: 0})
+	caseSample.ang = -90
+	testTable["-90 degrees Wast"] = caseSample
+
+	caseSample = tTable{}
+	caseSample.vecA, _ = NewVector(Point{X: 0, Y: 0}, Point{X: 0, Y: 1})
+	caseSample.vecB, _ = NewVector(Point{X: 0, Y: 0}, Point{X: -1, Y: 0})
+	caseSample.ang = 90
+	testTable["-90 degrees east"] = caseSample
+
 	for title, conditions := range testTable {
 		actualAng := conditions.vecA.AngleWith(conditions.vecB)
 		assert.Equal(t, conditions.ang, actualAng, title)

@@ -182,7 +182,8 @@ func (m *Vector) AngleWith(b *Vector) float64 {
 	dotProduct := (copyMe.X * copyOther.X) + (copyMe.Y * copyOther.Y)
 	cos := dotProduct / (copyMe.Length() * copyOther.Length())
 	ang := math.Round(math.Acos(cos)*(180/math.Pi)*100) / 100
-	if copyMe.Y > copyOther.Y {
+	cross := (copyMe.X * copyOther.Y) - (copyMe.Y * copyOther.X)
+	if cross < 0 {
 		ang *= -1
 	}
 	return ang
