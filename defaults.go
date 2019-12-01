@@ -1,4 +1,4 @@
-package client
+package lugo4go
 
 import (
 	"fmt"
