@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	clientGo "github.com/lugobots/client-player-go/v2"
-	"github.com/lugobots/client-player-go/v2/lugo"
-	"github.com/lugobots/client-player-go/v2/proto"
+	clientGo "github.com/lugobots/lugo4go/v2"
+	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"log"
 	"os"
 	"os/signal"

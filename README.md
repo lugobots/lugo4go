@@ -1,7 +1,7 @@
 # Lugo - Go Player Client
 
-[![GoDoc](https://godoc.org/github.com/lugobots/client-player-go?status.svg)](https://godoc.org/github.com/lugobots/client-player-go)
-[![Go Report Card](https://goreportcard.com/badge/github.com/lugobots/client-player-go)](https://goreportcard.com/report/github.com/lugobots/client-player-go)
+[![GoDoc](https://godoc.org/github.com/lugobots/lugo4go?status.svg)](https://godoc.org/github.com/lugobots/lugo4go)
+[![Go Report Card](https://goreportcard.com/badge/github.com/lugobots/lugo4go)](https://goreportcard.com/report/github.com/lugobots/lugo4go)
 
 Go Player Client is a [Go](http://golang.org/) implementation of a client player for [Lugo](https://lugobots.dev/) game. 
 
@@ -16,7 +16,7 @@ your strategy (see the project [The Dummies](https://github.com/lugobots/the-dum
  
 ### Documentation
 
-* [API Reference](http://godoc.org/github.com/lugobots/client-player-go)
+* [API Reference](http://godoc.org/github.com/lugobots/lugo4go)
 
 ### Requirements
 
@@ -26,7 +26,7 @@ your strategy (see the project [The Dummies](https://github.com/lugobots/the-dum
 
 ### Installation
 
-    git clone https://github.com/lugobots/client-player-go.git
+    git clone https://github.com/lugobots/lugo4go.git
 
 ### Kick start
 

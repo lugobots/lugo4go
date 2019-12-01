@@ -1,6 +1,6 @@
 package bot
 
-import "github.com/lugobots/client-player-go/v2/proto"
+import "github.com/lugobots/lugo4go/v2/proto"
 
 // Positioner Helps the bots to see the fields from their team perspective instead of using the cartesian plan provided
 // by the game server. Instead of base your logic on the axes X and Y, the positioner create a region map based

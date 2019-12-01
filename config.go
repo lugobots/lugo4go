@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/lugobots/client-player-go/v2/proto"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"io/ioutil"
 	"strings"
 )

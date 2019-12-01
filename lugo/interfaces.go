@@ -2,7 +2,7 @@ package lugo
 
 import (
 	"context"
-	"github.com/lugobots/client-player-go/v2/proto"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"google.golang.org/grpc"
 )
 

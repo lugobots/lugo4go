@@ -2,7 +2,7 @@ package client
 
 import (
 	"fmt"
-	"github.com/lugobots/client-player-go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/lugo"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

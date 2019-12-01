@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/lugobots/client-player-go/v2/proto"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

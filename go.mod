@@ -1,4 +1,4 @@
-module github.com/lugobots/client-player-go/v2
+module github.com/lugobots/lugo4go/v2
 
 go 1.12
 
