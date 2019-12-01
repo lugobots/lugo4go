@@ -1,4 +1,4 @@
-package bot
+package coach
 
 import "github.com/lugobots/lugo4go/v2/proto"
 

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	clientGo "github.com/lugobots/lugo4go/v2"
+	"github.com/lugobots/lugo4go/v2/coach"
 	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/proto"
 	"log"
@@ -37,7 +38,8 @@ func main() {
 	if err != nil {
 		logger.Fatalf("did not connected to the gRPC server at '%s': %s", playerConfig.GRPCAddress, err)
 	}
-	playerClient.OnNewTurn(myDecider, logger)
+	var d coach.Decider
+	playerClient.OnNewTurn(coach.DefaultTurnHandler(d, playerConfig, logger), logger)
 
 	// keep the process alive
 	signalChan := make(chan os.Signal, 1)
