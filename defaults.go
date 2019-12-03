@@ -2,12 +2,11 @@ package lugo4go
 
 import (
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/lugo"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-func DefaultLogger(config Config) (lugo.Logger, error) {
+func DefaultLogger(config Config) (Logger, error) {
 	configZap := zap.NewDevelopmentConfig()
 	configZap.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	zapLog, err := configZap.Build()
@@ -29,7 +28,7 @@ func DefaultConfigurator() (Config, error) {
 	return config, nil
 }
 
-func DefaultBundle() (Config, lugo.Logger, error) {
+func DefaultBundle() (Config, Logger, error) {
 	config, err := DefaultConfigurator()
 	if err != nil {
 		return config, nil, err

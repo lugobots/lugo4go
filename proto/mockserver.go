@@ -1,10 +1,9 @@
-package testdata
+package proto
 
 import (
 	"context"
 	"fmt"
 	"github.com/golang/mock/gomock"
-	"github.com/lugobots/lugo4go/v2/proto"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -13,7 +12,7 @@ import (
 func NewMockServer(ctx context.Context, ctr *gomock.Controller, port int16) (*MockGameServer, error) {
 	mock := NewMockGameServer(ctr)
 	gRPCServer := grpc.NewServer()
-	proto.RegisterGameServer(gRPCServer, mock)
+	RegisterGameServer(gRPCServer, mock)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {

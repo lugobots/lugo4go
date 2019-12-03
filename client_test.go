@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/golang/mock/gomock"
-	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/proto"
 	"github.com/lugobots/lugo4go/v2/testdata"
 	"github.com/stretchr/testify/assert"
@@ -23,7 +22,7 @@ func TestNewClient(t *testing.T) {
 	ctx, stop := context.WithCancel(context.Background())
 	defer stop()
 	// creates a fake server to test our client
-	srv, err := testdata.NewMockServer(ctx, ctrl, testServerPort)
+	srv, err := proto.NewMockServer(ctx, ctrl, testServerPort)
 	if err != nil {
 		t.Fatalf("did not start mock server: %s", err)
 	}
@@ -81,9 +80,9 @@ func TestClient_OnNewTurn(t *testing.T) {
 	receivedSnapshot := false
 
 	// defining mocks and expected method calls
-	mockLogger := testdata.NewMockLogger(ctrl)
-	mockStream := testdata.NewMockGame_JoinATeamClient(ctrl)
-	mockSender := testdata.NewMockOrderSender(ctrl)
+	mockLogger := NewMockLogger(ctrl)
+	mockStream := proto.NewMockGame_JoinATeamClient(ctrl)
+	mockSender := NewMockOrderSender(ctrl)
 	mockLogger.EXPECT().Debugf(gomock.Any(), gomock.Any()).AnyTimes()
 	mockLogger.EXPECT().Infof(gomock.Any(), gomock.Any()).AnyTimes()
 	mockStream.EXPECT().Recv().Return(expectedSnapshot, nil)
@@ -92,7 +91,7 @@ func TestClient_OnNewTurn(t *testing.T) {
 
 	c := &client{
 		stream: mockStream,
-		senderBuilder: func(snapshot *proto.GameSnapshot, logger lugo.Logger) lugo.OrderSender {
+		senderBuilder: func(snapshot *proto.GameSnapshot, logger Logger) OrderSender {
 			return mockSender
 		},
 		ctx: context.Background(),
@@ -104,7 +103,7 @@ func TestClient_OnNewTurn(t *testing.T) {
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
 
-	c.OnNewTurn(func(snapshot *proto.GameSnapshot, sender lugo.OrderSender) {
+	c.OnNewTurn(func(snapshot *proto.GameSnapshot, sender OrderSender) {
 		if snapshot != expectedSnapshot {
 			t.Errorf("Unexpected snapshot - Expected %v, Got %v", expectedSnapshot, snapshot)
 			return
@@ -138,8 +137,8 @@ func TestClient_ShouldStopItsContext(t *testing.T) {
 	defer ctrl.Finish() // checks all expected things for mocks
 
 	// defining mocks and expected method calls
-	mockLogger := testdata.NewMockLogger(ctrl)
-	mockStream := testdata.NewMockGame_JoinATeamClient(ctrl)
+	mockLogger := NewMockLogger(ctrl)
+	mockStream := proto.NewMockGame_JoinATeamClient(ctrl)
 
 	mockLogger.EXPECT().Infof(gomock.Any(), gomock.Any()).AnyTimes()
 	mockStream.EXPECT().Recv().Return(nil, io.EOF)
@@ -156,7 +155,7 @@ func TestClient_ShouldStopItsContext(t *testing.T) {
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	waiting, done := context.WithTimeout(context.Background(), 200*time.Millisecond)
 
-	c.OnNewTurn(func(snapshot *proto.GameSnapshot, sender lugo.OrderSender) {
+	c.OnNewTurn(func(snapshot *proto.GameSnapshot, sender OrderSender) {
 		t.Error("The DecisionMaker should not be called")
 		done()
 	}, mockLogger)
@@ -177,8 +176,8 @@ func TestSender_Send(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish() // checks all expected things for mocks
 
-	mockGameConn := testdata.NewMockGameClient(ctrl)
-	mockLogger := testdata.NewMockLogger(ctrl)
+	mockGameConn := proto.NewMockGameClient(ctrl)
+	mockLogger := NewMockLogger(ctrl)
 
 	expectedSnapshot := &proto.GameSnapshot{Turn: 321}
 	expectedContext := context.Background()
@@ -202,7 +201,7 @@ func TestSender_Send(t *testing.T) {
 	}
 	expectedServerResponse := &proto.OrderResponse{
 		Code:    proto.OrderResponse_SUCCESS,
-		Details: "nonthing else to say",
+		Details: "nothing else to say",
 	}
 
 	mockGameConn.EXPECT().SendOrders(expectedContext, expectedOrderSet).Return(expectedServerResponse, nil)

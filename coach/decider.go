@@ -23,7 +23,7 @@ const (
 type TurnData struct {
 	Me       *proto.Player
 	Snapshot *proto.GameSnapshot
-	Sender   lugo.OrderSender
+	Sender   lugo4go.OrderSender
 }
 
 type Decider interface {
@@ -57,9 +57,9 @@ func DefineMyState(config lugo4go.Config, snapshot *proto.GameSnapshot) (PlayerS
 	return Defending, nil
 }
 
-func DefaultTurnHandler(decider Decider, config lugo4go.Config, logger lugo.Logger) lugo.DecisionMaker {
+func DefaultTurnHandler(decider Decider, config lugo4go.Config, logger lugo4go.Logger) lugo4go.DecisionMaker {
 	goalkeeper := lugo.GoalkeeperNumber == config.Number // it is obviously not processed every turn
-	return func(snapshot *proto.GameSnapshot, sender lugo.OrderSender) {
+	return func(snapshot *proto.GameSnapshot, sender lugo4go.OrderSender) {
 		var err error
 		var state PlayerState
 		turnData := TurnData{

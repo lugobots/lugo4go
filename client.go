@@ -2,7 +2,6 @@ package lugo4go
 
 import (
 	"context"
-	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/proto"
 	"google.golang.org/grpc"
 	"io"
@@ -10,7 +9,7 @@ import (
 
 const ProtocolVersion = "2.0"
 
-func NewClient(config Config) (context.Context, lugo.Client, error) {
+func NewClient(config Config) (context.Context, Client, error) {
 	var err error
 	c := &client{}
 
@@ -25,7 +24,7 @@ func NewClient(config Config) (context.Context, lugo.Client, error) {
 
 	c.gameConn = proto.NewGameClient(c.grpcConn)
 
-	c.senderBuilder = func(snapshot *proto.GameSnapshot, logger lugo.Logger) lugo.OrderSender {
+	c.senderBuilder = func(snapshot *proto.GameSnapshot, logger Logger) OrderSender {
 		return &sender{
 			gameConn: c.gameConn,
 			snapshot: snapshot,
@@ -52,11 +51,11 @@ type client struct {
 	grpcConn      *grpc.ClientConn
 	ctx           context.Context
 	stopCtx       context.CancelFunc
-	senderBuilder func(snapshot *proto.GameSnapshot, logger lugo.Logger) lugo.OrderSender
-	sender        lugo.OrderSender
+	senderBuilder func(snapshot *proto.GameSnapshot, logger Logger) OrderSender
+	sender        OrderSender
 }
 
-func (c client) OnNewTurn(decider lugo.DecisionMaker, log lugo.Logger) {
+func (c client) OnNewTurn(decider DecisionMaker, log Logger) {
 	go func() {
 		for {
 			snapshot, err := c.stream.Recv()
@@ -88,13 +87,13 @@ func (c client) GetServiceConn() proto.GameClient {
 	return c.gameConn
 }
 
-func (c client) SenderBuilder(builder func(snapshot *proto.GameSnapshot, logger lugo.Logger) lugo.OrderSender) {
+func (c client) SenderBuilder(builder func(snapshot *proto.GameSnapshot, logger Logger) OrderSender) {
 	c.senderBuilder = builder
 }
 
 type sender struct {
 	snapshot *proto.GameSnapshot
-	logger   lugo.Logger
+	logger   Logger
 	gameConn proto.GameClient
 }
 

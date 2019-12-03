@@ -11,8 +11,8 @@ import (
 	"os/signal"
 )
 
-var logger lugo.Logger
-var playerClient lugo.Client
+var logger clientGo.Logger
+var playerClient clientGo.Client
 var playerCtx context.Context
 var playerConfig clientGo.Config
 
@@ -56,7 +56,7 @@ func main() {
 	logger.Infof("process finished")
 }
 
-func myDecider(snapshot *proto.GameSnapshot, sender lugo.OrderSender) {
+func myDecider(snapshot *proto.GameSnapshot, sender clientGo.OrderSender) {
 	me := lugo.GetPlayer(snapshot, playerConfig.TeamSide, playerConfig.Number)
 	if me == nil {
 		logger.Fatalf("i did not find my self in the game")
