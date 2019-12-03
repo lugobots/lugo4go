@@ -1,7 +1,7 @@
 package coach
 
 import (
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/field"
 	"github.com/lugobots/lugo4go/v2/proto"
 	"math"
 )
@@ -36,8 +36,8 @@ func NewPositioner(cols, rows uint8, sideRef proto.Team_Side) (Positioner, error
 		sideRef:      sideRef,
 		cols:         cols,
 		rows:         rows,
-		regionWidth:  lugo.FieldWidth / float64(cols),
-		regionHeight: lugo.FieldHeight / float64(rows),
+		regionWidth:  field.FieldWidth / float64(cols),
+		regionHeight: field.FieldHeight / float64(rows),
 	}, nil
 }
 
@@ -107,7 +107,7 @@ func (r region) Center() proto.Point {
 // Keep in mind that all coords in the field is based on the bottom left corner!
 func mirrorCoordsToAway(coords proto.Point) proto.Point {
 	return proto.Point{
-		X: lugo.FieldWidth - coords.X,
-		Y: lugo.FieldHeight - coords.Y,
+		X: field.FieldWidth - coords.X,
+		Y: field.FieldHeight - coords.Y,
 	}
 }

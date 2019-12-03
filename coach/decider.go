@@ -2,7 +2,7 @@ package coach
 
 import (
 	"github.com/lugobots/lugo4go/v2"
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/field"
 	"github.com/lugobots/lugo4go/v2/proto"
 )
 
@@ -39,7 +39,7 @@ func DefineMyState(config lugo4go.Config, snapshot *proto.GameSnapshot) (PlayerS
 		return "", ErrNoBall
 	}
 
-	me := lugo.GetPlayer(snapshot, config.TeamSide, config.Number)
+	me := field.GetPlayer(snapshot, config.TeamSide, config.Number)
 	if me == nil {
 		return "", ErrPlayerNotFound
 	}
@@ -58,12 +58,12 @@ func DefineMyState(config lugo4go.Config, snapshot *proto.GameSnapshot) (PlayerS
 }
 
 func DefaultTurnHandler(decider Decider, config lugo4go.Config, logger lugo4go.Logger) lugo4go.DecisionMaker {
-	goalkeeper := lugo.GoalkeeperNumber == config.Number // it is obviously not processed every turn
+	goalkeeper := field.GoalkeeperNumber == config.Number // it is obviously not processed every turn
 	return func(snapshot *proto.GameSnapshot, sender lugo4go.OrderSender) {
 		var err error
 		var state PlayerState
 		turnData := TurnData{
-			Me:       lugo.GetPlayer(snapshot, config.TeamSide, config.Number),
+			Me:       field.GetPlayer(snapshot, config.TeamSide, config.Number),
 			Snapshot: snapshot,
 			Sender:   sender,
 		}
