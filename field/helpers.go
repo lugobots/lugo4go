@@ -1,4 +1,4 @@
-package lugo
+package field
 
 import "github.com/lugobots/lugo4go/v2/proto"
 
