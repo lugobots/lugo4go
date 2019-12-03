@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	clientGo "github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/coach"
 	"github.com/lugobots/lugo4go/v2/example/bot"
@@ -12,20 +11,14 @@ import (
 	"os/signal"
 )
 
-var logger clientGo.Logger
-var playerClient clientGo.Client
-var playerCtx context.Context
-var playerConfig clientGo.Config
-
 func main() {
-	var err error
 	// DefaultBundle is a shot cut for stuff that usually we define in init functions
-	playerConfig, logger, err = clientGo.DefaultBundle()
+	playerConfig, logger, err := clientGo.DefaultBundle()
 	if err != nil {
 		log.Fatalf("could not init default config or logger: %s", err)
 	}
 
-	// just creating a position based on the player number
+	// just creating a position for example purposes
 	playerConfig.InitialPosition = proto.Point{
 		X: field.FieldWidth / 4,
 		Y: int32(playerConfig.Number) * field.PlayerSize * 2,
@@ -35,11 +28,16 @@ func main() {
 		playerConfig.InitialPosition.X = field.FieldWidth - playerConfig.InitialPosition.X
 	}
 
-	playerCtx, playerClient, err = clientGo.NewClient(playerConfig)
+	// open the connection to the server
+	playerCtx, playerClient, err := clientGo.NewClient(playerConfig)
 	if err != nil {
 		logger.Fatalf("did not connected to the gRPC server at '%s': %s", playerConfig.GRPCAddress, err)
 	}
+
+	// Creating a bot to play
 	myBot := bot.NewBot(playerCtx, logger)
+
+	// defining the bot as the "decider" interface to be used by the Turn Handler
 	playerClient.OnNewTurn(coach.DefaultTurnHandler(myBot, playerConfig, logger), logger)
 
 	// keep the process alive
