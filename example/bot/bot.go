@@ -9,39 +9,37 @@ import (
 	"github.com/lugobots/lugo4go/v2/proto"
 )
 
-var matchCtx context.Context
 var log lugo4go.Logger
 
 type Bot struct {
 }
 
-func NewBot(ctx context.Context, logger lugo4go.Logger) coach.Decider {
+func NewBot(logger lugo4go.Logger) coach.Decider {
 	log = logger
-	matchCtx = ctx
 	return Bot{}
 }
 
-func (b Bot) OnDisputing(data coach.TurnData) error {
-	return myDecider(data)
+func (b Bot) OnDisputing(ctx context.Context, data coach.TurnData) error {
+	return myDecider(ctx, data)
 }
 
-func (b Bot) OnDefending(data coach.TurnData) error {
-	return myDecider(data)
+func (b Bot) OnDefending(ctx context.Context, data coach.TurnData) error {
+	return myDecider(ctx, data)
 }
 
-func (b Bot) OnHolding(data coach.TurnData) error {
-	return myDecider(data)
+func (b Bot) OnHolding(ctx context.Context, data coach.TurnData) error {
+	return myDecider(ctx, data)
 }
 
-func (b Bot) OnSupporting(data coach.TurnData) error {
-	return myDecider(data)
+func (b Bot) OnSupporting(ctx context.Context, data coach.TurnData) error {
+	return myDecider(ctx, data)
 }
 
-func (b Bot) AsGoalkeeper(data coach.TurnData) error {
-	return myDecider(data)
+func (b Bot) AsGoalkeeper(ctx context.Context, data coach.TurnData) error {
+	return myDecider(ctx, data)
 }
 
-func myDecider(data coach.TurnData) error {
+func myDecider(ctx context.Context, data coach.TurnData) error {
 	var orders []proto.PlayerOrder
 	// we are going to kick the ball as soon as we catch it
 	if field.IsBallHolder(data.Snapshot, data.Me) {
@@ -61,7 +59,7 @@ func myDecider(data coach.TurnData) error {
 		orders = []proto.PlayerOrder{field.MakeOrderCatch()}
 	}
 
-	resp, err := data.Sender.Send(matchCtx, orders, "")
+	resp, err := data.Sender.Send(ctx, orders, "")
 	if err != nil {
 		return fmt.Errorf("could not send kick order during turn %d: %s", data.Snapshot.Turn, err)
 	} else if resp.Code != proto.OrderResponse_SUCCESS {

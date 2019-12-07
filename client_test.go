@@ -103,12 +103,12 @@ func TestClient_OnNewTurn(t *testing.T) {
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
 
-	c.OnNewTurn(func(snapshot *proto.GameSnapshot, sender OrderSender) {
+	c.OnNewTurn(func(ctx context.Context, snapshot *proto.GameSnapshot, sender OrderSender) {
 		if snapshot != expectedSnapshot {
 			t.Errorf("Unexpected snapshot - Expected %v, Got %v", expectedSnapshot, snapshot)
 			return
 		}
-		response, err := sender.Send(waiting, []proto.PlayerOrder{expectedOrder}, expectedDebugMsg)
+		response, err := sender.Send(ctx, []proto.PlayerOrder{expectedOrder}, expectedDebugMsg)
 		if err != nil {
 			t.Errorf("Unexpected erro - Expected nil, Got %v", err)
 		}
@@ -150,12 +150,13 @@ func TestClient_ShouldStopItsContext(t *testing.T) {
 		stopCtx: func() {
 			wasClosed = true
 		},
+		ctx: context.Background(),
 	}
 
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	waiting, done := context.WithTimeout(context.Background(), 200*time.Millisecond)
 
-	c.OnNewTurn(func(snapshot *proto.GameSnapshot, sender OrderSender) {
+	c.OnNewTurn(func(ctx context.Context, snapshot *proto.GameSnapshot, sender OrderSender) {
 		t.Error("The DecisionMaker should not be called")
 		done()
 	}, mockLogger)

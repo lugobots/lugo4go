@@ -1,6 +1,7 @@
 package coach
 
 import (
+	"context"
 	"github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/field"
 	"github.com/lugobots/lugo4go/v2/proto"
@@ -27,11 +28,11 @@ type TurnData struct {
 }
 
 type Decider interface {
-	OnDisputing(data TurnData) error
-	OnDefending(data TurnData) error
-	OnHolding(data TurnData) error
-	OnSupporting(data TurnData) error
-	AsGoalkeeper(data TurnData) error
+	OnDisputing(ctx context.Context, data TurnData) error
+	OnDefending(ctx context.Context, data TurnData) error
+	OnHolding(ctx context.Context, data TurnData) error
+	OnSupporting(ctx context.Context, data TurnData) error
+	AsGoalkeeper(ctx context.Context, data TurnData) error
 }
 
 func DefineMyState(config lugo4go.Config, snapshot *proto.GameSnapshot) (PlayerState, error) {
@@ -59,7 +60,7 @@ func DefineMyState(config lugo4go.Config, snapshot *proto.GameSnapshot) (PlayerS
 
 func DefaultTurnHandler(decider Decider, config lugo4go.Config, logger lugo4go.Logger) lugo4go.DecisionMaker {
 	goalkeeper := field.GoalkeeperNumber == config.Number // it is obviously not processed every turn
-	return func(snapshot *proto.GameSnapshot, sender lugo4go.OrderSender) {
+	return func(ctx context.Context, snapshot *proto.GameSnapshot, sender lugo4go.OrderSender) {
 		var err error
 		var state PlayerState
 		turnData := TurnData{
@@ -73,18 +74,18 @@ func DefaultTurnHandler(decider Decider, config lugo4go.Config, logger lugo4go.L
 		}
 
 		if goalkeeper {
-			err = decider.AsGoalkeeper(turnData)
+			err = decider.AsGoalkeeper(ctx, turnData)
 		} else {
 			state, err = DefineMyState(config, snapshot)
 			switch state {
 			case Supporting:
-				err = decider.OnDefending(turnData)
+				err = decider.OnDefending(ctx, turnData)
 			case HoldingTheBall:
-				err = decider.OnDefending(turnData)
+				err = decider.OnDefending(ctx, turnData)
 			case Defending:
-				err = decider.OnDefending(turnData)
+				err = decider.OnDefending(ctx, turnData)
 			case DisputingTheBall:
-				err = decider.OnDefending(turnData)
+				err = decider.OnDefending(ctx, turnData)
 			}
 		}
 		if err != nil {

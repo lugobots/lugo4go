@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-type DecisionMaker func(snapshot *proto.GameSnapshot, sender OrderSender)
+type DecisionMaker func(ctx context.Context, snapshot *proto.GameSnapshot, sender OrderSender)
 
 type Logger interface {
 	Debug(args ...interface{})

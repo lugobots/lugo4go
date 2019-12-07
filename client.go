@@ -56,9 +56,13 @@ type client struct {
 }
 
 func (c client) OnNewTurn(decider DecisionMaker, log Logger) {
+	var turnCrx context.Context
+	var stop context.CancelFunc = func() {}
 	go func() {
 		for {
 			snapshot, err := c.stream.Recv()
+			stop()
+			turnCrx, stop = context.WithCancel(c.ctx)
 			if err != nil {
 				if err == io.EOF {
 					log.Infof("gRPC connection closed")
@@ -69,7 +73,7 @@ func (c client) OnNewTurn(decider DecisionMaker, log Logger) {
 				return
 			}
 			log.Debugf("calling DecisionMaker for turn %d", snapshot.Turn)
-			decider(snapshot, c.senderBuilder(snapshot, log))
+			go decider(turnCrx, snapshot, c.senderBuilder(snapshot, log))
 		}
 	}()
 }
