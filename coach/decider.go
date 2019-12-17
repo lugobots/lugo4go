@@ -58,6 +58,10 @@ func DefineMyState(config lugo4go.Config, snapshot *proto.GameSnapshot) (PlayerS
 	return Defending, nil
 }
 
+// DefaultTurnHandler is a handler that allow you to create an interface to follow an basic strategy to define bot states.
+// This function does not have to be used. You may define your own DecisionMaker function, and handle all messages as
+// you prefer.
+// Please take a look into Decider interface, and see how it may simplify your work.
 func DefaultTurnHandler(decider Decider, config lugo4go.Config, logger lugo4go.Logger) lugo4go.DecisionMaker {
 	goalkeeper := field.GoalkeeperNumber == config.Number // it is obviously not processed every turn
 	return func(ctx context.Context, snapshot *proto.GameSnapshot, sender lugo4go.OrderSender) {
@@ -69,7 +73,7 @@ func DefaultTurnHandler(decider Decider, config lugo4go.Config, logger lugo4go.L
 			Sender:   sender,
 		}
 		if turnData.Me == nil {
-			logger.Warnf("i did not find my self in the game")
+			panic("i did not find my self in the game")
 			return
 		}
 
@@ -79,13 +83,13 @@ func DefaultTurnHandler(decider Decider, config lugo4go.Config, logger lugo4go.L
 			state, err = DefineMyState(config, snapshot)
 			switch state {
 			case Supporting:
-				err = decider.OnDefending(ctx, turnData)
+				err = decider.OnSupporting(ctx, turnData)
 			case HoldingTheBall:
-				err = decider.OnDefending(ctx, turnData)
+				err = decider.OnHolding(ctx, turnData)
 			case Defending:
 				err = decider.OnDefending(ctx, turnData)
 			case DisputingTheBall:
-				err = decider.OnDefending(ctx, turnData)
+				err = decider.OnDisputing(ctx, turnData)
 			}
 		}
 		if err != nil {

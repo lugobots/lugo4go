@@ -1,6 +1,8 @@
 package field
 
-import "github.com/lugobots/lugo4go/v2/proto"
+import (
+	"github.com/lugobots/lugo4go/v2/proto"
+)
 
 func GetTeam(s *proto.GameSnapshot, side proto.Team_Side) *proto.Team {
 	if s == nil {

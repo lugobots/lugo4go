@@ -9,3 +9,8 @@ mockgen -package=proto \
         -destination=proto/mocks.go \
         -self_package=github.com/lugobots/lugo4go/v2/proto \
         github.com/lugobots/lugo4go/v2/proto GameServer,GameClient,Game_JoinATeamClient
+
+mockgen -package=coach \
+        -destination=coach/mocks.go \
+        -self_package=github.com/lugobots/lugo4go/v2/coach \
+        github.com/lugobots/lugo4go/v2/coach Decider

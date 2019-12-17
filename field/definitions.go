@@ -14,6 +14,12 @@ const (
 	// this interval ensure players won't drop connection in purpose to be reallocated to their initial position.
 	PlayerReconnectionWaitTime = 20 * time.Second
 
+	// max number of players in a team by mach
+	MaxPlayers = 11
+
+	// min number of players in a team by mach, if a team gets to have less to this number, the team loses by W.O.
+	MinPlayers = 6
+
 	// PlayerMaxSpeed is the max speed that a play may move  by frame
 	PlayerMaxSpeed = 100.0
 

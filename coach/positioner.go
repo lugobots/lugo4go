@@ -1,10 +1,19 @@
 package coach
 
 import (
+	"fmt"
 	"github.com/lugobots/lugo4go/v2/field"
 	"github.com/lugobots/lugo4go/v2/proto"
 	"math"
 )
+
+// Important note: since our bot needs to have the best performance possible. We may ensure that some errors will never
+// happen based on our configuration. Once the errors are in a controlled and limited list of methods, we are able
+// to ignore the errors during the game, and only test them in our unit tests.
+//
+// For doing that, in our bot, we may create a limited list of region coordinates that will be translated to Regions,
+// and than test all of them. The other direction is the conversion from a Point to a region. In this case, we
+// assume that the server will only send us valid points (within the field limits).
 
 const (
 	// Define the min number of cols allowed on the field division by the positioner
@@ -101,6 +110,10 @@ func (r region) Row() uint8 {
 
 func (r region) Center() proto.Point {
 	return r.center
+}
+
+func (r region) String() string {
+	return fmt.Sprintf("{%d,%d-%s}", r.col, r.row, r.sideRef)
 }
 
 // Invert the coords X and Y as in a mirror to found out the same position seen from the away team field
