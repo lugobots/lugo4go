@@ -1,6 +1,9 @@
 package coach
 
-import "github.com/lugobots/lugo4go/v2/proto"
+import (
+	"fmt"
+	"github.com/lugobots/lugo4go/v2/proto"
+)
 
 // Positioner Helps the bots to see the fields from their team perspective instead of using the cartesian plan provided
 // by the game server. Instead of base your logic on the axes X and Y, the positioner create a region map based
@@ -19,6 +22,7 @@ type Positioner interface {
 // the field will be divided in. So, based on that division (e.g. 4 rows, 6 cols) there will be a fixed number of regions
 // and their coordinates will be zero-index (e.g. from 0 to 3 rows when divided in 4 rows).
 type Region interface {
+	fmt.Stringer
 	// The col coordinate based on the field division
 	Col() uint8
 	// The row coordinate based on the field division
