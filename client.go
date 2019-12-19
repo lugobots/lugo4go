@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/lugobots/lugo4go/v2/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/stats"
 	"io"
 )
 
@@ -13,10 +14,13 @@ func NewClient(config Config) (context.Context, Client, error) {
 	var err error
 	c := &client{}
 
+	// A bot may eventually do not listen to server stream (ignoring OnNewTurn). In this case, the client must stop
+	// when the gRPC connection is closed.
+	connHandler := grpc.WithStatsHandler(c)
 	if config.Insecure {
-		c.grpcConn, err = grpc.Dial(config.GRPCAddress, grpc.WithInsecure())
+		c.grpcConn, err = grpc.Dial(config.GRPCAddress, grpc.WithInsecure(), connHandler)
 	} else {
-		c.grpcConn, err = grpc.Dial(config.GRPCAddress)
+		c.grpcConn, err = grpc.Dial(config.GRPCAddress, connHandler)
 	}
 	if err != nil {
 		return nil, nil, err
@@ -112,4 +116,24 @@ func (s sender) Send(ctx context.Context, orders []proto.PlayerOrder, debugMsg s
 	}
 	s.logger.Debugf("sending orders for turn %d", s.snapshot.Turn)
 	return s.gameConn.SendOrders(ctx, orderSet)
+}
+
+func (c *client) TagRPC(ctx context.Context, t *stats.RPCTagInfo) context.Context {
+	return ctx
+}
+
+func (c *client) HandleRPC(context.Context, stats.RPCStats) {
+
+}
+
+func (c *client) TagConn(ctx context.Context, t *stats.ConnTagInfo) context.Context {
+	return ctx
+}
+
+func (c *client) HandleConn(ctx context.Context, sts stats.ConnStats) {
+	switch sts.(type) {
+	case *stats.ConnEnd:
+		_ = c.Stop()
+		break
+	}
 }

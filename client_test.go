@@ -219,3 +219,39 @@ func TestSender_Send(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, expectedServerResponse, serverResponse)
 }
+
+func TestClient_StopsIfGRPCConnectionIsInterrupted(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish() // checks all expected things for mocks
+
+	ctx, stopServer := context.WithCancel(context.Background())
+	defer stopServer()
+
+	// creates a fake server to test our client
+	if _, err := proto.NewMockServer(ctx, ctrl, testServerPort); err != nil {
+		t.Fatalf("did not start mock server: %s", err)
+	}
+
+	config := Config{
+		GRPCAddress:     fmt.Sprintf(":%d", testServerPort),
+		Insecure:        true,
+		TeamSide:        proto.Team_HOME,
+		Number:          3,
+		InitialPosition: proto.Point{X: 4000, Y: 4000},
+	}
+
+	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
+	//waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
+
+	// Now we may create the client to connect to our fake server
+	clientCtx, _, err := NewClient(config)
+	if err != nil {
+		t.Errorf("Unexpected erro - Expected nil, Got %v", err)
+	}
+	// let's give some time to the client stop after the server be stopped
+	maxWait, _ := context.WithTimeout(clientCtx, 500*time.Millisecond)
+
+	stopServer()
+	<-maxWait.Done()
+	assert.Equal(t, context.Canceled, clientCtx.Err())
+}
