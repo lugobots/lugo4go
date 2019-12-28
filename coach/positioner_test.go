@@ -1,9 +1,11 @@
 package coach
 
 import (
+	"fmt"
 	"github.com/lugobots/lugo4go/v2/field"
 	"github.com/lugobots/lugo4go/v2/proto"
 	"github.com/stretchr/testify/assert"
+	"reflect"
 	"testing"
 )
 
@@ -239,4 +241,142 @@ func TestPositioner_GetPointRegion_AwayTeam(t *testing.T) {
 		assert.Equal(t, testSettings.cols-1, r.Col(), testName)
 		assert.Equal(t, uint8(0), r.Row(), testName)
 	}
+}
+
+func TestRegion_Front(t *testing.T) {
+	maxCol := uint8(9)
+	maxRow := uint8(9)
+
+	type testCase struct {
+		col          uint8
+		row          uint8
+		expectedCol  uint8
+		expectedRow  uint8
+		expectedSame bool
+	}
+
+	testCases := map[string]testCase{
+		"center":             {5, 5, 6, 5, false},
+		"back-right-corner":  {0, 0, 1, 0, false},
+		"back-left-corner":   {0, 9, 1, 9, false},
+		"front-right-corner": {9, 0, 9, 0, true},
+		"front-left-corner":  {9, 9, 9, 9, true},
+	}
+	testTeamRegions := func(teamSide proto.Team_Side) {
+		p, err := NewPositioner(maxCol+1, maxRow+1, teamSide)
+		assert.Nil(t, err)
+		for testName, testSettings := range testCases {
+			regionTestCase, err := p.GetRegion(testSettings.col, testSettings.row)
+			assert.Nil(t, err, fmt.Sprintf("%s: test settings are invalid", testName))
+			regionActual := regionTestCase.Front()
+			assert.Equal(t, testSettings.expectedCol, regionActual.Col(), testName)
+			assert.Equal(t, testSettings.expectedRow, regionActual.Row(), testName)
+			assert.Equal(t, testSettings.expectedSame, reflect.DeepEqual(regionActual, regionTestCase))
+		}
+	}
+	testTeamRegions(proto.Team_HOME)
+	testTeamRegions(proto.Team_AWAY)
+}
+
+func TestRegion_Back(t *testing.T) {
+	maxCol := uint8(9)
+	maxRow := uint8(9)
+
+	type testCase struct {
+		col          uint8
+		row          uint8
+		expectedCol  uint8
+		expectedRow  uint8
+		expectedSame bool
+	}
+
+	testCases := map[string]testCase{
+		"center":             {5, 5, 4, 5, false},
+		"back-right-corner":  {0, 0, 0, 0, true},
+		"back-left-corner":   {0, 9, 0, 9, true},
+		"front-right-corner": {9, 0, 8, 0, false},
+		"front-left-corner":  {9, 9, 8, 9, false},
+	}
+	testTeamRegions := func(teamSide proto.Team_Side) {
+		p, err := NewPositioner(maxCol+1, maxRow+1, teamSide)
+		assert.Nil(t, err)
+		for testName, testSettings := range testCases {
+			regionTestCase, err := p.GetRegion(testSettings.col, testSettings.row)
+			assert.Nil(t, err, fmt.Sprintf("%s: test settings are invalid", testName))
+			regionActual := regionTestCase.Back()
+			assert.Equal(t, testSettings.expectedCol, regionActual.Col(), testName)
+			assert.Equal(t, testSettings.expectedRow, regionActual.Row(), testName)
+			assert.Equal(t, testSettings.expectedSame, reflect.DeepEqual(regionActual, regionTestCase))
+		}
+	}
+	testTeamRegions(proto.Team_HOME)
+	testTeamRegions(proto.Team_AWAY)
+}
+
+func TestRegion_Left(t *testing.T) {
+	maxCol := uint8(9)
+	maxRow := uint8(9)
+	type testCase struct {
+		col          uint8
+		row          uint8
+		expectedCol  uint8
+		expectedRow  uint8
+		expectedSame bool
+	}
+
+	testCases := map[string]testCase{
+		"center":             {5, 5, 5, 6, false},
+		"back-right-corner":  {0, 0, 0, 1, false},
+		"back-left-corner":   {0, 9, 0, 9, true},
+		"front-right-corner": {9, 0, 9, 1, false},
+		"front-left-corner":  {9, 9, 9, 9, true},
+	}
+	testTeamRegions := func(teamSide proto.Team_Side) {
+		p, err := NewPositioner(maxCol+1, maxRow+1, teamSide)
+		assert.Nil(t, err)
+		for testName, testSettings := range testCases {
+			regionTestCase, err := p.GetRegion(testSettings.col, testSettings.row)
+			assert.Nil(t, err, fmt.Sprintf("%s: test settings are invalid", testName))
+			regionActual := regionTestCase.Left()
+			assert.Equal(t, testSettings.expectedCol, regionActual.Col(), testName)
+			assert.Equal(t, testSettings.expectedRow, regionActual.Row(), testName)
+			assert.Equal(t, testSettings.expectedSame, reflect.DeepEqual(regionActual, regionTestCase))
+		}
+	}
+	testTeamRegions(proto.Team_HOME)
+	testTeamRegions(proto.Team_AWAY)
+}
+
+func TestRegion_Right(t *testing.T) {
+	maxCol := uint8(9)
+	maxRow := uint8(9)
+	type testCase struct {
+		col          uint8
+		row          uint8
+		expectedCol  uint8
+		expectedRow  uint8
+		expectedSame bool
+	}
+
+	testCases := map[string]testCase{
+		"center":             {5, 5, 5, 4, false},
+		"back-right-corner":  {0, 0, 0, 0, true},
+		"back-left-corner":   {0, 9, 0, 8, false},
+		"front-right-corner": {9, 0, 9, 0, true},
+		"front-left-corner":  {9, 9, 9, 8, false},
+	}
+	testTeamRegions := func(teamSide proto.Team_Side) {
+		p, err := NewPositioner(maxCol+1, maxRow+1, teamSide)
+		assert.Nil(t, err)
+		for testName, testSettings := range testCases {
+			regionTestCase, err := p.GetRegion(testSettings.col, testSettings.row)
+			assert.Nil(t, err, fmt.Sprintf("%s: test settings are invalid", testName))
+			regionActual := regionTestCase.Right()
+			assert.Equal(t, testSettings.expectedCol, regionActual.Col(), testName)
+			assert.Equal(t, testSettings.expectedRow, regionActual.Row(), testName)
+			assert.Equal(t, testSettings.expectedSame, reflect.DeepEqual(regionActual, regionTestCase))
+		}
+	}
+	testTeamRegions(proto.Team_HOME)
+	testTeamRegions(proto.Team_AWAY)
 }

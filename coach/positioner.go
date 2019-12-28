@@ -75,10 +75,11 @@ func (p *positioner) GetRegion(col, row uint8) (Region, error) {
 	}
 
 	return region{
-		col:     col,
-		row:     row,
-		sideRef: p.sideRef,
-		center:  center,
+		col:        col,
+		row:        row,
+		sideRef:    p.sideRef,
+		center:     center,
+		positioner: p,
 	}, nil
 }
 
@@ -94,10 +95,11 @@ func (p *positioner) GetPointRegion(point proto.Point) (Region, error) {
 }
 
 type region struct {
-	col     uint8
-	row     uint8
-	sideRef proto.Team_Side
-	center  proto.Point
+	col        uint8
+	row        uint8
+	sideRef    proto.Team_Side
+	center     proto.Point
+	positioner *positioner
 }
 
 func (r region) Col() uint8 {
@@ -114,6 +116,34 @@ func (r region) Center() proto.Point {
 
 func (r region) String() string {
 	return fmt.Sprintf("{%d,%d-%s}", r.col, r.row, r.sideRef)
+}
+
+func (r region) Front() Region {
+	if n, err := r.positioner.GetRegion(r.col+1, r.row); err == nil {
+		return n
+	}
+	return r
+}
+
+func (r region) Back() Region {
+	if n, err := r.positioner.GetRegion(r.col-1, r.row); err == nil {
+		return n
+	}
+	return r
+}
+
+func (r region) Left() Region {
+	if n, err := r.positioner.GetRegion(r.col, r.row+1); err == nil {
+		return n
+	}
+	return r
+}
+
+func (r region) Right() Region {
+	if n, err := r.positioner.GetRegion(r.col, r.row-1); err == nil {
+		return n
+	}
+	return r
 }
 
 // Invert the coords X and Y as in a mirror to found out the same position seen from the away team field

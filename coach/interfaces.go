@@ -29,4 +29,17 @@ type Region interface {
 	Row() uint8
 	// Return the point at the center of the quadrant represented by this Region. It is not always precise.
 	Center() proto.Point
+
+	// The region immediatelly in front of this one from the player perspective
+	// Important: The same region is returned if the requested region is not valid
+	Front() Region
+	// The region immediatelly behind this one from the player perspective
+	// Important: The same region is returned if the requested region is not valid
+	Back() Region
+	// The region immediatelly on left of this one from the player perspective
+	// Important: The same region is returned if the requested region is not valid
+	Left() Region
+	// The region immediatelly on right of this one from the player perspective
+	// Important: The same region is returned if the requested region is not valid
+	Right() Region
 }
