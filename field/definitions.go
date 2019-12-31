@@ -46,7 +46,7 @@ const (
 
 	// BallTimeInGoalZone is the max number of turns that the ball may be in a goal zone. After that, the ball will be auto kicked
 	// towards the center of the field.
-	BallTimeInGoalZone = 60 // 60 / 20 fps = 3 seconds
+	BallTimeInGoalZone = 40 // 40 / 20 fps = 2 seconds
 
 	// GoalWidth is the goal width
 	GoalWidth = 30 * BaseUnit

@@ -6,12 +6,12 @@ import (
 )
 
 // DistanceTo finds the distance of this point to a target point
-func (m *Point) DistanceTo(target Point) (distance float64) {
+func (m Point) DistanceTo(target Point) (distance float64) {
 	return math.Hypot(float64(target.X-m.X), float64(target.Y-m.Y))
 }
 
 // MiddlePointTo finds a point between this point and a target point
-func (m *Point) MiddlePointTo(target Point) Point {
+func (m Point) MiddlePointTo(target Point) Point {
 	x := math.Abs(float64(m.X - target.X))
 	y := math.Abs(float64(m.Y - target.Y))
 
