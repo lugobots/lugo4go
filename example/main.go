@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	// DefaultBundle is a shot cut for stuff that usually we define in init functions
+	// DefaultBundle is a shortcut for stuff that usually we define in init functions
 	playerConfig, logger, err := clientGo.DefaultBundle()
 	if err != nil {
 		log.Fatalf("could not init default config or logger: %s", err)
