@@ -1,6 +1,6 @@
 package field
 
-import "github.com/lugobots/lugo4go/v2/proto"
+import "github.com/lugobots/lugo4go/v2/lugo"
 
 // Goal is a set of value about a goal from a team
 type Goal struct {

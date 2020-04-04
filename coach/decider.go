@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/field"
-	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v2/lugo"
 )
 
 // PlayerState defines states specific for players

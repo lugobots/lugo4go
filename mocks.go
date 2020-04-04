@@ -7,7 +7,7 @@ package lugo4go
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	proto "github.com/lugobots/lugo4go/v2/proto"
+	lugo "github.com/lugobots/lugo4go/v2/lugo"
 	grpc "google.golang.org/grpc"
 	reflect "reflect"
 )
@@ -200,10 +200,10 @@ func (mr *MockClientMockRecorder) GetGRPCConn() *gomock.Call {
 }
 
 // GetServiceConn mocks base method
-func (m *MockClient) GetServiceConn() proto.GameClient {
+func (m *MockClient) GetServiceConn() lugo.GameClient {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetServiceConn")
-	ret0, _ := ret[0].(proto.GameClient)
+	ret0, _ := ret[0].(lugo.GameClient)
 	return ret0
 }
 
@@ -214,7 +214,7 @@ func (mr *MockClientMockRecorder) GetServiceConn() *gomock.Call {
 }
 
 // SenderBuilder mocks base method
-func (m *MockClient) SenderBuilder(builder func(*proto.GameSnapshot, Logger) OrderSender) {
+func (m *MockClient) SenderBuilder(builder func(*lugo.GameSnapshot, Logger) OrderSender) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "SenderBuilder", builder)
 }
@@ -249,10 +249,10 @@ func (m *MockOrderSender) EXPECT() *MockOrderSenderMockRecorder {
 }
 
 // Send mocks base method
-func (m *MockOrderSender) Send(ctx context.Context, orders []proto.PlayerOrder, debugMsg string) (*proto.OrderResponse, error) {
+func (m *MockOrderSender) Send(ctx context.Context, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Send", ctx, orders, debugMsg)
-	ret0, _ := ret[0].(*proto.OrderResponse)
+	ret0, _ := ret[0].(*lugo.OrderResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

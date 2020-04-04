@@ -5,7 +5,7 @@ import (
 	"github.com/lugobots/lugo4go/v2/coach"
 	"github.com/lugobots/lugo4go/v2/example/bot"
 	"github.com/lugobots/lugo4go/v2/field"
-	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v2/lugo"
 	"log"
 	"os"
 	"os/signal"

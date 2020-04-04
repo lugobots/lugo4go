@@ -3,7 +3,6 @@ package lugo4go
 import (
 	"context"
 	"github.com/lugobots/lugo4go/v2/lugo"
-	"github.com/lugobots/lugo4go/v2/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/stats"
 	"io"

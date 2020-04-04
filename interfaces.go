@@ -2,7 +2,7 @@ package lugo4go
 
 import (
 	"context"
-	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v2/lugo"
 	"google.golang.org/grpc"
 )
 
