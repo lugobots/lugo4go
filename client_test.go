@@ -7,12 +7,36 @@ import (
 	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/testdata"
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/grpc"
 	"io"
+	"log"
+	"net"
 	"testing"
 	"time"
 )
 
 const testServerPort = 2222
+
+func NewMockServer(ctx context.Context, ctr *gomock.Controller, port int16) (*lugo.MockGameServer, error) {
+	mock := lugo.NewMockGameServer(ctr)
+	gRPCServer := grpc.NewServer()
+	lugo.RegisterGameServer(gRPCServer, mock)
+
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	if err != nil {
+		return nil, err
+	}
+	go func() {
+		<-ctx.Done()
+		gRPCServer.Stop()
+	}()
+	go func() {
+		if err := gRPCServer.Serve(lis); err != nil {
+			log.Fatalf("test server has stopped: %s", err)
+		}
+	}()
+	return mock, nil
+}
 
 func TestNewClient(t *testing.T) {
 	// initiates Mock controller
@@ -22,7 +46,7 @@ func TestNewClient(t *testing.T) {
 	ctx, stop := context.WithCancel(context.Background())
 	defer stop()
 	// creates a fake server to test our client
-	srv, err := lugo.NewMockServer(ctx, ctrl, testServerPort)
+	srv, err := NewMockServer(ctx, ctrl, testServerPort)
 	if err != nil {
 		t.Fatalf("did not start mock server: %s", err)
 	}
@@ -228,7 +252,7 @@ func TestClient_StopsIfGRPCConnectionIsInterrupted(t *testing.T) {
 	defer stopServer()
 
 	// creates a fake server to test our client
-	if _, err := lugo.NewMockServer(ctx, ctrl, testServerPort); err != nil {
+	if _, err := NewMockServer(ctx, ctrl, testServerPort); err != nil {
 		t.Fatalf("did not start mock server: %s", err)
 	}
 
