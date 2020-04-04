@@ -22,7 +22,7 @@ func TestNewClient(t *testing.T) {
 	ctx, stop := context.WithCancel(context.Background())
 	defer stop()
 	// creates a fake server to test our client
-	srv, err := proto.NewMockServer(ctx, ctrl, testServerPort)
+	srv, err := lugo.NewMockServer(ctx, ctrl, testServerPort)
 	if err != nil {
 		t.Fatalf("did not start mock server: %s", err)
 	}
@@ -30,9 +30,9 @@ func TestNewClient(t *testing.T) {
 	config := Config{
 		GRPCAddress:     fmt.Sprintf(":%d", testServerPort),
 		Insecure:        true,
-		TeamSide:        proto.Team_HOME,
+		TeamSide:        lugo.Team_HOME,
 		Number:          3,
-		InitialPosition: proto.Point{X: 4000, Y: 4000},
+		InitialPosition: lugo.Point{X: 4000, Y: 4000},
 	}
 
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
@@ -40,7 +40,7 @@ func TestNewClient(t *testing.T) {
 
 	// the client will try to join to a team, so our server need to expect it happens
 	srv.EXPECT().JoinATeam(testdata.NewMatcher(func(arg interface{}) bool {
-		expectedRequest := &proto.JoinRequest{
+		expectedRequest := &lugo.JoinRequest{
 			Number:          config.Number,
 			InitPosition:    &config.InitialPosition,
 			TeamSide:        config.TeamSide,
@@ -71,27 +71,27 @@ func TestClient_OnNewTurn(t *testing.T) {
 
 	// defining expectations
 
-	expectedSnapshot := &proto.GameSnapshot{Turn: 200}
-	expectedOrder := &proto.Order_Catch{}
+	expectedSnapshot := &lugo.GameSnapshot{Turn: 200}
+	expectedOrder := &lugo.Order_Catch{}
 	expectedDebugMsg := "a-important-msg"
-	expectedResponse := &proto.OrderResponse{
-		Code: proto.OrderResponse_SUCCESS,
+	expectedResponse := &lugo.OrderResponse{
+		Code: lugo.OrderResponse_SUCCESS,
 	}
 	receivedSnapshot := false
 
 	// defining mocks and expected method calls
 	mockLogger := NewMockLogger(ctrl)
-	mockStream := proto.NewMockGame_JoinATeamClient(ctrl)
+	mockStream := lugo.NewMockGame_JoinATeamClient(ctrl)
 	mockSender := NewMockOrderSender(ctrl)
 	mockLogger.EXPECT().Debugf(gomock.Any(), gomock.Any()).AnyTimes()
 	mockLogger.EXPECT().Infof(gomock.Any(), gomock.Any()).AnyTimes()
 	mockStream.EXPECT().Recv().Return(expectedSnapshot, nil)
 	mockStream.EXPECT().Recv().Return(nil, io.EOF)
-	mockSender.EXPECT().Send(gomock.Any(), []proto.PlayerOrder{expectedOrder}, expectedDebugMsg).Return(expectedResponse, nil)
+	mockSender.EXPECT().Send(gomock.Any(), []lugo.PlayerOrder{expectedOrder}, expectedDebugMsg).Return(expectedResponse, nil)
 
 	c := &client{
 		stream: mockStream,
-		senderBuilder: func(snapshot *proto.GameSnapshot, logger Logger) OrderSender {
+		senderBuilder: func(snapshot *lugo.GameSnapshot, logger Logger) OrderSender {
 			return mockSender
 		},
 		ctx: context.Background(),
@@ -103,12 +103,12 @@ func TestClient_OnNewTurn(t *testing.T) {
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
 
-	c.OnNewTurn(func(ctx context.Context, snapshot *proto.GameSnapshot, sender OrderSender) {
+	c.OnNewTurn(func(ctx context.Context, snapshot *lugo.GameSnapshot, sender OrderSender) {
 		if snapshot != expectedSnapshot {
 			t.Errorf("Unexpected snapshot - Expected %v, Got %v", expectedSnapshot, snapshot)
 			return
 		}
-		response, err := sender.Send(ctx, []proto.PlayerOrder{expectedOrder}, expectedDebugMsg)
+		response, err := sender.Send(ctx, []lugo.PlayerOrder{expectedOrder}, expectedDebugMsg)
 		if err != nil {
 			t.Errorf("Unexpected erro - Expected nil, Got %v", err)
 		}
@@ -138,7 +138,7 @@ func TestClient_ShouldStopItsContext(t *testing.T) {
 
 	// defining mocks and expected method calls
 	mockLogger := NewMockLogger(ctrl)
-	mockStream := proto.NewMockGame_JoinATeamClient(ctrl)
+	mockStream := lugo.NewMockGame_JoinATeamClient(ctrl)
 
 	mockLogger.EXPECT().Infof(gomock.Any(), gomock.Any()).AnyTimes()
 	mockStream.EXPECT().Recv().Return(nil, io.EOF)
@@ -156,7 +156,7 @@ func TestClient_ShouldStopItsContext(t *testing.T) {
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	waiting, done := context.WithTimeout(context.Background(), 200*time.Millisecond)
 
-	c.OnNewTurn(func(ctx context.Context, snapshot *proto.GameSnapshot, sender OrderSender) {
+	c.OnNewTurn(func(ctx context.Context, snapshot *lugo.GameSnapshot, sender OrderSender) {
 		t.Error("The DecisionMaker should not be called")
 		done()
 	}, mockLogger)
@@ -177,31 +177,31 @@ func TestSender_Send(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish() // checks all expected things for mocks
 
-	mockGameConn := proto.NewMockGameClient(ctrl)
+	mockGameConn := lugo.NewMockGameClient(ctrl)
 	mockLogger := NewMockLogger(ctrl)
 
-	expectedSnapshot := &proto.GameSnapshot{Turn: 321}
+	expectedSnapshot := &lugo.GameSnapshot{Turn: 321}
 	expectedContext := context.Background()
 
 	// this is the list that the developer should be concerned about while the bot is been built.
 	// the rest of the job will be abstracted by the sender.
-	expectedOrderSlice := []proto.PlayerOrder{
-		&proto.Order_Catch{}, &proto.Order_Catch{},
+	expectedOrderSlice := []lugo.PlayerOrder{
+		&lugo.Order_Catch{}, &lugo.Order_Catch{},
 	}
 	expectedDebugMsg := "it's a nice debug message"
 
 	// The whole work done by the sender is converting a list of PlayerOrders into a more complex format expected
 	// by the server, that's the `OrderSet`. Since OrderSet also has a debug msg and the turn number, it also receive
 	// the snapshot.
-	expectedOrderSet := &proto.OrderSet{
+	expectedOrderSet := &lugo.OrderSet{
 		Turn:         expectedSnapshot.Turn,
 		DebugMessage: expectedDebugMsg,
-		Orders: []*proto.Order{
-			{Action: &proto.Order_Catch{}}, {Action: &proto.Order_Catch{}},
+		Orders: []*lugo.Order{
+			{Action: &lugo.Order_Catch{}}, {Action: &lugo.Order_Catch{}},
 		},
 	}
-	expectedServerResponse := &proto.OrderResponse{
-		Code:    proto.OrderResponse_SUCCESS,
+	expectedServerResponse := &lugo.OrderResponse{
+		Code:    lugo.OrderResponse_SUCCESS,
 		Details: "nothing else to say",
 	}
 
@@ -228,16 +228,16 @@ func TestClient_StopsIfGRPCConnectionIsInterrupted(t *testing.T) {
 	defer stopServer()
 
 	// creates a fake server to test our client
-	if _, err := proto.NewMockServer(ctx, ctrl, testServerPort); err != nil {
+	if _, err := lugo.NewMockServer(ctx, ctrl, testServerPort); err != nil {
 		t.Fatalf("did not start mock server: %s", err)
 	}
 
 	config := Config{
 		GRPCAddress:     fmt.Sprintf(":%d", testServerPort),
 		Insecure:        true,
-		TeamSide:        proto.Team_HOME,
+		TeamSide:        lugo.Team_HOME,
 		Number:          3,
-		InitialPosition: proto.Point{X: 4000, Y: 4000},
+		InitialPosition: lugo.Point{X: 4000, Y: 4000},
 	}
 
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze

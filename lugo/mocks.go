@@ -2,7 +2,7 @@
 // Source: github.com/lugobots/lugo4go/v2/proto (interfaces: PlayerOrder,GameServer,GameClient,Game_JoinATeamClient,Game_JoinATeamServer)
 
 // Package proto is a generated GoMock package.
-package proto
+package lugo
 
 import (
 	context "context"

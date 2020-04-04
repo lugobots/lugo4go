@@ -1,4 +1,4 @@
-package proto
+package lugo
 
 import (
 	"github.com/stretchr/testify/assert"

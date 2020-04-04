@@ -7,123 +7,123 @@ import (
 )
 
 func TestGetTeam_GetsTheRightTeam(t *testing.T) {
-	expected := proto.Team{Name: "MAY TEAM"}
-	snapshot := proto.GameSnapshot{HomeTeam: &expected}
+	expected := lugo.Team{Name: "MAY TEAM"}
+	snapshot := lugo.GameSnapshot{HomeTeam: &expected}
 
-	assert.Equal(t, &expected, GetTeam(&snapshot, proto.Team_HOME))
+	assert.Equal(t, &expected, GetTeam(&snapshot, lugo.Team_HOME))
 
-	expected = proto.Team{Name: "Another Team"}
-	snapshot = proto.GameSnapshot{AwayTeam: &expected}
+	expected = lugo.Team{Name: "Another Team"}
+	snapshot = lugo.GameSnapshot{AwayTeam: &expected}
 
-	assert.Equal(t, &expected, GetTeam(&snapshot, proto.Team_AWAY))
+	assert.Equal(t, &expected, GetTeam(&snapshot, lugo.Team_AWAY))
 }
 
 func TestGetTeam_DoNotPanicInvalidSnapshot(t *testing.T) {
-	assert.Nil(t, GetTeam(&proto.GameSnapshot{}, proto.Team_HOME))
-	assert.Nil(t, GetTeam(nil, proto.Team_HOME))
+	assert.Nil(t, GetTeam(&lugo.GameSnapshot{}, lugo.Team_HOME))
+	assert.Nil(t, GetTeam(nil, lugo.Team_HOME))
 }
 
 func TestIsBallHolder_ShouldBeTrue(t *testing.T) {
-	expectedHolder := proto.Player{Number: 3, TeamSide: proto.Team_AWAY}
-	ball := proto.Ball{Holder: &expectedHolder}
-	snapshot := proto.GameSnapshot{Ball: &ball}
+	expectedHolder := lugo.Player{Number: 3, TeamSide: lugo.Team_AWAY}
+	ball := lugo.Ball{Holder: &expectedHolder}
+	snapshot := lugo.GameSnapshot{Ball: &ball}
 
 	assert.True(t, IsBallHolder(&snapshot, &expectedHolder))
 }
 
 func TestIsBallHolder_ShouldBeFalse_NoHolder(t *testing.T) {
-	expectedHolder := proto.Player{Number: 3, TeamSide: proto.Team_AWAY}
-	ball := proto.Ball{}
-	snapshot := proto.GameSnapshot{Ball: &ball}
+	expectedHolder := lugo.Player{Number: 3, TeamSide: lugo.Team_AWAY}
+	ball := lugo.Ball{}
+	snapshot := lugo.GameSnapshot{Ball: &ball}
 
 	assert.False(t, IsBallHolder(&snapshot, &expectedHolder))
 }
 
 func TestIsBallHolder_ShouldBeFalse_OtherPlayerHolds(t *testing.T) {
-	expectedHolder := proto.Player{Number: 3, TeamSide: proto.Team_AWAY}
-	ball := proto.Ball{Holder: &proto.Player{Number: 2, TeamSide: proto.Team_HOME}}
-	snapshot := proto.GameSnapshot{Ball: &ball}
+	expectedHolder := lugo.Player{Number: 3, TeamSide: lugo.Team_AWAY}
+	ball := lugo.Ball{Holder: &lugo.Player{Number: 2, TeamSide: lugo.Team_HOME}}
+	snapshot := lugo.GameSnapshot{Ball: &ball}
 
 	assert.False(t, IsBallHolder(&snapshot, &expectedHolder))
 }
 
 func TestIsBallHolder_ShouldBeFalse_InvalidInputs(t *testing.T) {
-	expectedHolder := proto.Player{Number: 3, TeamSide: proto.Team_AWAY}
+	expectedHolder := lugo.Player{Number: 3, TeamSide: lugo.Team_AWAY}
 
-	assert.False(t, IsBallHolder(&proto.GameSnapshot{}, &expectedHolder))
+	assert.False(t, IsBallHolder(&lugo.GameSnapshot{}, &expectedHolder))
 	assert.False(t, IsBallHolder(nil, &expectedHolder))
-	assert.False(t, IsBallHolder(&proto.GameSnapshot{Ball: &proto.Ball{Holder: &expectedHolder}}, nil))
+	assert.False(t, IsBallHolder(&lugo.GameSnapshot{Ball: &lugo.Ball{Holder: &expectedHolder}}, nil))
 }
 
 func TestGetPlayer(t *testing.T) {
-	expectedPlayer := proto.Player{TeamSide: proto.Team_HOME, Number: 11}
-	snapshot := proto.GameSnapshot{
-		HomeTeam: &proto.Team{Players: []*proto.Player{
+	expectedPlayer := lugo.Player{TeamSide: lugo.Team_HOME, Number: 11}
+	snapshot := lugo.GameSnapshot{
+		HomeTeam: &lugo.Team{Players: []*lugo.Player{
 			&expectedPlayer,
 		}},
 	}
-	assert.Equal(t, &expectedPlayer, GetPlayer(&snapshot, proto.Team_HOME, 11))
+	assert.Equal(t, &expectedPlayer, GetPlayer(&snapshot, lugo.Team_HOME, 11))
 }
 
 func TestGetPlayer_PlayerNotPresent(t *testing.T) {
-	snapshot := proto.GameSnapshot{
-		HomeTeam: &proto.Team{Players: []*proto.Player{
-			{TeamSide: proto.Team_HOME, Number: 10},
+	snapshot := lugo.GameSnapshot{
+		HomeTeam: &lugo.Team{Players: []*lugo.Player{
+			{TeamSide: lugo.Team_HOME, Number: 10},
 		}},
 	}
 
-	assert.Nil(t, GetPlayer(&snapshot, proto.Team_HOME, 11))
+	assert.Nil(t, GetPlayer(&snapshot, lugo.Team_HOME, 11))
 }
 
 func TestGetPlayer_TeamNotPresent(t *testing.T) {
-	snapshot := proto.GameSnapshot{
-		HomeTeam: &proto.Team{Players: []*proto.Player{
-			{TeamSide: proto.Team_HOME, Number: 10},
+	snapshot := lugo.GameSnapshot{
+		HomeTeam: &lugo.Team{Players: []*lugo.Player{
+			{TeamSide: lugo.Team_HOME, Number: 10},
 		}},
 	}
 
-	assert.Nil(t, GetPlayer(&snapshot, proto.Team_AWAY, 10))
+	assert.Nil(t, GetPlayer(&snapshot, lugo.Team_AWAY, 10))
 }
 
 func TestGetPlayer_InvalidSnapshot(t *testing.T) {
-	assert.Nil(t, GetPlayer(nil, proto.Team_AWAY, 10))
+	assert.Nil(t, GetPlayer(nil, lugo.Team_AWAY, 10))
 }
 
 func TestMakeOrder_Move(t *testing.T) {
-	expectedOrderA := &proto.Order_Move{Move: &proto.Move{
-		Velocity: &proto.Velocity{
+	expectedOrderA := &lugo.Order_Move{Move: &lugo.Move{
+		Velocity: &lugo.Velocity{
 			Speed:     100,
-			Direction: proto.North().Copy().Normalize(),
+			Direction: lugo.North().Copy().Normalize(),
 		},
 	}}
 
-	got, err := MakeOrderMove(proto.Point{}, proto.Point{Y: 100}, 100)
+	got, err := MakeOrderMove(lugo.Point{}, lugo.Point{Y: 100}, 100)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOrderA, got)
 
-	expectedOrderB := &proto.Order_Move{Move: &proto.Move{
-		Velocity: &proto.Velocity{
+	expectedOrderB := &lugo.Order_Move{Move: &lugo.Move{
+		Velocity: &lugo.Velocity{
 			Speed:     40,
-			Direction: proto.South().Copy().Normalize(),
+			Direction: lugo.South().Copy().Normalize(),
 		},
 	}}
-	got, err = MakeOrderMove(proto.Point{Y: 100}, proto.Point{}, 40)
+	got, err = MakeOrderMove(lugo.Point{Y: 100}, lugo.Point{}, 40)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOrderB, got)
 
-	expectedOrderC := &proto.Order_Move{Move: &proto.Move{
-		Velocity: &proto.Velocity{
+	expectedOrderC := &lugo.Order_Move{Move: &lugo.Move{
+		Velocity: &lugo.Velocity{
 			Speed:     40,
-			Direction: proto.SouthEast().Copy().Normalize(),
+			Direction: lugo.SouthEast().Copy().Normalize(),
 		},
 	}}
-	got, err = MakeOrderMove(proto.Point{Y: 100}, proto.Point{X: 100}, 40)
+	got, err = MakeOrderMove(lugo.Point{Y: 100}, lugo.Point{X: 100}, 40)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOrderC, got)
 }
 
 func TestMakeOrder_Move_ShouldNotMakeInvalidMovement(t *testing.T) {
-	order, err := MakeOrderMove(proto.Point{X: 40, Y: 50}, proto.Point{X: 40, Y: 50}, 100)
+	order, err := MakeOrderMove(lugo.Point{X: 40, Y: 50}, lugo.Point{X: 40, Y: 50}, 100)
 
 	assert.NotNil(t, err)
 	assert.Nil(t, order)
@@ -131,75 +131,75 @@ func TestMakeOrder_Move_ShouldNotMakeInvalidMovement(t *testing.T) {
 
 func TestMakeOrder_Jump(t *testing.T) {
 
-	expectedOrderA := &proto.Order_Jump{Jump: &proto.Jump{
-		Velocity: &proto.Velocity{
+	expectedOrderA := &lugo.Order_Jump{Jump: &lugo.Jump{
+		Velocity: &lugo.Velocity{
 			Speed:     100,
-			Direction: proto.North().Copy().Normalize(),
+			Direction: lugo.North().Copy().Normalize(),
 		},
 	}}
 
-	got, err := MakeOrderJump(proto.Point{}, proto.Point{Y: 100}, 100)
+	got, err := MakeOrderJump(lugo.Point{}, lugo.Point{Y: 100}, 100)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOrderA, got)
 
-	expectedOrderB := &proto.Order_Jump{Jump: &proto.Jump{
-		Velocity: &proto.Velocity{
+	expectedOrderB := &lugo.Order_Jump{Jump: &lugo.Jump{
+		Velocity: &lugo.Velocity{
 			Speed:     40,
-			Direction: proto.South().Copy().Normalize(),
+			Direction: lugo.South().Copy().Normalize(),
 		},
 	}}
-	got, err = MakeOrderJump(proto.Point{Y: 100}, proto.Point{}, 40)
+	got, err = MakeOrderJump(lugo.Point{Y: 100}, lugo.Point{}, 40)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOrderB, got)
 
-	expectedOrderC := &proto.Order_Jump{Jump: &proto.Jump{
-		Velocity: &proto.Velocity{
+	expectedOrderC := &lugo.Order_Jump{Jump: &lugo.Jump{
+		Velocity: &lugo.Velocity{
 			Speed:     40,
-			Direction: proto.SouthEast().Copy().Normalize(),
+			Direction: lugo.SouthEast().Copy().Normalize(),
 		},
 	}}
-	got, err = MakeOrderJump(proto.Point{Y: 100}, proto.Point{X: 100}, 40)
+	got, err = MakeOrderJump(lugo.Point{Y: 100}, lugo.Point{X: 100}, 40)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOrderC, got)
 }
 
 func TestMakeOrder_Jump_ShouldNotMakeInvalidMovement(t *testing.T) {
-	order, err := MakeOrderJump(proto.Point{X: 40, Y: 50}, proto.Point{X: 40, Y: 50}, 100)
+	order, err := MakeOrderJump(lugo.Point{X: 40, Y: 50}, lugo.Point{X: 40, Y: 50}, 100)
 
 	assert.NotNil(t, err)
 	assert.Nil(t, order)
 }
 
 func TestMakeOrder_Kick_SameDirection(t *testing.T) {
-	expectedOrderA := &proto.Order_Kick{Kick: &proto.Kick{
-		Velocity: &proto.Velocity{
+	expectedOrderA := &lugo.Order_Kick{Kick: &lugo.Kick{
+		Velocity: &lugo.Velocity{
 			Speed:     BallMaxSpeed,
-			Direction: proto.North().Copy().Normalize(),
+			Direction: lugo.North().Copy().Normalize(),
 		},
 	}}
 
 	origin := FieldCenter()
-	ball := proto.Ball{Position: &origin, Velocity: proto.NewZeroedVelocity(*proto.North().Copy()).Copy()}
+	ball := lugo.Ball{Position: &origin, Velocity: lugo.NewZeroedVelocity(*lugo.North().Copy()).Copy()}
 
-	got, err := MakeOrderKick(ball, proto.Point{X: origin.X, Y: origin.Y + 100}, BallMaxSpeed)
+	got, err := MakeOrderKick(ball, lugo.Point{X: origin.X, Y: origin.Y + 100}, BallMaxSpeed)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOrderA, got)
 }
 
 func TestMakeOrder_Kick_DiffDirection(t *testing.T) {
-	originPoint := proto.Point{X: 1, Y: 1}
-	originVelocity := proto.Velocity{
+	originPoint := lugo.Point{X: 1, Y: 1}
+	originVelocity := lugo.Velocity{
 		Speed: 100,
-		Direction: &proto.Vector{ // Going east
+		Direction: &lugo.Vector{ // Going east
 			X: 1,
 			Y: 0,
 		},
 	}
 
-	targetPoint := proto.Point{X: 2, Y: 2} // this point is on northeast from the original potin
+	targetPoint := lugo.Point{X: 2, Y: 2} // this point is on northeast from the original potin
 
 	// this is the final direction we desire the ball goes in
-	desiredDirection, err := proto.NewVector(originPoint, targetPoint)
+	desiredDirection, err := lugo.NewVector(originPoint, targetPoint)
 	if err != nil {
 		t.Fatalf("bad test: %s", err)
 	}
@@ -210,8 +210,8 @@ func TestMakeOrder_Kick_DiffDirection(t *testing.T) {
 		t.Fatalf("bad test: %s", err)
 	}
 
-	expectedOrderA := &proto.Order_Kick{Kick: &proto.Kick{
-		Velocity: &proto.Velocity{
+	expectedOrderA := &lugo.Order_Kick{Kick: &lugo.Kick{
+		Velocity: &lugo.Velocity{
 			Speed: BallMaxSpeed,
 			// we expect that the function created a complementary Vector,
 			// so we do not have to think about it during the development
@@ -219,7 +219,7 @@ func TestMakeOrder_Kick_DiffDirection(t *testing.T) {
 		},
 	}}
 
-	ball := proto.Ball{Position: &originPoint, Velocity: &originVelocity}
+	ball := lugo.Ball{Position: &originPoint, Velocity: &originVelocity}
 
 	got, err := MakeOrderKick(ball, targetPoint, BallMaxSpeed)
 	assert.Nil(t, err)

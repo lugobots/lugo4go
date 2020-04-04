@@ -17,11 +17,11 @@ func TestLoadConfig(t *testing.T) {
 		GRPCAddress: "localhost:1212",
 		Insecure:    true,
 		Token:       "UUID",
-		TeamSide:    proto.Team_HOME,
+		TeamSide:    lugo.Team_HOME,
 		Number:      4,
 	}
 	okAway := okHome
-	okAway.TeamSide = proto.Team_AWAY
+	okAway.TeamSide = lugo.Team_AWAY
 	caseList := map[string]testCase{
 		"ok": {
 			path:           "testdata/config_test_ok.json",

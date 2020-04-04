@@ -40,29 +40,29 @@ func (b Bot) AsGoalkeeper(ctx context.Context, data coach.TurnData) error {
 }
 
 func myDecider(ctx context.Context, data coach.TurnData) error {
-	var orders []proto.PlayerOrder
+	var orders []lugo.PlayerOrder
 	// we are going to kick the ball as soon as we catch it
 	if field.IsBallHolder(data.Snapshot, data.Me) {
 		orderToKick, err := field.MakeOrderKick(*data.Snapshot.Ball, field.GetOpponentGoal(data.Me.TeamSide).Center, field.BallMaxSpeed)
 		if err != nil {
 			return fmt.Errorf("could not create kick order during turn %d: %s", data.Snapshot.Turn, err)
 		}
-		orders = []proto.PlayerOrder{orderToKick}
+		orders = []lugo.PlayerOrder{orderToKick}
 	} else if data.Me.Number == 10 {
 		// otherwise, let's run towards the ball like kids
 		orderToMove, err := field.MakeOrderMoveMaxSpeed(*data.Me.Position, *data.Snapshot.Ball.Position)
 		if err != nil {
 			return fmt.Errorf("could not create move order during turn %d: %s", data.Snapshot.Turn, err)
 		}
-		orders = []proto.PlayerOrder{orderToMove, field.MakeOrderCatch()}
+		orders = []lugo.PlayerOrder{orderToMove, field.MakeOrderCatch()}
 	} else {
-		orders = []proto.PlayerOrder{field.MakeOrderCatch()}
+		orders = []lugo.PlayerOrder{field.MakeOrderCatch()}
 	}
 
 	resp, err := data.Sender.Send(ctx, orders, "")
 	if err != nil {
 		return fmt.Errorf("could not send kick order during turn %d: %s", data.Snapshot.Turn, err)
-	} else if resp.Code != proto.OrderResponse_SUCCESS {
+	} else if resp.Code != lugo.OrderResponse_SUCCESS {
 		return fmt.Errorf("order sent not  order during turn %d: %s", data.Snapshot.Turn, err)
 	}
 	return nil

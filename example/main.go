@@ -19,12 +19,12 @@ func main() {
 	}
 
 	// just creating a position for example purposes
-	playerConfig.InitialPosition = proto.Point{
+	playerConfig.InitialPosition = lugo.Point{
 		X: field.FieldWidth / 4,
 		Y: int32(playerConfig.Number) * field.PlayerSize * 2,
 	}
 
-	if playerConfig.TeamSide == proto.Team_AWAY {
+	if playerConfig.TeamSide == lugo.Team_AWAY {
 		playerConfig.InitialPosition.X = field.FieldWidth - playerConfig.InitialPosition.X
 	}
 

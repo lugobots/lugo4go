@@ -4,17 +4,17 @@ import (
 	"github.com/lugobots/lugo4go/v2/proto"
 )
 
-func GetTeam(s *proto.GameSnapshot, side proto.Team_Side) *proto.Team {
+func GetTeam(s *lugo.GameSnapshot, side lugo.Team_Side) *lugo.Team {
 	if s == nil {
 		return nil
 	}
-	if side == proto.Team_HOME {
+	if side == lugo.Team_HOME {
 		return s.HomeTeam
 	}
 	return s.AwayTeam
 }
 
-func IsBallHolder(s *proto.GameSnapshot, player *proto.Player) bool {
+func IsBallHolder(s *lugo.GameSnapshot, player *lugo.Player) bool {
 	if s == nil {
 		return false
 	}
@@ -24,18 +24,18 @@ func IsBallHolder(s *proto.GameSnapshot, player *proto.Player) bool {
 		s.Ball.Holder.Number == player.Number
 }
 
-func GetOpponentSide(side proto.Team_Side) proto.Team_Side {
-	if side == proto.Team_HOME {
-		return proto.Team_AWAY
+func GetOpponentSide(side lugo.Team_Side) lugo.Team_Side {
+	if side == lugo.Team_HOME {
+		return lugo.Team_AWAY
 	}
-	return proto.Team_HOME
+	return lugo.Team_HOME
 }
 
-func GetOpponentGoal(mySide proto.Team_Side) Goal {
+func GetOpponentGoal(mySide lugo.Team_Side) Goal {
 	return GetTeamsGoal(GetOpponentSide(mySide))
 }
 
-func GetPlayer(s *proto.GameSnapshot, side proto.Team_Side, number uint32) *proto.Player {
+func GetPlayer(s *lugo.GameSnapshot, side lugo.Team_Side, number uint32) *lugo.Player {
 	team := GetTeam(s, side)
 	if team == nil {
 		return nil
@@ -48,32 +48,32 @@ func GetPlayer(s *proto.GameSnapshot, side proto.Team_Side, number uint32) *prot
 	return nil
 }
 
-func MakeOrderMoveMaxSpeed(origin, target proto.Point) (*proto.Order_Move, error) {
+func MakeOrderMoveMaxSpeed(origin, target lugo.Point) (*lugo.Order_Move, error) {
 	return MakeOrderMove(origin, target, PlayerMaxSpeed)
 }
 
-func MakeOrderMove(origin, target proto.Point, speed float64) (*proto.Order_Move, error) {
-	vec, err := proto.NewVector(origin, target)
+func MakeOrderMove(origin, target lugo.Point, speed float64) (*lugo.Order_Move, error) {
+	vec, err := lugo.NewVector(origin, target)
 	if err != nil {
 		return nil, err
 	}
-	vel := proto.NewZeroedVelocity(*vec.Normalize())
+	vel := lugo.NewZeroedVelocity(*vec.Normalize())
 	vel.Speed = speed
-	return &proto.Order_Move{Move: &proto.Move{Velocity: &vel}}, nil
+	return &lugo.Order_Move{Move: &lugo.Move{Velocity: &vel}}, nil
 }
 
-func MakeOrderJump(origin, target proto.Point, speed float64) (*proto.Order_Jump, error) {
-	vec, err := proto.NewVector(origin, target)
+func MakeOrderJump(origin, target lugo.Point, speed float64) (*lugo.Order_Jump, error) {
+	vec, err := lugo.NewVector(origin, target)
 	if err != nil {
 		return nil, err
 	}
-	vel := proto.NewZeroedVelocity(*vec.Normalize())
+	vel := lugo.NewZeroedVelocity(*vec.Normalize())
 	vel.Speed = speed
-	return &proto.Order_Jump{Jump: &proto.Jump{Velocity: &vel}}, nil
+	return &lugo.Order_Jump{Jump: &lugo.Jump{Velocity: &vel}}, nil
 }
 
-func MakeOrderKick(ball proto.Ball, target proto.Point, speed float64) (*proto.Order_Kick, error) {
-	ballExpectedDirection, err := proto.NewVector(*ball.Position, target)
+func MakeOrderKick(ball lugo.Ball, target lugo.Point, speed float64) (*lugo.Order_Kick, error) {
+	ballExpectedDirection, err := lugo.NewVector(*ball.Position, target)
 	if err != nil {
 		return nil, err
 	}
@@ -82,13 +82,13 @@ func MakeOrderKick(ball proto.Ball, target proto.Point, speed float64) (*proto.O
 	if err != nil {
 		return nil, err
 	}
-	vel := proto.NewZeroedVelocity(*diffVector)
+	vel := lugo.NewZeroedVelocity(*diffVector)
 	vel.Direction.Normalize()
 	vel.Speed = speed
 
-	return &proto.Order_Kick{Kick: &proto.Kick{Velocity: &vel}}, nil
+	return &lugo.Order_Kick{Kick: &lugo.Kick{Velocity: &vel}}, nil
 }
 
-func MakeOrderCatch() *proto.Order_Catch {
-	return &proto.Order_Catch{Catch: &proto.Catch{}}
+func MakeOrderCatch() *lugo.Order_Catch {
+	return &lugo.Order_Catch{Catch: &lugo.Catch{}}
 }

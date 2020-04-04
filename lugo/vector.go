@@ -1,4 +1,4 @@
-package proto
+package lugo
 
 import (
 	"encoding/json"

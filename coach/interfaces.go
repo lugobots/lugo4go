@@ -15,7 +15,7 @@ type Positioner interface {
 	// GetRegion Returns a region based on the coordinates and on the current field division
 	GetRegion(col, row uint8) (Region, error)
 	// GetPointRegion returns the region where that point is in
-	GetPointRegion(point proto.Point) (Region, error)
+	GetPointRegion(point lugo.Point) (Region, error)
 }
 
 // Region represent a quadrant on the field. It is not always squared form because you may define how many cols/rows
@@ -28,7 +28,7 @@ type Region interface {
 	// The row coordinate based on the field division
 	Row() uint8
 	// Return the point at the center of the quadrant represented by this Region. It is not always precise.
-	Center() proto.Point
+	Center() lugo.Point
 
 	// The region immediatelly in front of this one from the player perspective
 	// Important: The same region is returned if the requested region is not valid

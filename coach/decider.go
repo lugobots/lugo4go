@@ -22,8 +22,8 @@ const (
 )
 
 type TurnData struct {
-	Me       *proto.Player
-	Snapshot *proto.GameSnapshot
+	Me       *lugo.Player
+	Snapshot *lugo.GameSnapshot
 	Sender   lugo4go.OrderSender
 }
 
@@ -35,7 +35,7 @@ type Decider interface {
 	AsGoalkeeper(ctx context.Context, data TurnData) error
 }
 
-func DefineMyState(config lugo4go.Config, snapshot *proto.GameSnapshot) (PlayerState, error) {
+func DefineMyState(config lugo4go.Config, snapshot *lugo.GameSnapshot) (PlayerState, error) {
 	if snapshot == nil || snapshot.Ball == nil {
 		return "", ErrNoBall
 	}
@@ -64,7 +64,7 @@ func DefineMyState(config lugo4go.Config, snapshot *proto.GameSnapshot) (PlayerS
 // Please take a look into Decider interface, and see how it may simplify your work.
 func DefaultTurnHandler(decider Decider, config lugo4go.Config, logger lugo4go.Logger) lugo4go.DecisionMaker {
 	goalkeeper := field.GoalkeeperNumber == config.Number // it is obviously not processed every turn
-	return func(ctx context.Context, snapshot *proto.GameSnapshot, sender lugo4go.OrderSender) {
+	return func(ctx context.Context, snapshot *lugo.GameSnapshot, sender lugo4go.OrderSender) {
 		var err error
 		var state PlayerState
 		turnData := TurnData{

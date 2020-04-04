@@ -8,8 +8,8 @@ import "github.com/lugobots/lugo4go/v2/proto"
 //
 // This function is specially useful when a player have opponent player at some point between him and the goal.
 // The angle between the route to the goal and the opponent may be used to decide to change its route.
-func AngleWithRoute(direction proto.Vector, from, obstacle proto.Point) float64 {
-	angleToObstacle, err := proto.NewVector(from, obstacle)
+func AngleWithRoute(direction lugo.Vector, from, obstacle lugo.Point) float64 {
+	angleToObstacle, err := lugo.NewVector(from, obstacle)
 	if err != nil {
 		return 0
 	}

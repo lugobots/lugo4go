@@ -1,4 +1,4 @@
-package proto
+package lugo
 
 // PlayerOrder is a hack to create a single type that includes all orders structs.
 // The structs and interfaces generated from the protobuf files does not creates a common type that allows us

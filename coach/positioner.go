@@ -27,7 +27,7 @@ const (
 )
 
 // NewPositioner creates a new Positioner that will map the field to provide Regions
-func NewPositioner(cols, rows uint8, sideRef proto.Team_Side) (Positioner, error) {
+func NewPositioner(cols, rows uint8, sideRef lugo.Team_Side) (Positioner, error) {
 	if cols < MinCols {
 		return nil, ErrMinCols
 	}
@@ -51,7 +51,7 @@ func NewPositioner(cols, rows uint8, sideRef proto.Team_Side) (Positioner, error
 }
 
 type positioner struct {
-	sideRef      proto.Team_Side
+	sideRef      lugo.Team_Side
 	cols         uint8
 	rows         uint8
 	regionWidth  float64
@@ -66,11 +66,11 @@ func (p *positioner) GetRegion(col, row uint8) (Region, error) {
 		return nil, ErrMaxRows
 	}
 
-	center := proto.Point{
+	center := lugo.Point{
 		X: int32(math.Round(float64(col)*p.regionWidth + p.regionWidth/2)),
 		Y: int32(math.Round(float64(row)*p.regionHeight + p.regionHeight/2)),
 	}
-	if p.sideRef == proto.Team_AWAY {
+	if p.sideRef == lugo.Team_AWAY {
 		center = mirrorCoordsToAway(center)
 	}
 
@@ -83,8 +83,8 @@ func (p *positioner) GetRegion(col, row uint8) (Region, error) {
 	}, nil
 }
 
-func (p *positioner) GetPointRegion(point proto.Point) (Region, error) {
-	if p.sideRef == proto.Team_AWAY {
+func (p *positioner) GetPointRegion(point lugo.Point) (Region, error) {
+	if p.sideRef == lugo.Team_AWAY {
 		point = mirrorCoordsToAway(point)
 	}
 	cx := float64(point.X) / p.regionWidth
@@ -97,8 +97,8 @@ func (p *positioner) GetPointRegion(point proto.Point) (Region, error) {
 type region struct {
 	col        uint8
 	row        uint8
-	sideRef    proto.Team_Side
-	center     proto.Point
+	sideRef    lugo.Team_Side
+	center     lugo.Point
 	positioner *positioner
 }
 
@@ -110,7 +110,7 @@ func (r region) Row() uint8 {
 	return r.row
 }
 
-func (r region) Center() proto.Point {
+func (r region) Center() lugo.Point {
 	return r.center
 }
 
@@ -148,8 +148,8 @@ func (r region) Right() Region {
 
 // Invert the coords X and Y as in a mirror to found out the same position seen from the away team field
 // Keep in mind that all coords in the field is based on the bottom left corner!
-func mirrorCoordsToAway(coords proto.Point) proto.Point {
-	return proto.Point{
+func mirrorCoordsToAway(coords lugo.Point) lugo.Point {
+	return lugo.Point{
 		X: field.FieldWidth - coords.X,
 		Y: field.FieldHeight - coords.Y,
 	}
