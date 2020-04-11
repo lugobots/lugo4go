@@ -68,4 +68,7 @@ const (
 
 	// GoalkeeperNumber defines the goalkeeper number
 	GoalkeeperNumber = uint32(1)
+
+	// Number of turns each teams has on attack before losing the ball possession.
+	ShotClockTime = 600
 )
