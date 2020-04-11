@@ -12,8 +12,8 @@ import (
 )
 
 func main() {
-	// DefaultBundle is a shortcut for stuff that usually we define in init functions
-	playerConfig, logger, err := clientGo.DefaultBundle()
+	// DefaultInitBundle is a shortcut for stuff that usually we define in init functions
+	playerConfig, logger, err := clientGo.DefaultInitBundle()
 	if err != nil {
 		log.Fatalf("could not init default config or logger: %s", err)
 	}
@@ -29,7 +29,7 @@ func main() {
 	}
 
 	// open the connection to the server
-	playerCtx, playerClient, err := clientGo.NewClient(playerConfig)
+	playerCtx, playerClient, err := clientGo.NewClient_deprecated(playerConfig)
 	if err != nil {
 		logger.Fatalf("did not connected to the gRPC server at '%s': %s", playerConfig.GRPCAddress, err)
 	}

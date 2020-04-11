@@ -6,6 +6,23 @@ import (
 	"google.golang.org/grpc"
 )
 
+type TurnData struct {
+	Me       *lugo.Player
+	Snapshot *lugo.GameSnapshot
+}
+
+type Bot interface {
+	OnDisputing(ctx context.Context, sender OrderSender, data TurnData) error
+	OnDefending(ctx context.Context, sender OrderSender, data TurnData) error
+	OnHolding(ctx context.Context, sender OrderSender, data TurnData) error
+	OnSupporting(ctx context.Context, sender OrderSender, data TurnData) error
+	AsGoalkeeper(ctx context.Context, sender OrderSender, data TurnData) error
+}
+
+type OrderSender interface {
+	Send(ctx context.Context, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error)
+}
+
 type DecisionMaker func(ctx context.Context, snapshot *lugo.GameSnapshot, sender OrderSender)
 
 type Logger interface {
@@ -17,7 +34,7 @@ type Logger interface {
 	Fatalf(template string, args ...interface{})
 }
 
-type Client interface {
+type GRPCHandler interface {
 	OnNewTurn(DecisionMaker, Logger)
 	Stop() error
 	GetGRPCConn() *grpc.ClientConn
@@ -25,9 +42,5 @@ type Client interface {
 	// The sender will not need the entire snapshot struct. However there are plans to allow the sender
 	// to do mre complex jobs (e.g. having middleware to save status for machine learning). Then, we are
 	// passing the snapshot since now, so the new versions will be compatible.
-	SenderBuilder(builder func(snapshot *lugo.GameSnapshot, logger Logger) OrderSender)
-}
-
-type OrderSender interface {
-	Send(ctx context.Context, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error)
+	//	SenderBuilder(builder func(snapshot *lugo.GameSnapshot, logger Logger) OrderSender)
 }

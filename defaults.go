@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func DefaultLogger(config Config) (Logger, error) {
+func DefaultLogger(config Config) (*zap.SugaredLogger, error) {
 	configZap := zap.NewDevelopmentConfig()
 	configZap.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	zapLog, err := configZap.Build()
@@ -28,7 +28,7 @@ func DefaultConfigurator() (Config, error) {
 	return config, nil
 }
 
-func DefaultBundle() (Config, Logger, error) {
+func DefaultInitBundle() (Config, *zap.SugaredLogger, error) {
 	config, err := DefaultConfigurator()
 	if err != nil {
 		return config, nil, err

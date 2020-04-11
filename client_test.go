@@ -45,7 +45,7 @@ func TestNewClient(t *testing.T) {
 
 	ctx, stop := context.WithCancel(context.Background())
 	defer stop()
-	// creates a fake server to test our client
+	// creates a fake server to test our Client
 	srv, err := NewMockServer(ctx, ctrl, testServerPort)
 	if err != nil {
 		t.Fatalf("did not start mock server: %s", err)
@@ -62,7 +62,7 @@ func TestNewClient(t *testing.T) {
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
 
-	// the client will try to join to a team, so our server need to expect it happens
+	// the Client will try to join to a team, so our server need to expect it happens
 	srv.EXPECT().JoinATeam(testdata.NewMatcher(func(arg interface{}) bool {
 		expectedRequest := &lugo.JoinRequest{
 			Number:          config.Number,
@@ -74,8 +74,8 @@ func TestNewClient(t *testing.T) {
 		return fmt.Sprintf("%s", arg) == fmt.Sprintf("%s", expectedRequest)
 	}), gomock.Any()).Return(nil)
 
-	// Now we may create the client to connect to our fake server
-	_, playerClient, err := NewClient(config)
+	// Now we may create the Client to connect to our fake server
+	_, playerClient, err := NewClient_deprecated(config)
 
 	// This last lines may run really quickly, and the server may not have ran the expected methods yet
 	// Let's give some time to the server run it before finish the test function
@@ -113,7 +113,7 @@ func TestClient_OnNewTurn(t *testing.T) {
 	mockStream.EXPECT().Recv().Return(nil, io.EOF)
 	mockSender.EXPECT().Send(gomock.Any(), []lugo.PlayerOrder{expectedOrder}, expectedDebugMsg).Return(expectedResponse, nil)
 
-	c := &client{
+	c := &Client{
 		stream: mockStream,
 		senderBuilder: func(snapshot *lugo.GameSnapshot, logger Logger) OrderSender {
 			return mockSender
@@ -169,7 +169,7 @@ func TestClient_ShouldStopItsContext(t *testing.T) {
 
 	wasClosed := false
 
-	c := &client{
+	c := &Client{
 		stream: mockStream,
 		stopCtx: func() {
 			wasClosed = true
@@ -251,7 +251,7 @@ func TestClient_StopsIfGRPCConnectionIsInterrupted(t *testing.T) {
 	ctx, stopServer := context.WithCancel(context.Background())
 	defer stopServer()
 
-	// creates a fake server to test our client
+	// creates a fake server to test our Client
 	if _, err := NewMockServer(ctx, ctrl, testServerPort); err != nil {
 		t.Fatalf("did not start mock server: %s", err)
 	}
@@ -267,12 +267,12 @@ func TestClient_StopsIfGRPCConnectionIsInterrupted(t *testing.T) {
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	//waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
 
-	// Now we may create the client to connect to our fake server
-	clientCtx, _, err := NewClient(config)
+	// Now we may create the Client to connect to our fake server
+	clientCtx, _, err := NewClient_deprecated(config)
 	if err != nil {
 		t.Errorf("Unexpected erro - Expected nil, Got %v", err)
 	}
-	// let's give some time to the client stop after the server be stopped
+	// let's give some time to the Client stop after the server be stopped
 	maxWait, _ := context.WithTimeout(clientCtx, 500*time.Millisecond)
 
 	stopServer()

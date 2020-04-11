@@ -10,11 +10,15 @@ import (
 
 const ProtocolVersion = "2.0"
 
-func NewClient(config Config) (context.Context, Client, error) {
-	var err error
-	c := &client{}
+func NewClient(config Config, bot Bot) {
 
-	// A bot may eventually do not listen to server stream (ignoring OnNewTurn). In this case, the client must stop
+}
+
+func NewClient_deprecated(config Config) (context.Context, *Client, error) {
+	var err error
+	c := &Client{}
+
+	// A bot may eventually do not listen to server stream (ignoring OnNewTurn). In this case, the Client must stop
 	// when the gRPC connection is closed.
 	connHandler := grpc.WithStatsHandler(c)
 	if config.Insecure {
@@ -49,7 +53,7 @@ func NewClient(config Config) (context.Context, Client, error) {
 	return c.ctx, c, nil
 }
 
-type client struct {
+type Client struct {
 	stream        lugo.Game_JoinATeamClient
 	gameConn      lugo.GameClient
 	grpcConn      *grpc.ClientConn
@@ -59,7 +63,7 @@ type client struct {
 	sender        OrderSender
 }
 
-func (c client) OnNewTurn(decider DecisionMaker, log Logger) {
+func (c Client) OnNewTurn(decider DecisionMaker, log Logger) {
 	var turnCrx context.Context
 	var stop context.CancelFunc = func() {}
 	go func() {
@@ -82,20 +86,20 @@ func (c client) OnNewTurn(decider DecisionMaker, log Logger) {
 	}()
 }
 
-func (c client) Stop() error {
+func (c Client) Stop() error {
 	c.stopCtx()
 	return c.grpcConn.Close()
 }
 
-func (c client) GetGRPCConn() *grpc.ClientConn {
+func (c Client) GetGRPCConn() *grpc.ClientConn {
 	return c.grpcConn
 }
 
-func (c client) GetServiceConn() lugo.GameClient {
+func (c Client) GetServiceConn() lugo.GameClient {
 	return c.gameConn
 }
 
-func (c client) SenderBuilder(builder func(snapshot *lugo.GameSnapshot, logger Logger) OrderSender) {
+func (c Client) SenderBuilder(builder func(snapshot *lugo.GameSnapshot, logger Logger) OrderSender) {
 	c.senderBuilder = builder
 }
 
@@ -118,19 +122,19 @@ func (s sender) Send(ctx context.Context, orders []lugo.PlayerOrder, debugMsg st
 	return s.gameConn.SendOrders(ctx, orderSet)
 }
 
-func (c *client) TagRPC(ctx context.Context, t *stats.RPCTagInfo) context.Context {
+func (c *Client) TagRPC(ctx context.Context, t *stats.RPCTagInfo) context.Context {
 	return ctx
 }
 
-func (c *client) HandleRPC(context.Context, stats.RPCStats) {
+func (c *Client) HandleRPC(context.Context, stats.RPCStats) {
 
 }
 
-func (c *client) TagConn(ctx context.Context, t *stats.ConnTagInfo) context.Context {
+func (c *Client) TagConn(ctx context.Context, t *stats.ConnTagInfo) context.Context {
 	return ctx
 }
 
-func (c *client) HandleConn(ctx context.Context, sts stats.ConnStats) {
+func (c *Client) HandleConn(ctx context.Context, sts stats.ConnStats) {
 	switch sts.(type) {
 	case *stats.ConnEnd:
 		_ = c.Stop()
