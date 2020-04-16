@@ -1,8 +1,6 @@
 package coach
 
 import (
-	"context"
-	"github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/field"
 	"github.com/lugobots/lugo4go/v2/lugo"
 )
@@ -21,26 +19,20 @@ const (
 	DisputingTheBall PlayerState = "disputing"
 )
 
-type TurnData struct {
-	Me       *lugo.Player
-	Snapshot *lugo.GameSnapshot
-	Sender   lugo4go.OrderSender
-}
+//type Decider interface {
+//	OnDisputing(ctx context.Context, data TurnData) error
+//	OnDefending(ctx context.Context, data TurnData) error
+//	OnHolding(ctx context.Context, data TurnData) error
+//	OnSupporting(ctx context.Context, data TurnData) error
+//	AsGoalkeeper(ctx context.Context, data TurnData) error
+//}
 
-type Decider interface {
-	OnDisputing(ctx context.Context, data TurnData) error
-	OnDefending(ctx context.Context, data TurnData) error
-	OnHolding(ctx context.Context, data TurnData) error
-	OnSupporting(ctx context.Context, data TurnData) error
-	AsGoalkeeper(ctx context.Context, data TurnData) error
-}
-
-func DefineMyState(config lugo4go.Config, snapshot *lugo.GameSnapshot) (PlayerState, error) {
+func DefineMyState(snapshot *lugo.GameSnapshot, playerNumber uint32, side lugo.Team_Side) (PlayerState, error) {
 	if snapshot == nil || snapshot.Ball == nil {
 		return "", ErrNoBall
 	}
 
-	me := field.GetPlayer(snapshot, config.TeamSide, config.Number)
+	me := field.GetPlayer(snapshot, side, playerNumber)
 	if me == nil {
 		return "", ErrPlayerNotFound
 	}
@@ -49,8 +41,8 @@ func DefineMyState(config lugo4go.Config, snapshot *lugo.GameSnapshot) (PlayerSt
 
 	if ballHolder == nil {
 		return DisputingTheBall, nil
-	} else if ballHolder.TeamSide == config.TeamSide {
-		if ballHolder.Number == config.Number {
+	} else if ballHolder.TeamSide == side {
+		if ballHolder.Number == playerNumber {
 			return HoldingTheBall, nil
 		}
 		return Supporting, nil
@@ -59,42 +51,42 @@ func DefineMyState(config lugo4go.Config, snapshot *lugo.GameSnapshot) (PlayerSt
 }
 
 // DefaultTurnHandler is a handler that allow you to create an interface to follow an basic strategy to define bot states.
-// This function does not have to be used. You may define your own DecisionMaker function, and handle all messages as
+// This function does not have to be used. You may define your own TurnHandler function, and handle all messages as
 // you prefer.
 // Please take a look into Decider interface, and see how it may simplify your work.
-func DefaultTurnHandler(decider Decider, config lugo4go.Config, logger lugo4go.Logger) lugo4go.DecisionMaker {
-	goalkeeper := field.GoalkeeperNumber == config.Number // it is obviously not processed every turn
-	return func(ctx context.Context, snapshot *lugo.GameSnapshot, sender lugo4go.OrderSender) {
-		var err error
-		var state PlayerState
-		turnData := TurnData{
-			Me:       field.GetPlayer(snapshot, config.TeamSide, config.Number),
-			Snapshot: snapshot,
-			Sender:   sender,
-		}
-		if turnData.Me == nil {
-			panic("i did not find my self in the game")
-			return
-		}
-
-		if goalkeeper {
-			err = decider.AsGoalkeeper(ctx, turnData)
-		} else {
-			state, err = DefineMyState(config, snapshot)
-			switch state {
-			case Supporting:
-				err = decider.OnSupporting(ctx, turnData)
-			case HoldingTheBall:
-				err = decider.OnHolding(ctx, turnData)
-			case Defending:
-				err = decider.OnDefending(ctx, turnData)
-			case DisputingTheBall:
-				err = decider.OnDisputing(ctx, turnData)
-			}
-		}
-		if err != nil {
-			logger.Errorf("error processing turn %d: %s", snapshot.Turn, err)
-		}
-
-	}
-}
+//func DefaultTurnHandler(decider Decider, config lugo.Config, logger lugo4go.Logger) lugo4go.TurnHandler {
+//	goalkeeper := field.GoalkeeperNumber == config.Number // it is obviously not processed every turn
+//	return func(ctx context.Context, snapshot *lugo.GameSnapshot, grpcClient lugo.GameClient) {
+//		var err error
+//		var state PlayerState
+//		turnData := TurnData{
+//			Me:       field.GetPlayer(snapshot, config.TeamSide, config.Number),
+//			Snapshot: snapshot,
+//			Sender:   sender,
+//		}
+//		if turnData.Me == nil {
+//			panic("i did not find my self in the game")
+//			return
+//		}
+//
+//		if goalkeeper {
+//			err = decider.AsGoalkeeper(ctx, turnData)
+//		} else {
+//			state, err = DefineMyState(config, snapshot)
+//			switch state {
+//			case Supporting:
+//				err = decider.OnSupporting(ctx, turnData)
+//			case HoldingTheBall:
+//				err = decider.OnHolding(ctx, turnData)
+//			case Defending:
+//				err = decider.OnDefending(ctx, turnData)
+//			case DisputingTheBall:
+//				err = decider.OnDisputing(ctx, turnData)
+//			}
+//		}
+//		if err != nil {
+//			logger.Errorf("error processing turn %d: %s", snapshot.Turn, err)
+//		}
+//
+//	}
+//}

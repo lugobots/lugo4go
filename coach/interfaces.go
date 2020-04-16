@@ -1,9 +1,22 @@
 package coach
 
 import (
+	"context"
 	"fmt"
 	"github.com/lugobots/lugo4go/v2/lugo"
 )
+
+type OrderSender interface {
+	Send(ctx context.Context, turn uint32, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error)
+}
+
+type Bot interface {
+	OnDisputing(ctx context.Context, sender OrderSender, snapshot *lugo.GameSnapshot) error
+	OnDefending(ctx context.Context, sender OrderSender, snapshot *lugo.GameSnapshot) error
+	OnHolding(ctx context.Context, sender OrderSender, snapshot *lugo.GameSnapshot) error
+	OnSupporting(ctx context.Context, sender OrderSender, snapshot *lugo.GameSnapshot) error
+	AsGoalkeeper(ctx context.Context, sender OrderSender, snapshot *lugo.GameSnapshot) error
+}
 
 // Positioner Helps the bots to see the fields from their team perspective instead of using the cartesian plan provided
 // by the game server. Instead of base your logic on the axes X and Y, the positioner create a region map based

@@ -12,6 +12,6 @@ mockgen -package=lugo \
 Game_JoinATeamServer,BroadcastClient,Broadcast_OnEventClient,BroadcastServer,Broadcast_OnEventServer
 
 mockgen -package=coach \
-        -source=coach/decider.go \
+        -source=coach/interfaces.go \
         -destination=./coach/mocks.go \
         -self_package=github.com/lugobots/lugo4go/v2/coach
