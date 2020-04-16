@@ -2,6 +2,7 @@ package lugo4go
 
 import (
 	"context"
+	"fmt"
 	"github.com/lugobots/lugo4go/v2/lugo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/stats"
@@ -10,15 +11,13 @@ import (
 
 const ProtocolVersion = "2.0"
 
-func NewClient(config Config, bot Bot) {
-
-}
-
-func NewClient_deprecated(config Config) (context.Context, *Client, error) {
+func NewRawClient(config Config, handler TurnHandler) (*Client, error) {
 	var err error
-	c := &Client{}
+	c := &Client{
+		Handler: handler,
+	}
 
-	// A bot may eventually do not listen to server stream (ignoring OnNewTurn). In this case, the Client must stop
+	// A bot may eventually do not listen to server Stream (ignoring OnNewTurn). In this case, the Client must stop
 	// when the gRPC connection is closed.
 	connHandler := grpc.WithStatsHandler(c)
 	if config.Insecure {
@@ -27,100 +26,99 @@ func NewClient_deprecated(config Config) (context.Context, *Client, error) {
 		c.grpcConn, err = grpc.Dial(config.GRPCAddress, connHandler)
 	}
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	c.gameConn = lugo.NewGameClient(c.grpcConn)
+	c.GRPCClient = lugo.NewGameClient(c.grpcConn)
 
-	c.senderBuilder = func(snapshot *lugo.GameSnapshot, logger Logger) OrderSender {
-		return &sender{
-			gameConn: c.gameConn,
-			snapshot: snapshot,
-			logger:   logger,
-		}
-	}
+	//c.Sender = func(snapshot *lugo.GameSnapshot, logger Logger) OrderSender {
+	//	return &sender{
+	//		gameConn: c.GRPCClient,
+	//		snapshot: snapshot,
+	//		logger:   logger,
+	//	}
+	//}
 
-	c.ctx, c.stopCtx = context.WithCancel(context.Background())
-	if c.stream, err = c.gameConn.JoinATeam(c.ctx, &lugo.JoinRequest{
+	if c.Stream, err = c.GRPCClient.JoinATeam(context.Background(), &lugo.JoinRequest{
 		Token:           config.Token,
 		Number:          config.Number,
 		InitPosition:    &config.InitialPosition,
 		TeamSide:        config.TeamSide,
 		ProtocolVersion: ProtocolVersion,
 	}); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	return c.ctx, c, nil
+	return c, nil
 }
 
 type Client struct {
-	stream        lugo.Game_JoinATeamClient
-	gameConn      lugo.GameClient
-	grpcConn      *grpc.ClientConn
-	ctx           context.Context
-	stopCtx       context.CancelFunc
-	senderBuilder func(snapshot *lugo.GameSnapshot, logger Logger) OrderSender
-	sender        OrderSender
+	Stream     lugo.Game_JoinATeamClient
+	GRPCClient lugo.GameClient
+	grpcConn   *grpc.ClientConn
+	Handler    TurnHandler
+	Logger     Logger
+	//Sender     OrderSender
+	//ErrorHandler func(response *lugo.OrderResponse, err error)
 }
 
-func (c Client) OnNewTurn(decider DecisionMaker, log Logger) {
+func (c Client) Play() error {
 	var turnCrx context.Context
 	var stop context.CancelFunc = func() {}
-	go func() {
-		for {
-			snapshot, err := c.stream.Recv()
-			stop()
-			turnCrx, stop = context.WithCancel(c.ctx)
-			if err != nil {
-				if err == io.EOF {
-					log.Infof("gRPC connection closed")
-				} else {
-					log.Errorf("gRPC stream error: %s", err)
-				}
-				c.stopCtx()
-				return
+	for {
+		snapshot, err := c.Stream.Recv()
+		stop()
+		if err != nil {
+			if err != io.EOF {
+				//err = fmt.Errorf("connection error: %w", err)
+				return fmt.Errorf("%w: %s", ErrGRPCConnectionLost, err)
 			}
-			log.Debugf("calling DecisionMaker for turn %d", snapshot.Turn)
-			go decider(turnCrx, snapshot, c.senderBuilder(snapshot, log))
+			return ErrGRPCConnectionClosed
 		}
-	}()
+		turnCrx, stop = context.WithCancel(context.Background())
+		mustHasStarted := make(chan bool)
+		go func() {
+			close(mustHasStarted)
+			c.Handler.Handle(turnCrx, snapshot, c.GRPCClient)
+		}()
+		<-mustHasStarted
+	}
 }
 
 func (c Client) Stop() error {
-	c.stopCtx()
 	return c.grpcConn.Close()
 }
 
-func (c Client) GetGRPCConn() *grpc.ClientConn {
-	return c.grpcConn
-}
+//
+//func (c Client) GetGRPCConn() *grpc.ClientConn {
+//	return c.grpcConn
+//}
 
-func (c Client) GetServiceConn() lugo.GameClient {
-	return c.gameConn
-}
+//func (c Client) GetServiceConn() lugo.GameClient {
+//	return c.GRPCClient
+//}
 
-func (c Client) SenderBuilder(builder func(snapshot *lugo.GameSnapshot, logger Logger) OrderSender) {
-	c.senderBuilder = builder
-}
+//func (c Client) SenderBuilder(builder func(snapshot *lugo.GameSnapshot, logger Logger) OrderSender) {
+//	c.Sender = builder
+//}
 
-type sender struct {
-	snapshot *lugo.GameSnapshot
-	logger   Logger
-	gameConn lugo.GameClient
-}
-
-func (s sender) Send(ctx context.Context, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error) {
-	orderSet := &lugo.OrderSet{
-		Turn:         s.snapshot.Turn,
-		DebugMessage: debugMsg,
-		Orders:       []*lugo.Order{},
-	}
-	for _, order := range orders {
-		orderSet.Orders = append(orderSet.Orders, &lugo.Order{Action: order})
-	}
-	s.logger.Debugf("sending orders for turn %d", s.snapshot.Turn)
-	return s.gameConn.SendOrders(ctx, orderSet)
-}
+//type sender struct {
+//	snapshot *lugo.GameSnapshot
+//	logger   Logger
+//	gameConn lugo.GameClient
+//}
+//
+//func (s sender) Send(ctx context.Context, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error) {
+//	orderSet := &lugo.OrderSet{
+//		Turn:         s.snapshot.Turn,
+//		DebugMessage: debugMsg,
+//		Orders:       []*lugo.Order{},
+//	}
+//	for _, order := range orders {
+//		orderSet.Orders = append(orderSet.Orders, &lugo.Order{Action: order})
+//	}
+//	s.logger.Debugf("sending orders for turn %d", s.snapshot.Turn)
+//	return s.gameConn.SendOrders(ctx, orderSet)
+//}
 
 func (c *Client) TagRPC(ctx context.Context, t *stats.RPCTagInfo) context.Context {
 	return ctx
