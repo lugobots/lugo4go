@@ -196,7 +196,7 @@ func TestMakeOrder_Kick_DiffDirection(t *testing.T) {
 		},
 	}
 
-	targetPoint := lugo.Point{X: 2, Y: 2} // this point is on northeast from the original potin
+	targetPoint := lugo.Point{X: 2, Y: 2} // this point is on northeast from the original point
 
 	// this is the final direction we desire the ball goes in
 	desiredDirection, err := lugo.NewVector(originPoint, targetPoint)

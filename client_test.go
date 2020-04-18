@@ -19,8 +19,8 @@ import (
 
 const testServerPort = 2222
 
-func NewMockServer(ctx context.Context, ctr *gomock.Controller, port int16) (*lugo.MockGameServer, error) {
-	mock := lugo.NewMockGameServer(ctr)
+func NewMockServer(ctx context.Context, ctr *gomock.Controller, port int16) (*MockGameServer, error) {
+	mock := NewMockGameServer(ctr)
 	gRPCServer := grpc.NewServer()
 	lugo.RegisterGameServer(gRPCServer, mock)
 
@@ -96,9 +96,9 @@ func TestClient_PlayCallsHandlerForEachMessage(t *testing.T) {
 	defer ctrl.Finish() // checks all expected things for mocks
 
 	// defining mocks and expected method calls
-	mockStream := lugo.NewMockGame_JoinATeamClient(ctrl)
-	mockGRPCClient := lugo.NewMockGameClient(ctrl)
-	mockHandler := lugo4go.NewMockTurnHandler(ctrl)
+	mockStream := NewMockGame_JoinATeamClient(ctrl)
+	mockGRPCClient := NewMockGameClient(ctrl)
+	mockHandler := NewMockTurnHandler(ctrl)
 
 	c := &lugo4go.Client{
 		Stream:     mockStream,
@@ -133,9 +133,9 @@ func TestClient_PlayReturnsTheRightError(t *testing.T) {
 	defer ctrl.Finish() // checks all expected things for mocks
 
 	// defining mocks and expected method calls
-	mockStream := lugo.NewMockGame_JoinATeamClient(ctrl)
-	mockGRPCClient := lugo.NewMockGameClient(ctrl)
-	mockHandler := lugo4go.NewMockTurnHandler(ctrl)
+	mockStream := NewMockGame_JoinATeamClient(ctrl)
+	mockGRPCClient := NewMockGameClient(ctrl)
+	mockHandler := NewMockTurnHandler(ctrl)
 
 	c := &lugo4go.Client{
 		Stream:     mockStream,
@@ -167,9 +167,9 @@ func TestClient_PlayShouldStopContextWhenANewTurnStarts(t *testing.T) {
 	defer ctrl.Finish() // checks all expected things for mocks
 
 	// defining mocks and expected method calls
-	mockStream := lugo.NewMockGame_JoinATeamClient(ctrl)
-	mockGRPCClient := lugo.NewMockGameClient(ctrl)
-	mockHandler := lugo4go.NewMockTurnHandler(ctrl)
+	mockStream := NewMockGame_JoinATeamClient(ctrl)
+	mockGRPCClient := NewMockGameClient(ctrl)
+	mockHandler := NewMockTurnHandler(ctrl)
 
 	c := &lugo4go.Client{
 		Stream:     mockStream,

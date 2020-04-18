@@ -37,7 +37,7 @@ func main() {
 	// Creating a bot to play
 	myBot := bot.NewBot(logger)
 
-	// defining the bot as the "decider" interface to be used by the Turn Handler
+	// defining the bot as the "decider" interface to be used by the Turn Handle
 	playerClient.OnNewTurn(coach.DefaultTurnHandler(myBot, playerConfig, logger), logger)
 
 	// keep the process alive

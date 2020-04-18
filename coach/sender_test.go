@@ -14,8 +14,8 @@ func TestSender_Send(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockGRPCCLient := lugo.NewMockGameClient(ctrl)
-	sender := coach.Sender{GRPCClient: mockGRPCCLient}
+	mockGRPCClient := NewMockGameClient(ctrl)
+	sender := coach.Sender{GRPCClient: mockGRPCClient}
 
 	velocitySample := lugo.NewZeroedVelocity(lugo.North())
 	moveOrder := &lugo.Order_Move{
@@ -174,7 +174,7 @@ func TestSender_Send(t *testing.T) {
 	for _, testCase := range testCases {
 		ctx, _ := context.WithTimeout(context.Background(), 100*time.Millisecond)
 
-		mockGRPCCLient.EXPECT().SendOrders(ctx, testCase.orderSet).Return(testCase.clientResp, testCase.clientErr)
+		mockGRPCClient.EXPECT().SendOrders(ctx, testCase.orderSet).Return(testCase.clientResp, testCase.clientErr)
 		resp, err := sender.Send(ctx, testCase.turn, testCase.orders, testCase.debugMsg)
 		assert.Equal(t, testCase.clientResp, resp)
 		assert.Equal(t, testCase.clientErr, err)

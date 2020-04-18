@@ -53,12 +53,13 @@ type Client struct {
 	config     lugo.Config
 }
 
-func (c Client) PlayWithBot(bot coach.Bot, logger lugo.Logger) error {
+func (c *Client) PlayWithBot(bot coach.Bot, logger lugo.Logger) error {
 	sender := coach.NewSender(c.GRPCClient)
 	handler := coach.NewHandler(bot, sender, logger, c.config.Number, c.config.TeamSide)
 	return c.Play(handler)
 }
-func (c Client) Play(handler TurnHandler) error {
+
+func (c *Client) Play(handler TurnHandler) error {
 	var turnCrx context.Context
 	var stop context.CancelFunc = func() {}
 	for {
@@ -80,43 +81,11 @@ func (c Client) Play(handler TurnHandler) error {
 	}
 }
 
-func (c Client) Stop() error {
+func (c *Client) Stop() error {
 	return c.grpcConn.Close()
 }
 
-//
-//func (c Client) GetGRPCConn() *grpc.ClientConn {
-//	return c.grpcConn
-//}
-
-//func (c Client) GetServiceConn() lugo.GameClient {
-//	return c.GRPCClient
-//}
-
-//func (c Client) SenderBuilder(builder func(snapshot *lugo.GameSnapshot, logger Logger) OrderSender) {
-//	c.Sender = builder
-//}
-
-//type sender struct {
-//	snapshot *lugo.GameSnapshot
-//	logger   Logger
-//	gameConn lugo.GameClient
-//}
-//
-//func (s sender) Send(ctx context.Context, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error) {
-//	orderSet := &lugo.OrderSet{
-//		Turn:         s.snapshot.Turn,
-//		DebugMessage: debugMsg,
-//		Orders:       []*lugo.Order{},
-//	}
-//	for _, order := range orders {
-//		orderSet.Orders = append(orderSet.Orders, &lugo.Order{Action: order})
-//	}
-//	s.logger.Debugf("sending orders for turn %d", s.snapshot.Turn)
-//	return s.gameConn.SendOrders(ctx, orderSet)
-//}
-
-func (c *Client) TagRPC(ctx context.Context, t *stats.RPCTagInfo) context.Context {
+func (c *Client) TagRPC(ctx context.Context, _ *stats.RPCTagInfo) context.Context {
 	return ctx
 }
 
@@ -124,11 +93,11 @@ func (c *Client) HandleRPC(context.Context, stats.RPCStats) {
 
 }
 
-func (c *Client) TagConn(ctx context.Context, t *stats.ConnTagInfo) context.Context {
+func (c *Client) TagConn(ctx context.Context, _ *stats.ConnTagInfo) context.Context {
 	return ctx
 }
 
-func (c *Client) HandleConn(ctx context.Context, sts stats.ConnStats) {
+func (c *Client) HandleConn(_ context.Context, sts stats.ConnStats) {
 	switch sts.(type) {
 	case *stats.ConnEnd:
 		_ = c.Stop()

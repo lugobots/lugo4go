@@ -116,7 +116,7 @@ func (m *Vector) Cos() float64 {
 
 // Angle returns the angle of the vector with the X axis
 func (m *Vector) Angle() float64 {
-	return float64(math.Atan2(float64(m.Y), float64(m.X)))
+	return math.Atan2(m.Y, m.X)
 }
 
 func (m *Vector) AngleDegrees() float64 {

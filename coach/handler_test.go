@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func TestcoachDefineMyState_AllStates(t *testing.T) {
+func TestCoachDefineMyState_AllStates(t *testing.T) {
 	var state coach.PlayerState
 	var err error
 	home3 := &lugo.Player{Number: 3, TeamSide: lugo.Team_HOME}
@@ -57,7 +57,7 @@ func TestcoachDefineMyState_AllStates(t *testing.T) {
 	assert.Equal(t, coach.Defending, state)
 }
 
-func TestcoachDefineMyState_ErrorInvalidSnapshot(t *testing.T) {
+func TestCoachDefineMyState_ErrorInvalidSnapshot(t *testing.T) {
 	var err error
 
 	_, err = coach.DefineMyState(nil, 3, lugo.Team_HOME)
@@ -67,7 +67,7 @@ func TestcoachDefineMyState_ErrorInvalidSnapshot(t *testing.T) {
 	assert.Equal(t, err, coach.ErrNoBall)
 }
 
-func TestcoachDefineMyState_ErrorNoPlayer(t *testing.T) {
+func TestCoachDefineMyState_ErrorNoPlayer(t *testing.T) {
 	var err error
 
 	_, err = coach.DefineMyState(&lugo.GameSnapshot{Ball: &lugo.Ball{}}, 3, lugo.Team_HOME)
@@ -79,7 +79,7 @@ func TestHandler_Handle_ShouldCallRightMethod(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish() // checks all expected things for mocks
 
-	mockLog := lugo.NewMockLogger(ctrl)
+	mockLog := NewMockLogger(ctrl)
 	mockBot := NewMockBot(ctrl)
 	mockBotGoalkeeper := NewMockBot(ctrl)
 	mockSender := NewMockOrderSender(ctrl)
@@ -149,7 +149,7 @@ func TestHandler_Handle_ShouldLogErrors(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish() // checks all expected things for mocks
 
-	mockLog := lugo.NewMockLogger(ctrl)
+	mockLog := NewMockLogger(ctrl)
 	mockBot := NewMockBot(ctrl)
 	mockSender := NewMockOrderSender(ctrl)
 	//mockSender := NewMockOrderSender(ctrl)

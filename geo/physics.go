@@ -2,6 +2,7 @@ package geo
 
 import "github.com/lugobots/lugo4go/v2/lugo"
 
+// Experimental: use WithDefaultServiceConfig and WithDisableServiceConfig
 // Given an direction and an origin point, this function returns the angle to a particular target.
 // The angle adopts the direction as the base axis, so a positive angle indicates a the obstacle is on the left side,
 // while a negative angle indicates that the obstacle if on the right side.
