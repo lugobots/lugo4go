@@ -17,14 +17,18 @@ func DefaultLogger(config Config) (*zap.SugaredLogger, error) {
 }
 
 func DefaultConfigurator() (Config, error) {
-	config, err := LoadConfig("./config.json")
+	config := Config{}
+	configFile, err := config.ParseConfigFlags()
 	if err != nil {
-		return Config{}, fmt.Errorf("did not load the config: %s", err)
-	}
-	if err := config.ParseConfigFlags(); err != nil {
 		return Config{}, fmt.Errorf("did not parsed well the flags for config: %s", err)
 	}
 
+	if configFile != "" {
+		err := LoadConfig("./config.json", &config)
+		if err != nil {
+			return Config{}, fmt.Errorf("did not load the config: %s", err)
+		}
+	}
 	return config, nil
 }
 
