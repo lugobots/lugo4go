@@ -1,5 +1,5 @@
 # Lugo - Go Player Client
-
+[![Build Status](https://travis-ci.org/lugobots/lugo4go.svg?branch=master)](https://travis-ci.org/lugobots/lugo4go)
 [![GoDoc](https://godoc.org/github.com/lugobots/lugo4go?status.svg)](https://godoc.org/github.com/lugobots/lugo4go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lugobots/lugo4go)](https://goreportcard.com/report/github.com/lugobots/lugo4go)
 
