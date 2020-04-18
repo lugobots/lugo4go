@@ -8,6 +8,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/stats"
 	"io"
+	"sync"
 )
 
 const ProtocolVersion = "2.0"
@@ -62,6 +63,7 @@ func (c *Client) PlayWithBot(bot coach.Bot, logger lugo.Logger) error {
 func (c *Client) Play(handler TurnHandler) error {
 	var turnCrx context.Context
 	var stop context.CancelFunc = func() {}
+	m := sync.Mutex{}
 	for {
 		snapshot, err := c.Stream.Recv()
 		stop()
@@ -74,7 +76,9 @@ func (c *Client) Play(handler TurnHandler) error {
 		turnCrx, stop = context.WithCancel(context.Background())
 		mustHasStarted := make(chan bool)
 		go func() {
+			m.Lock()
 			close(mustHasStarted)
+			defer m.Unlock()
 			handler.Handle(turnCrx, snapshot)
 		}()
 		<-mustHasStarted
