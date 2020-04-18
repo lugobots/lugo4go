@@ -2,11 +2,12 @@ package lugo4go
 
 import (
 	"fmt"
+	"github.com/lugobots/lugo4go/v2/lugo"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-func DefaultLogger(config Config) (*zap.SugaredLogger, error) {
+func DefaultLogger(config lugo.Config) (*zap.SugaredLogger, error) {
 	configZap := zap.NewDevelopmentConfig()
 	configZap.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	zapLog, err := configZap.Build()
@@ -16,19 +17,19 @@ func DefaultLogger(config Config) (*zap.SugaredLogger, error) {
 	return zapLog.Sugar().Named(fmt.Sprintf("%s-%d", config.TeamSide, config.Number)), nil
 }
 
-func DefaultConfigurator() (Config, error) {
-	config, err := LoadConfig("./config.json")
+func DefaultConfigurator() (lugo.Config, error) {
+	config, err := lugo.LoadConfig("./config.json")
 	if err != nil {
-		return Config{}, fmt.Errorf("did not load the config: %s", err)
+		return lugo.Config{}, fmt.Errorf("did not load the config: %s", err)
 	}
 	if err := config.ParseConfigFlags(); err != nil {
-		return Config{}, fmt.Errorf("did not parsed well the flags for config: %s", err)
+		return lugo.Config{}, fmt.Errorf("did not parsed well the flags for config: %s", err)
 	}
 
 	return config, nil
 }
 
-func DefaultInitBundle() (Config, *zap.SugaredLogger, error) {
+func DefaultInitBundle() (lugo.Config, *zap.SugaredLogger, error) {
 	config, err := DefaultConfigurator()
 	if err != nil {
 		return config, nil, err

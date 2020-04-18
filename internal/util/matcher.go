@@ -1,4 +1,4 @@
-package testdata
+package util
 
 import "github.com/golang/mock/gomock"
 

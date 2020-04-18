@@ -3,6 +3,7 @@ package lugo4go
 import (
 	"context"
 	"fmt"
+	"github.com/lugobots/lugo4go/v2/coach"
 	"github.com/lugobots/lugo4go/v2/lugo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/stats"
@@ -11,10 +12,10 @@ import (
 
 const ProtocolVersion = "2.0"
 
-func NewRawClient(config Config, handler TurnHandler) (*Client, error) {
+func NewClient(config lugo.Config) (*Client, error) {
 	var err error
 	c := &Client{
-		Handler: handler,
+		config: config,
 	}
 
 	// A bot may eventually do not listen to server Stream (ignoring OnNewTurn). In this case, the Client must stop
@@ -30,14 +31,6 @@ func NewRawClient(config Config, handler TurnHandler) (*Client, error) {
 	}
 
 	c.GRPCClient = lugo.NewGameClient(c.grpcConn)
-
-	//c.Sender = func(snapshot *lugo.GameSnapshot, logger Logger) OrderSender {
-	//	return &sender{
-	//		gameConn: c.GRPCClient,
-	//		snapshot: snapshot,
-	//		logger:   logger,
-	//	}
-	//}
 
 	if c.Stream, err = c.GRPCClient.JoinATeam(context.Background(), &lugo.JoinRequest{
 		Token:           config.Token,
@@ -56,12 +49,16 @@ type Client struct {
 	GRPCClient lugo.GameClient
 	grpcConn   *grpc.ClientConn
 	Handler    TurnHandler
-	Logger     Logger
-	//Sender     OrderSender
-	//ErrorHandler func(response *lugo.OrderResponse, err error)
+	Logger     lugo.Logger
+	config     lugo.Config
 }
 
-func (c Client) Play() error {
+func (c Client) PlayWithBot(bot coach.Bot, logger lugo.Logger) error {
+	sender := coach.NewSender(c.GRPCClient)
+	handler := coach.NewHandler(bot, sender, logger, c.config.Number, c.config.TeamSide)
+	return c.Play(handler)
+}
+func (c Client) Play(handler TurnHandler) error {
 	var turnCrx context.Context
 	var stop context.CancelFunc = func() {}
 	for {
@@ -69,7 +66,6 @@ func (c Client) Play() error {
 		stop()
 		if err != nil {
 			if err != io.EOF {
-				//err = fmt.Errorf("connection error: %w", err)
 				return fmt.Errorf("%w: %s", ErrGRPCConnectionLost, err)
 			}
 			return ErrGRPCConnectionClosed
@@ -78,7 +74,7 @@ func (c Client) Play() error {
 		mustHasStarted := make(chan bool)
 		go func() {
 			close(mustHasStarted)
-			c.Handler.Handle(turnCrx, snapshot, c.GRPCClient)
+			handler.Handle(turnCrx, snapshot)
 		}()
 		<-mustHasStarted
 	}

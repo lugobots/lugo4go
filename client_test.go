@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/golang/mock/gomock"
 	"github.com/lugobots/lugo4go/v2"
+	"github.com/lugobots/lugo4go/v2/internal/util"
 	"github.com/lugobots/lugo4go/v2/lugo"
-	"github.com/lugobots/lugo4go/v2/testdata"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"io"
@@ -52,10 +52,8 @@ func TestNewRawClient(t *testing.T) {
 	if err != nil {
 		t.Fatalf("did not start mock server: %s", err)
 	}
-	mockHandler := lugo4go.NewMockTurnHandler(ctrl)
-	//logger := lugo4go.NewMockLogger(ctrl)
 
-	config := lugo4go.Config{
+	config := lugo.Config{
 		GRPCAddress:     fmt.Sprintf(":%d", testServerPort),
 		Insecure:        true,
 		TeamSide:        lugo.Team_HOME,
@@ -67,7 +65,7 @@ func TestNewRawClient(t *testing.T) {
 	waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
 
 	// the Client will try to join to a team, so our server need to expect it happens
-	srv.EXPECT().JoinATeam(testdata.NewMatcher(func(arg interface{}) bool {
+	srv.EXPECT().JoinATeam(util.NewMatcher(func(arg interface{}) bool {
 		expectedRequest := &lugo.JoinRequest{
 			Number:          config.Number,
 			InitPosition:    &config.InitialPosition,
@@ -79,7 +77,7 @@ func TestNewRawClient(t *testing.T) {
 	}), gomock.Any()).Return(nil)
 
 	// Now we may create the Client to connect to our fake server
-	playerClient, err := lugo4go.NewRawClient(config, mockHandler)
+	playerClient, err := lugo4go.NewClient(config)
 
 	// This last lines may run really quickly, and the server may not have ran the expected methods yet
 	// Let's give some time to the server run it before finish the test function
@@ -119,9 +117,9 @@ func TestClient_PlayCallsHandlerForEachMessage(t *testing.T) {
 		time.Sleep(50 * time.Millisecond)
 	}).Return(nil, io.EOF)
 
-	mockHandler.EXPECT().Handle(gomock.Any(), expectedSnapshot, mockGRPCClient)
+	mockHandler.EXPECT().Handle(gomock.Any(), expectedSnapshot)
 
-	err := c.Play()
+	err := c.Play(mockHandler)
 	done()
 	assert.Equal(t, lugo4go.ErrGRPCConnectionClosed, err)
 	if waiting.Err() != context.Canceled {
@@ -155,7 +153,7 @@ func TestClient_PlayReturnsTheRightError(t *testing.T) {
 		time.Sleep(50 * time.Millisecond)
 	}).Return(nil, expectedError)
 
-	err := c.Play()
+	err := c.Play(mockHandler)
 	done()
 	assert.True(t, errors.Is(err, lugo4go.ErrGRPCConnectionLost))
 	if waiting.Err() != context.Canceled {
@@ -195,8 +193,8 @@ func TestClient_PlayShouldStopContextWhenANewTurnStarts(t *testing.T) {
 	// we expect that it finishes immediately after the stream gets a new turn msg
 	// if it does not, the next handler will unblock it, but it will be considered an error
 	mockHandler.EXPECT().
-		Handle(gomock.Any(), expectedSnapshotA, mockGRPCClient).
-		DoAndReturn(func(ctx context.Context, snapshot *lugo.GameSnapshot, sender lugo4go.OrderSender) {
+		Handle(gomock.Any(), expectedSnapshotA).
+		DoAndReturn(func(ctx context.Context, snapshot *lugo.GameSnapshot) {
 			select {
 			case <-ctx.Done():
 				firstHandlerIsExpired = true
@@ -207,12 +205,12 @@ func TestClient_PlayShouldStopContextWhenANewTurnStarts(t *testing.T) {
 
 	// the second call to handler will close our channel just to ensure anything will be left behind in your test
 	mockHandler.EXPECT().
-		Handle(gomock.Any(), expectedSnapshotB, mockGRPCClient).
-		DoAndReturn(func(ctx context.Context, snapshot *lugo.GameSnapshot, sender lugo4go.OrderSender) {
+		Handle(gomock.Any(), expectedSnapshotB).
+		DoAndReturn(func(ctx context.Context, snapshot *lugo.GameSnapshot) {
 			close(holder)
 		})
 
-	err := c.Play()
+	err := c.Play(mockHandler)
 	done()
 	assert.Equal(t, lugo4go.ErrGRPCConnectionClosed, err)
 	assert.True(t, firstHandlerIsExpired)
