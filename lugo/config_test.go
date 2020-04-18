@@ -24,22 +24,36 @@ func TestLoadConfig(t *testing.T) {
 	caseList := map[string]testCase{
 		"ok": {
 			path:           "testdata/config_test_ok.json",
-			expectedConfig: okHome},
+			expectedConfig: okHome,
+		},
 		"ok_away": {
 			path:           "testdata/config_test_ok_away.json",
-			expectedConfig: okAway},
+			expectedConfig: okAway,
+		},
 		"ok_team_cap": {
 			path:           "testdata/config_test_ok_team_capitals.json",
-			expectedConfig: okHome},
+			expectedConfig: okHome,
+		},
 		"team undefined": {
 			path:          "testdata/config_test_invalid_home_undefined.json",
-			expectedError: "invalid team option"},
+			expectedError: "invalid team option",
+		},
 		"number 0": {
 			path:          "testdata/config_test_invalid_number_0.json",
-			expectedError: "invalid player number"},
+			expectedError: "invalid player number",
+		},
 		"number 12": {
 			path:          "testdata/config_test_invalid_number_12.json",
-			expectedError: "invalid player number"},
+			expectedError: "invalid player number",
+		},
+		"file not found": {
+			path:          "testdata/no-file.json",
+			expectedError: "no such file or director",
+		},
+		"invalid json": {
+			path:          "testdata/config_test_invalid_json.json",
+			expectedError: "error parsing the config",
+		},
 	}
 
 	for caseName, tCase := range caseList {

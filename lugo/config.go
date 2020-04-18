@@ -24,27 +24,28 @@ type jsonConfig struct {
 	Team string `json:"team"`
 }
 
-func LoadConfig(filepath string) (c Config, e error) {
+func LoadConfig(filepath string) (Config, error) {
+	config := Config{}
+	intermediateConfig := jsonConfig{}
+
 	content, err := ioutil.ReadFile(filepath)
-
-	config := jsonConfig{}
 	if err != nil {
-		e = fmt.Errorf("error loading the config file at %s: %s", filepath, err)
-	} else if err := json.Unmarshal(content, &config); err != nil {
-		e = fmt.Errorf("error parsing the config file at %s: %s", filepath, err)
-	} else if _, ok := Team_Side_name[int32(c.TeamSide)]; !ok {
-		e = fmt.Errorf("invalid team side in config file at %s", filepath)
-	} else if config.Number < 1 || config.Number > 11 {
-		e = fmt.Errorf("invalid player number in config file at %s: %d", filepath, config.Number)
+		return config, fmt.Errorf("error loading the config file at %s: %s", filepath, err)
+	} else if err := json.Unmarshal(content, &intermediateConfig); err != nil {
+		return config, fmt.Errorf("error parsing the config file at %s: %s", filepath, err)
+	} else if _, ok := Team_Side_name[int32(intermediateConfig.TeamSide)]; !ok {
+		return config, fmt.Errorf("invalid team side in config file at %s", filepath)
+	} else if intermediateConfig.Number < 1 || intermediateConfig.Number > 11 {
+		return config, fmt.Errorf("invalid player number in config file at %s: %d", filepath, intermediateConfig.Number)
 	}
 
-	side, ok := Team_Side_value[strings.ToUpper(config.Team)]
+	side, ok := Team_Side_value[strings.ToUpper(intermediateConfig.Team)]
 	if !ok {
-		e = fmt.Errorf("invalid team option '%s'. Must be either HOME or AWAY", config.Team)
+		return config, fmt.Errorf("invalid team option '%s'. Must be either HOME or AWAY", intermediateConfig.Team)
 	}
-	c = config.Config
-	c.TeamSide = Team_Side(side)
-	return
+	config = intermediateConfig.Config
+	config.TeamSide = Team_Side(side)
+	return config, nil
 }
 
 // ParseConfigFlags is a helper that sets flags to make the configuration be overwritten by command line.
