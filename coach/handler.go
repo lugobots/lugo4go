@@ -2,11 +2,12 @@ package coach
 
 import (
 	"context"
-	"github.com/lugobots/lugo4go/v2/field"
 	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/pkg/field"
+	"github.com/lugobots/lugo4go/v2/pkg/util"
 )
 
-func NewHandler(bot Bot, sender OrderSender, logger lugo.Logger, playerNumber uint32, side lugo.Team_Side) *Handler {
+func NewHandler(bot Bot, sender OrderSender, logger util.Logger, playerNumber uint32, side lugo.Team_Side) *Handler {
 	return &Handler{
 		Logger:       logger,
 		Sender:       sender,
@@ -19,7 +20,7 @@ func NewHandler(bot Bot, sender OrderSender, logger lugo.Logger, playerNumber ui
 // Handler is a Lugo4go client handler that allow you to create an interface to follow an basic strategy based on team
 // states.
 type Handler struct {
-	Logger       lugo.Logger
+	Logger       util.Logger
 	Sender       OrderSender
 	PlayerNumber uint32
 	Side         lugo.Team_Side

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/lugobots/lugo4go/v2/coach"
 	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/pkg/util"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/stats"
 	"io"
@@ -13,7 +14,7 @@ import (
 
 const ProtocolVersion = "2.0"
 
-func NewClient(config lugo.Config) (*Client, error) {
+func NewClient(config util.Config) (*Client, error) {
 	var err error
 	c := &Client{
 		config: config,
@@ -50,11 +51,11 @@ type Client struct {
 	GRPCClient lugo.GameClient
 	grpcConn   *grpc.ClientConn
 	Handler    TurnHandler
-	Logger     lugo.Logger
-	config     lugo.Config
+	Logger     util.Logger
+	config     util.Config
 }
 
-func (c *Client) PlayWithBot(bot coach.Bot, logger lugo.Logger) error {
+func (c *Client) PlayWithBot(bot coach.Bot, logger util.Logger) error {
 	sender := coach.NewSender(c.GRPCClient)
 	handler := coach.NewHandler(bot, sender, logger, c.config.Number, c.config.TeamSide)
 	return c.Play(handler)

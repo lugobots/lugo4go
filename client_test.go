@@ -8,6 +8,7 @@ import (
 	"github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/internal/util"
 	"github.com/lugobots/lugo4go/v2/lugo"
+	util2 "github.com/lugobots/lugo4go/v2/pkg/util"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"io"
@@ -53,7 +54,7 @@ func TestNewRawClient(t *testing.T) {
 		t.Fatalf("did not start mock server: %s", err)
 	}
 
-	config := lugo.Config{
+	config := util2.Config{
 		GRPCAddress:     fmt.Sprintf(":%d", testServerPort),
 		Insecure:        true,
 		TeamSide:        lugo.Team_HOME,

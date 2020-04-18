@@ -1,4 +1,4 @@
-package lugo
+package util
 
 type Logger interface {
 	Debug(args ...interface{})

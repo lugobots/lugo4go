@@ -16,4 +16,8 @@ mockgen -package=coach_test \
 
 mockgen -package=coach_test \
         -destination=coach/mocks_lugo_test.go \
-        github.com/lugobots/lugo4go/v2/lugo Logger,GameClient
+        github.com/lugobots/lugo4go/v2/lugo GameClient
+
+mockgen -package=coach_test \
+        -destination=coach/mocks_log_test.go \
+        github.com/lugobots/lugo4go/v2/pkg/util Logger

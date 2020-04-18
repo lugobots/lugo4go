@@ -5,8 +5,9 @@ import (
 	"errors"
 	"github.com/golang/mock/gomock"
 	"github.com/lugobots/lugo4go/v2/coach"
-	"github.com/lugobots/lugo4go/v2/field"
 	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/pkg/field"
+	"github.com/lugobots/lugo4go/v2/pkg/util"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -84,7 +85,7 @@ func TestHandler_Handle_ShouldCallRightMethod(t *testing.T) {
 	mockBotGoalkeeper := NewMockBot(ctrl)
 	mockSender := NewMockOrderSender(ctrl)
 
-	config := lugo.Config{Number: 4, TeamSide: lugo.Team_HOME}
+	config := util.Config{Number: 4, TeamSide: lugo.Team_HOME}
 
 	handler := coach.NewHandler(mockBot, mockSender, mockLog, config.Number, config.TeamSide)
 	goalkeeperHandler := coach.NewHandler(mockBotGoalkeeper, mockSender, mockLog, field.GoalkeeperNumber, config.TeamSide)
@@ -154,7 +155,7 @@ func TestHandler_Handle_ShouldLogErrors(t *testing.T) {
 	mockSender := NewMockOrderSender(ctrl)
 	//mockSender := NewMockOrderSender(ctrl)
 
-	config := lugo.Config{Number: 4, TeamSide: lugo.Team_HOME}
+	config := util.Config{Number: 4, TeamSide: lugo.Team_HOME}
 	handler := coach.NewHandler(mockBot, mockSender, mockLog, config.Number, config.TeamSide)
 
 	//ball := &lugo.Ball{}

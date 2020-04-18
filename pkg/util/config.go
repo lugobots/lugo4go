@@ -1,9 +1,10 @@
-package lugo
+package util
 
 import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/lugobots/lugo4go/v2/lugo"
 	"io/ioutil"
 	"strings"
 )
@@ -14,9 +15,9 @@ type Config struct {
 	GRPCAddress     string `json:"grpc_address"`
 	Insecure        bool   `json:"insecure"`
 	Token           string `json:"token"`
-	TeamSide        Team_Side
-	Number          uint32 `json:"number"`
-	InitialPosition Point  `json:"-"`
+	TeamSide        lugo.Team_Side
+	Number          uint32     `json:"number"`
+	InitialPosition lugo.Point `json:"-"`
 }
 
 type jsonConfig struct {
@@ -33,18 +34,18 @@ func LoadConfig(filepath string) (Config, error) {
 		return config, fmt.Errorf("error loading the config file at %s: %s", filepath, err)
 	} else if err := json.Unmarshal(content, &intermediateConfig); err != nil {
 		return config, fmt.Errorf("error parsing the config file at %s: %s", filepath, err)
-	} else if _, ok := Team_Side_name[int32(intermediateConfig.TeamSide)]; !ok {
+	} else if _, ok := lugo.Team_Side_name[int32(intermediateConfig.TeamSide)]; !ok {
 		return config, fmt.Errorf("invalid team side in config file at %s", filepath)
 	} else if intermediateConfig.Number < 1 || intermediateConfig.Number > 11 {
 		return config, fmt.Errorf("invalid player number in config file at %s: %d", filepath, intermediateConfig.Number)
 	}
 
-	side, ok := Team_Side_value[strings.ToUpper(intermediateConfig.Team)]
+	side, ok := lugo.Team_Side_value[strings.ToUpper(intermediateConfig.Team)]
 	if !ok {
 		return config, fmt.Errorf("invalid team option '%s'. Must be either HOME or AWAY", intermediateConfig.Team)
 	}
 	config = intermediateConfig.Config
-	config.TeamSide = Team_Side(side)
+	config.TeamSide = lugo.Team_Side(side)
 	return config, nil
 }
 
@@ -62,7 +63,7 @@ func (c *Config) ParseConfigFlags() error {
 
 	flag.Parse()
 
-	side, ok := Team_Side_value[strings.ToUpper(name)]
+	side, ok := lugo.Team_Side_value[strings.ToUpper(name)]
 	if !ok {
 		return fmt.Errorf("invalid team option '%s'. Must be either HOME or AWAY", name)
 	}
@@ -71,7 +72,7 @@ func (c *Config) ParseConfigFlags() error {
 		return fmt.Errorf("invalid player number '%d'. Must be 1 to 11", number)
 	}
 
-	c.TeamSide = Team_Side(side)
+	c.TeamSide = lugo.Team_Side(side)
 	c.Number = uint32(number)
 	return nil
 }

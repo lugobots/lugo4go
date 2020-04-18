@@ -1,6 +1,7 @@
-package lugo
+package util
 
 import (
+	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -16,11 +17,11 @@ func TestLoadConfig(t *testing.T) {
 		GRPCAddress: "localhost:1212",
 		Insecure:    true,
 		Token:       "UUID",
-		TeamSide:    Team_HOME,
+		TeamSide:    lugo.Team_HOME,
 		Number:      4,
 	}
 	okAway := okHome
-	okAway.TeamSide = Team_AWAY
+	okAway.TeamSide = lugo.Team_AWAY
 	caseList := map[string]testCase{
 		"ok": {
 			path:           "testdata/config_test_ok.json",
