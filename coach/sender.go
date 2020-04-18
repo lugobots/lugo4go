@@ -7,12 +7,12 @@ import (
 
 func NewSender(grpcClient lugo.GameClient) *Sender {
 	return &Sender{
-		grpcClient: grpcClient,
+		GRPCClient: grpcClient,
 	}
 }
 
 type Sender struct {
-	grpcClient lugo.GameClient
+	GRPCClient lugo.GameClient
 }
 
 func (s *Sender) Send(ctx context.Context, turn uint32, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error) {
@@ -24,5 +24,5 @@ func (s *Sender) Send(ctx context.Context, turn uint32, orders []lugo.PlayerOrde
 	for _, order := range orders {
 		orderSet.Orders = append(orderSet.Orders, &lugo.Order{Action: order})
 	}
-	return s.grpcClient.SendOrders(ctx, orderSet)
+	return s.GRPCClient.SendOrders(ctx, orderSet)
 }

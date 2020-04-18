@@ -17,6 +17,7 @@ const (
 )
 
 const (
-	ErrPlayerNotFound = Error("player not found in the game Snapshot")
+	ErrNilSnapshot    = Error("invalid snapshot state (nil)")
+	ErrPlayerNotFound = Error("player not found in the game snapshot")
 	ErrNoBall         = Error("no ball found in the snapshot")
 )

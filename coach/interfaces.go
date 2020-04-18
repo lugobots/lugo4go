@@ -15,7 +15,7 @@ type Bot interface {
 	OnDefending(ctx context.Context, sender OrderSender, snapshot *lugo.GameSnapshot) error
 	OnHolding(ctx context.Context, sender OrderSender, snapshot *lugo.GameSnapshot) error
 	OnSupporting(ctx context.Context, sender OrderSender, snapshot *lugo.GameSnapshot) error
-	AsGoalkeeper(ctx context.Context, sender OrderSender, snapshot *lugo.GameSnapshot) error
+	AsGoalkeeper(ctx context.Context, sender OrderSender, snapshot *lugo.GameSnapshot, state PlayerState) error
 }
 
 // Positioner Helps the bots to see the fields from their team perspective instead of using the cartesian plan provided
