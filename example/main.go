@@ -35,38 +35,24 @@ func main() {
 	logger.Info("connected to the game server")
 
 	// Creating a bot to play
-	myBot, errs := bot.NewBot(logger, playerConfig.TeamSide, playerConfig.Number)
+	myBot := bot.NewBot(logger, playerConfig.TeamSide, playerConfig.Number)
 
-	watch := make(chan error)
+	errChan := make(chan error)
 	go func() {
-		logger.Info("starting playing")
-		if err := player.PlayWithBot(myBot, logger.Named("bot")); err != nil {
-			log.Fatalf("could not start to play: %s", err)
-		}
-		close(watch)
+		errChan <- player.PlayWithBot(myBot, logger.Named("bot"))
 	}()
 
-	go func() {
-		for {
-			select {
-			case err := <-errs:
-				//that's a nice place to implement some logic to understand your bot errors
-				log.Printf("bot error: %s", err)
-			case <-watch:
-				return
-			}
-		}
-	}()
-
-	// keep the process alive
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 	select {
+	case err := <-errChan:
+		//that's a nice place to implement some logic to understand your bot errors
+		log.Printf("bot error: %s", err)
 	case <-signalChan:
 		logger.Warnf("got interruption signal")
-		player.Stop()
-	case <-watch:
-		logger.Infof("player client stopped")
+		if err := player.Stop(); err != nil {
+			log.Printf("error stopping bot: %s", err)
+		}
 	}
 	logger.Infof("process finished")
 }
