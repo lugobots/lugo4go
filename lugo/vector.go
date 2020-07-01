@@ -25,29 +25,29 @@ func NewVector(from Point, to Point) (*Vector, error) {
 	return v, nil
 }
 
-func (m Vector) Copy() *Vector {
+func (v Vector) Copy() *Vector {
 	nv := new(Vector)
-	nv.X = m.X
-	nv.Y = m.Y
+	nv.X = v.X
+	nv.Y = v.Y
 	return nv
 }
 
-func (m Vector) Perpendicular() *Vector {
+func (v Vector) Perpendicular() *Vector {
 	nv := new(Vector)
-	nv.X = m.Y
-	nv.Y = -m.X
+	nv.X = v.Y
+	nv.Y = -v.X
 	return nv
 }
 
-func (m *Vector) MarshalJSON() ([]byte, error) {
+func (v *Vector) MarshalJSON() ([]byte, error) {
 	return json.Marshal(map[string]interface{}{
-		"x":   m.X,
-		"y":   m.Y,
-		"ang": m.AngleDegrees(),
+		"x":   v.X,
+		"y":   v.Y,
+		"ang": v.AngleDegrees(),
 	})
 }
 
-func (m *Vector) UnmarshalJSON(b []byte) error {
+func (v *Vector) UnmarshalJSON(b []byte) error {
 	var tmp struct {
 		X float64 `json:"x"`
 		Y float64 `json:"y"`
@@ -56,127 +56,128 @@ func (m *Vector) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	m.X = tmp.X
-	m.Y = tmp.Y
-	if err := m.isValidCoords(m.X, m.Y); err != nil {
+	v.X = tmp.X
+	v.Y = tmp.Y
+	if err := v.isValidCoords(v.X, v.Y); err != nil {
 		return err
 	}
 	return nil
 }
 
 // Normalizes the vector on base 100 (not 1 as conventional) to reduce the loss.
-func (m *Vector) Normalize() *Vector {
-	length := m.Length()
-	_, _ = m.Scale(100 / length)
-	return m
+func (v *Vector) Normalize() *Vector {
+	length := v.Length()
+	_, _ = v.Scale(100 / length)
+	return v
 }
 
-func (m *Vector) SetLength(length float64) (*Vector, error) {
-	return m.Scale(length / m.Length())
+func (v *Vector) SetLength(length float64) (*Vector, error) {
+	return v.Scale(length / v.Length())
 }
 
-func (m *Vector) SetX(x float64) (*Vector, error) {
-	if err := m.isValidCoords(x, m.Y); err != nil {
+func (v *Vector) SetX(x float64) (*Vector, error) {
+	if err := v.isValidCoords(x, v.Y); err != nil {
 		return nil, err
 	}
-	m.X = x
-	return m, nil
+	v.X = x
+	return v, nil
 }
 
-func (m *Vector) SetY(y float64) (*Vector, error) {
-	if err := m.isValidCoords(m.X, y); err != nil {
+func (v *Vector) SetY(y float64) (*Vector, error) {
+	if err := v.isValidCoords(v.X, y); err != nil {
 		return nil, err
 	}
-	m.Y = y
-	return m, nil
+	v.Y = y
+	return v, nil
 }
 
-func (m *Vector) Invert() *Vector {
-	m.X = -m.X
-	m.Y = -m.Y
-	return m
+func (v *Vector) Invert() *Vector {
+	v.X = -v.X
+	v.Y = -v.Y
+	return v
 }
 
-func (m *Vector) Scale(t float64) (*Vector, error) {
+func (v *Vector) Scale(t float64) (*Vector, error) {
 	if t == 0 {
 		return nil, errors.New("vector can not have zero length")
 	}
-	m.X *= t
-	m.Y *= t
-	return m, nil
+	v.X *= t
+	v.Y *= t
+	return v, nil
 }
 
-func (m *Vector) Sin() float64 {
-	return m.Y / m.Length()
+func (v *Vector) Sin() float64 {
+	return v.Y / v.Length()
 }
 
-func (m *Vector) Cos() float64 {
-	return m.X / m.Length()
+func (v *Vector) Cos() float64 {
+	return v.X / v.Length()
 }
 
 // Angle returns the angle of the vector with the X axis
-func (m *Vector) Angle() float64 {
-	return math.Atan2(m.Y, m.X)
+func (v *Vector) Angle() float64 {
+	return math.Atan2(v.Y, v.X)
 }
 
-func (m *Vector) AngleDegrees() float64 {
-	return m.Angle() * 180 / math.Pi
+func (v *Vector) AngleDegrees() float64 {
+	return v.Angle() * 180 / math.Pi
 }
 
-func (m *Vector) OppositeAngle() float64 {
-	return math.Acos(m.Cos())
+func (v *Vector) OppositeAngle() float64 {
+	return math.Acos(v.Cos())
 }
 
-func (m *Vector) AddAngleDegree(degree float64) *Vector {
-	newAngle := m.AngleDegrees() + degree
+func (v *Vector) AddAngleDegree(degree float64) *Vector {
+	newAngle := v.AngleDegrees() + degree
 	newAngle *= math.Pi / 180
 
-	length := m.Length()
-	m.X = length * math.Cos(newAngle)
-	m.Y = length * math.Sin(newAngle)
-	return m
+	length := v.Length()
+	v.X = length * math.Cos(newAngle)
+	v.Y = length * math.Sin(newAngle)
+	return v
 }
 
-func (m *Vector) Length() float64 {
-	return math.Hypot(m.X, m.Y)
+func (v *Vector) Length() float64 {
+	return math.Hypot(v.X, v.Y)
 }
 
-func (m *Vector) Add(vector *Vector) (*Vector, error) {
-	x := m.X + vector.X
-	y := m.Y + vector.Y
-	if err := m.isValidCoords(x, y); err != nil {
+// torcar pra valow de copia
+func (v *Vector) Add(vector *Vector) (*Vector, error) {
+	x := v.X + vector.X
+	y := v.Y + vector.Y
+	if err := v.isValidCoords(x, y); err != nil {
 		return nil, err
 	}
-	m.X = x
-	m.Y = y
-	return m, nil
+	v.X = x
+	v.Y = y
+	return v, nil
 }
 
-func (m *Vector) Sub(vector *Vector) (*Vector, error) {
-	x := m.X - vector.X
-	y := m.Y - vector.Y
-	if err := m.isValidCoords(x, y); err != nil {
+func (v *Vector) Sub(vector *Vector) (*Vector, error) {
+	x := v.X - vector.X
+	y := v.Y - vector.Y
+	if err := v.isValidCoords(x, y); err != nil {
 		return nil, err
 	}
-	m.X = x
-	m.Y = y
-	return m, nil
+	v.X = x
+	v.Y = y
+	return v, nil
 }
 
-func (m *Vector) TargetFrom(point Point) Point {
+func (v *Vector) TargetFrom(point Point) Point {
 	return Point{
-		X: point.X + int32(math.Round(m.X)),
-		Y: point.Y + int32(math.Round(m.Y)),
+		X: point.X + int32(math.Round(v.X)),
+		Y: point.Y + int32(math.Round(v.Y)),
 	}
 }
 
-func (m *Vector) IsEqualTo(b *Vector) bool {
-	return b.Y == m.Y && b.X == m.X
+func (v *Vector) IsEqualTo(b *Vector) bool {
+	return b.Y == v.Y && b.X == v.X
 }
 
-func (m *Vector) AngleWith(b *Vector) float64 {
+func (v *Vector) AngleWith(b *Vector) float64 {
 	//http://onlinemschool.com/math/assistance/vector/angl/
-	copyMe := m.Copy().Normalize()
+	copyMe := v.Copy().Normalize()
 	copyOther := b.Copy().Normalize()
 
 	dotProduct := (copyMe.X * copyOther.X) + (copyMe.Y * copyOther.Y)
@@ -189,15 +190,15 @@ func (m *Vector) AngleWith(b *Vector) float64 {
 	return ang
 }
 
-func (m *Vector) IsObstacle(from Point, obstacle Point) bool {
-	to := m.TargetFrom(from)
+func (v *Vector) IsObstacle(from Point, obstacle Point) bool {
+	to := v.TargetFrom(from)
 	a := from.DistanceTo(obstacle)
 	b := obstacle.DistanceTo(to)
 	hypo := from.DistanceTo(to)
 	return math.Round(a+b-hypo) < 0.1
 }
 
-func (m *Vector) isValidCoords(x, y float64) error {
+func (v *Vector) isValidCoords(x, y float64) error {
 	if x == 0 && y == 0 {
 		return errors.New("vector can not have zero length")
 	}

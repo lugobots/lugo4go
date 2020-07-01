@@ -1,4 +1,4 @@
-package coach
+package team
 
 // Error helps to define internal errors
 type Error string

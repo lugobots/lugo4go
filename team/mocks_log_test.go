@@ -2,7 +2,7 @@
 // Source: github.com/lugobots/lugo4go/v2/pkg/util (interfaces: Logger)
 
 // Package coach_test is a generated GoMock package.
-package coach_test
+package team_test
 
 import (
 	gomock "github.com/golang/mock/gomock"

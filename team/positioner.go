@@ -1,4 +1,4 @@
-package coach
+package team
 
 import (
 	"fmt"
@@ -11,23 +11,23 @@ import (
 // happen based on our configuration. Once the errors are in a controlled and limited list of methods, we are able
 // to ignore the errors during the game, and only test them in our unit tests.
 //
-// For doing that, in our bot, we may create a limited list of region coordinates that will be translated to Regions,
-// and than test all of them. The other direction is the conversion from a Point to a region. In this case, we
+// For doing that, in our bot, we may create a limited list of FieldArea coordinates that will be translated to Regions,
+// and than test all of them. The other direction is the conversion from a Point to a FieldArea. In this case, we
 // assume that the server will only send us valid points (within the field limits).
 
 const (
-	// Define the min number of cols allowed on the field division by the positioner
+	// Define the min number of cols allowed on the field division by the Arrangement
 	MinCols uint8 = 4
-	// Define the min number of rows allowed on the field division by the positioner
+	// Define the min number of rows allowed on the field division by the Arrangement
 	MinRows uint8 = 2
-	// Define the max number of cols allowed on the field division by the positioner
-	MaxCols uint8 = 20
-	// Define the max number of rows allowed on the field division by the positioner
-	MaxRows uint8 = 10
+	// Define the max number of cols allowed on the field division by the Arrangement
+	MaxCols uint8 = 200
+	// Define the max number of rows allowed on the field division by the Arrangement
+	MaxRows uint8 = 100
 )
 
-// NewPositioner creates a new Positioner that will map the field to provide Regions
-func NewPositioner(cols, rows uint8, sideRef lugo.Team_Side) (Positioner, error) {
+// NewArrangement creates a new Positioner that will map the field to provide Regions
+func NewArrangement(cols, rows uint8, sideRef lugo.Team_Side) (*Arrangement, error) {
 	if cols < MinCols {
 		return nil, ErrMinCols
 	}
@@ -41,8 +41,8 @@ func NewPositioner(cols, rows uint8, sideRef lugo.Team_Side) (Positioner, error)
 		return nil, ErrMaxRows
 	}
 
-	return &positioner{
-		sideRef:      sideRef,
+	return &Arrangement{
+		TeamSide:     sideRef,
 		cols:         cols,
 		rows:         rows,
 		regionWidth:  field.FieldWidth / float64(cols),
@@ -50,15 +50,15 @@ func NewPositioner(cols, rows uint8, sideRef lugo.Team_Side) (Positioner, error)
 	}, nil
 }
 
-type positioner struct {
-	sideRef      lugo.Team_Side
+type Arrangement struct {
+	TeamSide     lugo.Team_Side
 	cols         uint8
 	rows         uint8
 	regionWidth  float64
 	regionHeight float64
 }
 
-func (p *positioner) GetRegion(col, row uint8) (Region, error) {
+func (p *Arrangement) GetRegion(col, row uint8) (FieldNav, error) {
 	if col >= p.cols {
 		return nil, ErrMaxCols
 	}
@@ -70,21 +70,21 @@ func (p *positioner) GetRegion(col, row uint8) (Region, error) {
 		X: int32(math.Round(float64(col)*p.regionWidth + p.regionWidth/2)),
 		Y: int32(math.Round(float64(row)*p.regionHeight + p.regionHeight/2)),
 	}
-	if p.sideRef == lugo.Team_AWAY {
+	if p.TeamSide == lugo.Team_AWAY {
 		center = mirrorCoordsToAway(center)
 	}
 
-	return region{
+	return FieldArea{
 		col:        col,
 		row:        row,
-		sideRef:    p.sideRef,
+		sideRef:    p.TeamSide,
 		center:     center,
 		positioner: p,
 	}, nil
 }
 
-func (p *positioner) GetPointRegion(point lugo.Point) (Region, error) {
-	if p.sideRef == lugo.Team_AWAY {
+func (p *Arrangement) GetPointRegion(point lugo.Point) (FieldNav, error) {
+	if p.TeamSide == lugo.Team_AWAY {
 		point = mirrorCoordsToAway(point)
 	}
 	cx := float64(point.X) / p.regionWidth
@@ -94,52 +94,52 @@ func (p *positioner) GetPointRegion(point lugo.Point) (Region, error) {
 	return p.GetRegion(col, row)
 }
 
-type region struct {
+type FieldArea struct {
 	col        uint8
 	row        uint8
 	sideRef    lugo.Team_Side
 	center     lugo.Point
-	positioner *positioner
+	positioner *Arrangement
 }
 
-func (r region) Col() uint8 {
+func (r FieldArea) Col() uint8 {
 	return r.col
 }
 
-func (r region) Row() uint8 {
+func (r FieldArea) Row() uint8 {
 	return r.row
 }
 
-func (r region) Center() lugo.Point {
+func (r FieldArea) Center() lugo.Point {
 	return r.center
 }
 
-func (r region) String() string {
+func (r FieldArea) String() string {
 	return fmt.Sprintf("{%d,%d-%s}", r.col, r.row, r.sideRef)
 }
 
-func (r region) Front() Region {
+func (r FieldArea) Front() FieldNav {
 	if n, err := r.positioner.GetRegion(r.col+1, r.row); err == nil {
 		return n
 	}
 	return r
 }
 
-func (r region) Back() Region {
+func (r FieldArea) Back() FieldNav {
 	if n, err := r.positioner.GetRegion(r.col-1, r.row); err == nil {
 		return n
 	}
 	return r
 }
 
-func (r region) Left() Region {
+func (r FieldArea) Left() FieldNav {
 	if n, err := r.positioner.GetRegion(r.col, r.row+1); err == nil {
 		return n
 	}
 	return r
 }
 
-func (r region) Right() Region {
+func (r FieldArea) Right() FieldNav {
 	if n, err := r.positioner.GetRegion(r.col, r.row-1); err == nil {
 		return n
 	}

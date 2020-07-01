@@ -2,13 +2,13 @@
 // Source: coach/interfaces.go
 
 // Package coach_test is a generated GoMock package.
-package coach_test
+package team_test
 
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
-	coach "github.com/lugobots/lugo4go/v2/coach"
 	lugo "github.com/lugobots/lugo4go/v2/lugo"
+	coach "github.com/lugobots/lugo4go/v2/team"
 	reflect "reflect"
 )
 
@@ -167,10 +167,10 @@ func (m *MockPositioner) EXPECT() *MockPositionerMockRecorder {
 }
 
 // GetRegion mocks base method
-func (m *MockPositioner) GetRegion(col, row uint8) (coach.Region, error) {
+func (m *MockPositioner) GetRegion(col, row uint8) (coach.FieldNav, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetRegion", col, row)
-	ret0, _ := ret[0].(coach.Region)
+	ret0, _ := ret[0].(coach.FieldNav)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -182,10 +182,10 @@ func (mr *MockPositionerMockRecorder) GetRegion(col, row interface{}) *gomock.Ca
 }
 
 // GetPointRegion mocks base method
-func (m *MockPositioner) GetPointRegion(point lugo.Point) (coach.Region, error) {
+func (m *MockPositioner) GetPointRegion(point lugo.Point) (coach.FieldNav, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPointRegion", point)
-	ret0, _ := ret[0].(coach.Region)
+	ret0, _ := ret[0].(coach.FieldNav)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -196,7 +196,7 @@ func (mr *MockPositionerMockRecorder) GetPointRegion(point interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPointRegion", reflect.TypeOf((*MockPositioner)(nil).GetPointRegion), point)
 }
 
-// MockRegion is a mock of Region interface
+// MockRegion is a mock of FieldNav interface
 type MockRegion struct {
 	ctrl     *gomock.Controller
 	recorder *MockRegionMockRecorder
@@ -276,10 +276,10 @@ func (mr *MockRegionMockRecorder) Center() *gomock.Call {
 }
 
 // Front mocks base method
-func (m *MockRegion) Front() coach.Region {
+func (m *MockRegion) Front() coach.FieldNav {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Front")
-	ret0, _ := ret[0].(coach.Region)
+	ret0, _ := ret[0].(coach.FieldNav)
 	return ret0
 }
 
@@ -290,10 +290,10 @@ func (mr *MockRegionMockRecorder) Front() *gomock.Call {
 }
 
 // Back mocks base method
-func (m *MockRegion) Back() coach.Region {
+func (m *MockRegion) Back() coach.FieldNav {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Back")
-	ret0, _ := ret[0].(coach.Region)
+	ret0, _ := ret[0].(coach.FieldNav)
 	return ret0
 }
 
@@ -304,10 +304,10 @@ func (mr *MockRegionMockRecorder) Back() *gomock.Call {
 }
 
 // Left mocks base method
-func (m *MockRegion) Left() coach.Region {
+func (m *MockRegion) Left() coach.FieldNav {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Left")
-	ret0, _ := ret[0].(coach.Region)
+	ret0, _ := ret[0].(coach.FieldNav)
 	return ret0
 }
 
@@ -318,10 +318,10 @@ func (mr *MockRegionMockRecorder) Left() *gomock.Call {
 }
 
 // Right mocks base method
-func (m *MockRegion) Right() coach.Region {
+func (m *MockRegion) Right() coach.FieldNav {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Right")
-	ret0, _ := ret[0].(coach.Region)
+	ret0, _ := ret[0].(coach.FieldNav)
 	return ret0
 }
 

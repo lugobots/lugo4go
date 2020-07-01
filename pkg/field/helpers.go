@@ -92,3 +92,43 @@ func MakeOrderKick(ball lugo.Ball, target lugo.Point, speed float64) (*lugo.Orde
 func MakeOrderCatch() *lugo.Order_Catch {
 	return &lugo.Order_Catch{Catch: &lugo.Catch{}}
 }
+
+func GoForward(side lugo.Team_Side) *lugo.Order_Move {
+	forward := lugo.East()
+	if side == lugo.Team_AWAY {
+		forward = lugo.West()
+	}
+	vel := lugo.NewZeroedVelocity(forward)
+	vel.Speed = PlayerMaxSpeed
+	return &lugo.Order_Move{Move: &lugo.Move{Velocity: &vel}}
+}
+
+func GoBackward(side lugo.Team_Side) *lugo.Order_Move {
+	backward := lugo.West()
+	if side == lugo.Team_AWAY {
+		backward = lugo.East()
+	}
+	vel := lugo.NewZeroedVelocity(backward)
+	vel.Speed = PlayerMaxSpeed
+	return &lugo.Order_Move{Move: &lugo.Move{Velocity: &vel}}
+}
+
+func GoRight(side lugo.Team_Side) *lugo.Order_Move {
+	right := lugo.South()
+	if side == lugo.Team_AWAY {
+		right = lugo.North()
+	}
+	vel := lugo.NewZeroedVelocity(right)
+	vel.Speed = PlayerMaxSpeed
+	return &lugo.Order_Move{Move: &lugo.Move{Velocity: &vel}}
+}
+
+func GoLeft(side lugo.Team_Side) *lugo.Order_Move {
+	left := lugo.North()
+	if side == lugo.Team_AWAY {
+		left = lugo.South()
+	}
+	vel := lugo.NewZeroedVelocity(left)
+	vel.Speed = PlayerMaxSpeed
+	return &lugo.Order_Move{Move: &lugo.Move{Velocity: &vel}}
+}

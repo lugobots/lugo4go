@@ -3,13 +3,14 @@ package lugo4go
 import (
 	"context"
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/coach"
 	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/pkg/util"
+	"github.com/lugobots/lugo4go/v2/team"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/stats"
 	"io"
 	"sync"
+	"time"
 )
 
 // ProtocolVersion defines the current game protocol
@@ -25,11 +26,14 @@ func NewClient(config util.Config) (*Client, error) {
 	// A bot may eventually do not listen to server Stream (ignoring OnNewTurn). In this case, the Client must stop
 	// when the gRPC connection is closed.
 	connHandler := grpc.WithStatsHandler(c)
+
+	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
+
 	// @todo there are some gRPC options that we should take a look tro improve this part.
 	if config.Insecure {
-		c.grpcConn, err = grpc.Dial(config.GRPCAddress, grpc.WithInsecure(), connHandler)
+		c.grpcConn, err = grpc.DialContext(ctx, config.GRPCAddress, grpc.WithBlock(), grpc.WithInsecure(), connHandler)
 	} else {
-		c.grpcConn, err = grpc.Dial(config.GRPCAddress, connHandler)
+		c.grpcConn, err = grpc.DialContext(ctx, config.GRPCAddress, grpc.WithBlock(), connHandler)
 	}
 	if err != nil {
 		return nil, err
@@ -61,9 +65,9 @@ type Client struct {
 
 // PlayWithBot is a sugared Play mode that uses an TurnHandler from coach package.
 // Coach TurnHandler creates basic player states to help the development of new bots.
-func (c *Client) PlayWithBot(bot coach.Bot, logger util.Logger) error {
-	sender := coach.NewSender(c.GRPCClient)
-	handler := coach.NewHandler(bot, sender, logger, c.config.Number, c.config.TeamSide)
+func (c *Client) PlayWithBot(bot team.Bot, logger util.Logger) error {
+	sender := team.NewSender(c.GRPCClient)
+	handler := team.NewHandler(bot, sender, logger, c.config.Number, c.config.TeamSide)
 	return c.Play(handler)
 }
 
