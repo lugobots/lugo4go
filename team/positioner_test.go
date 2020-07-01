@@ -45,7 +45,7 @@ func TestRegion_Center_HomeTeam(t *testing.T) {
 
 	testCases := map[string]testCase{
 		"minimals":  {cols: MinCols, rows: MinRows, regionHalfWidth: int32(2500), regionHalfHeight: int32(2500)},
-		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: int32(500), regionHalfHeight: int32(500)},
+		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: int32(50), regionHalfHeight: int32(50)},
 		"custom-1":  {cols: 10, rows: 10, regionHalfWidth: int32(1000), regionHalfHeight: int32(500)},
 		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: int32(833), regionHalfHeight: int32(833)},
 	}
@@ -89,7 +89,7 @@ func TestRegion_Center_Away(t *testing.T) {
 
 	testCases := map[string]testCase{
 		"minimals":  {cols: MinCols, rows: MinRows, regionHalfWidth: int32(2500), regionHalfHeight: int32(2500)},
-		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: int32(500), regionHalfHeight: int32(500)},
+		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: int32(50), regionHalfHeight: int32(50)},
 		"custom-1":  {cols: 10, rows: 10, regionHalfWidth: int32(1000), regionHalfHeight: int32(500)},
 		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: int32(833), regionHalfHeight: int32(833)},
 	}
@@ -155,7 +155,7 @@ func TestPositioner_GetPointRegion_HomeTeam(t *testing.T) {
 
 	testCases := map[string]testCase{
 		"minimals":  {cols: MinCols, rows: MinRows, regionHalfWidth: int32(2500), regionHalfHeight: int32(2500)},
-		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: int32(500), regionHalfHeight: int32(500)},
+		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: int32(50), regionHalfHeight: int32(50)},
 		"custom-1":  {cols: 10, rows: 10, regionHalfWidth: int32(1000), regionHalfHeight: int32(500)},
 		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: int32(833), regionHalfHeight: int32(833)},
 	}
@@ -203,7 +203,7 @@ func TestPositioner_GetPointRegion_AwayTeam(t *testing.T) {
 
 	testCases := map[string]testCase{
 		"minimals":  {cols: MinCols, rows: MinRows, regionHalfWidth: int32(2500), regionHalfHeight: int32(2500)},
-		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: int32(500), regionHalfHeight: int32(500)},
+		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: int32(50), regionHalfHeight: int32(50)},
 		"custom-1":  {cols: 10, rows: 10, regionHalfWidth: int32(1000), regionHalfHeight: int32(500)},
 		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: int32(833), regionHalfHeight: int32(833)},
 	}
