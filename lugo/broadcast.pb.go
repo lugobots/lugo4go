@@ -488,8 +488,7 @@ type TeamSettings struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	//  Team.Side side = 2;
+	Name   string      `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Avatar string      `protobuf:"bytes,2,opt,name=avatar,proto3" json:"avatar,omitempty"`
 	Colors *TeamColors `protobuf:"bytes,3,opt,name=colors,proto3" json:"colors,omitempty"`
 }

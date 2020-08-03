@@ -9,7 +9,6 @@ package lugo
 import (
 	context "context"
 	proto "github.com/golang/protobuf/proto"
-	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -79,7 +78,121 @@ func (x CommandResponse_StatusCode) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use CommandResponse_StatusCode.Descriptor instead.
 func (CommandResponse_StatusCode) EnumDescriptor() ([]byte, []int) {
-	return file_remote_proto_rawDescGZIP(), []int{3, 0}
+	return file_remote_proto_rawDescGZIP(), []int{6, 0}
+}
+
+type PauseResumeRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *PauseResumeRequest) Reset() {
+	*x = PauseResumeRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_remote_proto_msgTypes[0]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PauseResumeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PauseResumeRequest) ProtoMessage() {}
+
+func (x *PauseResumeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_remote_proto_msgTypes[0]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PauseResumeRequest.ProtoReflect.Descriptor instead.
+func (*PauseResumeRequest) Descriptor() ([]byte, []int) {
+	return file_remote_proto_rawDescGZIP(), []int{0}
+}
+
+type NextTurnRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *NextTurnRequest) Reset() {
+	*x = NextTurnRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_remote_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *NextTurnRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NextTurnRequest) ProtoMessage() {}
+
+func (x *NextTurnRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_remote_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NextTurnRequest.ProtoReflect.Descriptor instead.
+func (*NextTurnRequest) Descriptor() ([]byte, []int) {
+	return file_remote_proto_rawDescGZIP(), []int{1}
+}
+
+type NextOrderRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *NextOrderRequest) Reset() {
+	*x = NextOrderRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_remote_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *NextOrderRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NextOrderRequest) ProtoMessage() {}
+
+func (x *NextOrderRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_remote_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NextOrderRequest.ProtoReflect.Descriptor instead.
+func (*NextOrderRequest) Descriptor() ([]byte, []int) {
+	return file_remote_proto_rawDescGZIP(), []int{2}
 }
 
 type BallProperties struct {
@@ -95,7 +208,7 @@ type BallProperties struct {
 func (x *BallProperties) Reset() {
 	*x = BallProperties{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_remote_proto_msgTypes[0]
+		mi := &file_remote_proto_msgTypes[3]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -108,7 +221,7 @@ func (x *BallProperties) String() string {
 func (*BallProperties) ProtoMessage() {}
 
 func (x *BallProperties) ProtoReflect() protoreflect.Message {
-	mi := &file_remote_proto_msgTypes[0]
+	mi := &file_remote_proto_msgTypes[3]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -121,7 +234,7 @@ func (x *BallProperties) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BallProperties.ProtoReflect.Descriptor instead.
 func (*BallProperties) Descriptor() ([]byte, []int) {
-	return file_remote_proto_rawDescGZIP(), []int{0}
+	return file_remote_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *BallProperties) GetPosition() *Point {
@@ -159,7 +272,7 @@ type PlayerProperties struct {
 func (x *PlayerProperties) Reset() {
 	*x = PlayerProperties{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_remote_proto_msgTypes[1]
+		mi := &file_remote_proto_msgTypes[4]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -172,7 +285,7 @@ func (x *PlayerProperties) String() string {
 func (*PlayerProperties) ProtoMessage() {}
 
 func (x *PlayerProperties) ProtoReflect() protoreflect.Message {
-	mi := &file_remote_proto_msgTypes[1]
+	mi := &file_remote_proto_msgTypes[4]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -185,7 +298,7 @@ func (x *PlayerProperties) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PlayerProperties.ProtoReflect.Descriptor instead.
 func (*PlayerProperties) Descriptor() ([]byte, []int) {
-	return file_remote_proto_rawDescGZIP(), []int{1}
+	return file_remote_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *PlayerProperties) GetSide() Team_Side {
@@ -221,16 +334,17 @@ type GameProperties struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Turn          uint32 `protobuf:"varint,1,opt,name=turn,proto3" json:"turn,omitempty"`
-	HomeScore     uint32 `protobuf:"varint,2,opt,name=home_score,json=homeScore,proto3" json:"home_score,omitempty"`
-	AwayScore     uint32 `protobuf:"varint,3,opt,name=away_score,json=awayScore,proto3" json:"away_score,omitempty"`
-	FrameInterval int64  `protobuf:"varint,4,opt,name=frame_interval,json=frameInterval,proto3" json:"frame_interval,omitempty"`
+	Turn          uint32     `protobuf:"varint,1,opt,name=turn,proto3" json:"turn,omitempty"`
+	HomeScore     uint32     `protobuf:"varint,2,opt,name=home_score,json=homeScore,proto3" json:"home_score,omitempty"`
+	AwayScore     uint32     `protobuf:"varint,3,opt,name=away_score,json=awayScore,proto3" json:"away_score,omitempty"`
+	FrameInterval int64      `protobuf:"varint,4,opt,name=frame_interval,json=frameInterval,proto3" json:"frame_interval,omitempty"`
+	ShotClock     *ShotClock `protobuf:"bytes,5,opt,name=shot_clock,json=shotClock,proto3" json:"shot_clock,omitempty"`
 }
 
 func (x *GameProperties) Reset() {
 	*x = GameProperties{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_remote_proto_msgTypes[2]
+		mi := &file_remote_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -243,7 +357,7 @@ func (x *GameProperties) String() string {
 func (*GameProperties) ProtoMessage() {}
 
 func (x *GameProperties) ProtoReflect() protoreflect.Message {
-	mi := &file_remote_proto_msgTypes[2]
+	mi := &file_remote_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -256,7 +370,7 @@ func (x *GameProperties) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GameProperties.ProtoReflect.Descriptor instead.
 func (*GameProperties) Descriptor() ([]byte, []int) {
-	return file_remote_proto_rawDescGZIP(), []int{2}
+	return file_remote_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *GameProperties) GetTurn() uint32 {
@@ -287,6 +401,13 @@ func (x *GameProperties) GetFrameInterval() int64 {
 	return 0
 }
 
+func (x *GameProperties) GetShotClock() *ShotClock {
+	if x != nil {
+		return x.ShotClock
+	}
+	return nil
+}
+
 type CommandResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -300,7 +421,7 @@ type CommandResponse struct {
 func (x *CommandResponse) Reset() {
 	*x = CommandResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_remote_proto_msgTypes[3]
+		mi := &file_remote_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -313,7 +434,7 @@ func (x *CommandResponse) String() string {
 func (*CommandResponse) ProtoMessage() {}
 
 func (x *CommandResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_remote_proto_msgTypes[3]
+	mi := &file_remote_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -326,7 +447,7 @@ func (x *CommandResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CommandResponse.ProtoReflect.Descriptor instead.
 func (*CommandResponse) Descriptor() ([]byte, []int) {
-	return file_remote_proto_rawDescGZIP(), []int{3}
+	return file_remote_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *CommandResponse) GetCode() CommandResponse_StatusCode {
@@ -356,8 +477,10 @@ var file_remote_proto_rawDesc = []byte{
 	0x0a, 0x0c, 0x72, 0x65, 0x6d, 0x6f, 0x74, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12, 0x04,
 	0x6c, 0x75, 0x67, 0x6f, 0x1a, 0x0d, 0x70, 0x68, 0x79, 0x73, 0x69, 0x63, 0x73, 0x2e, 0x70, 0x72,
 	0x6f, 0x74, 0x6f, 0x1a, 0x0c, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x1a, 0x1b, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62,
-	0x75, 0x66, 0x2f, 0x65, 0x6d, 0x70, 0x74, 0x79, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x22, 0x8b,
+	0x6f, 0x22, 0x14, 0x0a, 0x12, 0x50, 0x61, 0x75, 0x73, 0x65, 0x52, 0x65, 0x73, 0x75, 0x6d, 0x65,
+	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x11, 0x0a, 0x0f, 0x4e, 0x65, 0x78, 0x74, 0x54,
+	0x75, 0x72, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x12, 0x0a, 0x10, 0x4e, 0x65,
+	0x78, 0x74, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x8b,
 	0x01, 0x0a, 0x0e, 0x42, 0x61, 0x6c, 0x6c, 0x50, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x69, 0x65,
 	0x73, 0x12, 0x27, 0x0a, 0x08, 0x70, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20,
 	0x01, 0x28, 0x0b, 0x32, 0x0b, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x50, 0x6f, 0x69, 0x6e, 0x74,
@@ -377,7 +500,7 @@ var file_remote_proto_rawDesc = []byte{
 	0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x2a, 0x0a, 0x08, 0x76, 0x65, 0x6c, 0x6f, 0x63,
 	0x69, 0x74, 0x79, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x0e, 0x2e, 0x6c, 0x75, 0x67, 0x6f,
 	0x2e, 0x56, 0x65, 0x6c, 0x6f, 0x63, 0x69, 0x74, 0x79, 0x52, 0x08, 0x76, 0x65, 0x6c, 0x6f, 0x63,
-	0x69, 0x74, 0x79, 0x22, 0x89, 0x01, 0x0a, 0x0e, 0x47, 0x61, 0x6d, 0x65, 0x50, 0x72, 0x6f, 0x70,
+	0x69, 0x74, 0x79, 0x22, 0xb9, 0x01, 0x0a, 0x0e, 0x47, 0x61, 0x6d, 0x65, 0x50, 0x72, 0x6f, 0x70,
 	0x65, 0x72, 0x74, 0x69, 0x65, 0x73, 0x12, 0x12, 0x0a, 0x04, 0x74, 0x75, 0x72, 0x6e, 0x18, 0x01,
 	0x20, 0x01, 0x28, 0x0d, 0x52, 0x04, 0x74, 0x75, 0x72, 0x6e, 0x12, 0x1d, 0x0a, 0x0a, 0x68, 0x6f,
 	0x6d, 0x65, 0x5f, 0x73, 0x63, 0x6f, 0x72, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x09,
@@ -385,7 +508,10 @@ var file_remote_proto_rawDesc = []byte{
 	0x79, 0x5f, 0x73, 0x63, 0x6f, 0x72, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x09, 0x61,
 	0x77, 0x61, 0x79, 0x53, 0x63, 0x6f, 0x72, 0x65, 0x12, 0x25, 0x0a, 0x0e, 0x66, 0x72, 0x61, 0x6d,
 	0x65, 0x5f, 0x69, 0x6e, 0x74, 0x65, 0x72, 0x76, 0x61, 0x6c, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03,
-	0x52, 0x0d, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x49, 0x6e, 0x74, 0x65, 0x72, 0x76, 0x61, 0x6c, 0x22,
+	0x52, 0x0d, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x49, 0x6e, 0x74, 0x65, 0x72, 0x76, 0x61, 0x6c, 0x12,
+	0x2e, 0x0a, 0x0a, 0x73, 0x68, 0x6f, 0x74, 0x5f, 0x63, 0x6c, 0x6f, 0x63, 0x6b, 0x18, 0x05, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x0f, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x53, 0x68, 0x6f, 0x74, 0x43,
+	0x6c, 0x6f, 0x63, 0x6b, 0x52, 0x09, 0x73, 0x68, 0x6f, 0x74, 0x43, 0x6c, 0x6f, 0x63, 0x6b, 0x22,
 	0xea, 0x01, 0x0a, 0x0f, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f,
 	0x6e, 0x73, 0x65, 0x12, 0x34, 0x0a, 0x04, 0x63, 0x6f, 0x64, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28,
 	0x0e, 0x32, 0x20, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64,
@@ -400,35 +526,35 @@ var file_remote_proto_rawDesc = []byte{
 	0x43, 0x43, 0x45, 0x53, 0x53, 0x10, 0x00, 0x12, 0x11, 0x0a, 0x0d, 0x49, 0x4e, 0x56, 0x41, 0x4c,
 	0x49, 0x44, 0x5f, 0x56, 0x41, 0x4c, 0x55, 0x45, 0x10, 0x01, 0x12, 0x15, 0x0a, 0x11, 0x44, 0x45,
 	0x41, 0x44, 0x4c, 0x49, 0x4e, 0x45, 0x5f, 0x45, 0x58, 0x43, 0x45, 0x45, 0x44, 0x45, 0x44, 0x10,
-	0x02, 0x12, 0x09, 0x0a, 0x05, 0x4f, 0x54, 0x48, 0x45, 0x52, 0x10, 0x63, 0x32, 0x89, 0x03, 0x0a,
-	0x06, 0x52, 0x65, 0x6d, 0x6f, 0x74, 0x65, 0x12, 0x3e, 0x0a, 0x0d, 0x50, 0x61, 0x75, 0x73, 0x65,
-	0x4f, 0x72, 0x52, 0x65, 0x73, 0x75, 0x6d, 0x65, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
-	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
+	0x02, 0x12, 0x09, 0x0a, 0x05, 0x4f, 0x54, 0x48, 0x45, 0x52, 0x10, 0x63, 0x32, 0x8a, 0x03, 0x0a,
+	0x06, 0x52, 0x65, 0x6d, 0x6f, 0x74, 0x65, 0x12, 0x40, 0x0a, 0x0d, 0x50, 0x61, 0x75, 0x73, 0x65,
+	0x4f, 0x72, 0x52, 0x65, 0x73, 0x75, 0x6d, 0x65, 0x12, 0x18, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e,
+	0x50, 0x61, 0x75, 0x73, 0x65, 0x52, 0x65, 0x73, 0x75, 0x6d, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65,
+	0x73, 0x74, 0x1a, 0x15, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e,
+	0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x38, 0x0a, 0x08, 0x4e, 0x65, 0x78,
+	0x74, 0x54, 0x75, 0x72, 0x6e, 0x12, 0x15, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x4e, 0x65, 0x78,
+	0x74, 0x54, 0x75, 0x72, 0x6e, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x15, 0x2e, 0x6c,
+	0x75, 0x67, 0x6f, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f,
+	0x6e, 0x73, 0x65, 0x12, 0x3a, 0x0a, 0x09, 0x4e, 0x65, 0x78, 0x74, 0x4f, 0x72, 0x64, 0x65, 0x72,
+	0x12, 0x16, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x4e, 0x65, 0x78, 0x74, 0x4f, 0x72, 0x64, 0x65,
+	0x72, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x15, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e,
+	0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
+	0x40, 0x0a, 0x11, 0x53, 0x65, 0x74, 0x42, 0x61, 0x6c, 0x6c, 0x50, 0x72, 0x6f, 0x70, 0x65, 0x72,
+	0x74, 0x69, 0x65, 0x73, 0x12, 0x14, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x42, 0x61, 0x6c, 0x6c,
+	0x50, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x69, 0x65, 0x73, 0x1a, 0x15, 0x2e, 0x6c, 0x75, 0x67,
+	0x6f, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
+	0x65, 0x12, 0x44, 0x0a, 0x13, 0x53, 0x65, 0x74, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x50, 0x72,
+	0x6f, 0x70, 0x65, 0x72, 0x74, 0x69, 0x65, 0x73, 0x12, 0x16, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e,
+	0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x50, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x69, 0x65, 0x73,
 	0x1a, 0x15, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52,
-	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x39, 0x0a, 0x08, 0x4e, 0x65, 0x78, 0x74, 0x54,
-	0x75, 0x72, 0x6e, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f,
-	0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x15, 0x2e, 0x6c, 0x75,
-	0x67, 0x6f, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
-	0x73, 0x65, 0x12, 0x3a, 0x0a, 0x09, 0x4e, 0x65, 0x78, 0x74, 0x4f, 0x72, 0x64, 0x65, 0x72, 0x12,
-	0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75,
-	0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79, 0x1a, 0x15, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x43,
-	0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x40,
-	0x0a, 0x11, 0x53, 0x65, 0x74, 0x42, 0x61, 0x6c, 0x6c, 0x50, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74,
-	0x69, 0x65, 0x73, 0x12, 0x14, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x42, 0x61, 0x6c, 0x6c, 0x50,
-	0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x69, 0x65, 0x73, 0x1a, 0x15, 0x2e, 0x6c, 0x75, 0x67, 0x6f,
-	0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
-	0x12, 0x44, 0x0a, 0x13, 0x53, 0x65, 0x74, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x50, 0x72, 0x6f,
-	0x70, 0x65, 0x72, 0x74, 0x69, 0x65, 0x73, 0x12, 0x16, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x50,
-	0x6c, 0x61, 0x79, 0x65, 0x72, 0x50, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x69, 0x65, 0x73, 0x1a,
-	0x15, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x40, 0x0a, 0x11, 0x53, 0x65, 0x74, 0x47, 0x61, 0x6d,
-	0x65, 0x50, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x69, 0x65, 0x73, 0x12, 0x14, 0x2e, 0x6c, 0x75,
-	0x67, 0x6f, 0x2e, 0x47, 0x61, 0x6d, 0x65, 0x50, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x69, 0x65,
-	0x73, 0x1a, 0x15, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e, 0x64,
-	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x22, 0x5a, 0x20, 0x67, 0x69, 0x74, 0x68,
-	0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6c, 0x75, 0x67, 0x6f, 0x62, 0x6f, 0x74, 0x73, 0x2f,
-	0x6c, 0x75, 0x67, 0x6f, 0x34, 0x67, 0x6f, 0x2f, 0x6c, 0x75, 0x67, 0x6f, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x40, 0x0a, 0x11, 0x53, 0x65, 0x74, 0x47, 0x61,
+	0x6d, 0x65, 0x50, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x69, 0x65, 0x73, 0x12, 0x14, 0x2e, 0x6c,
+	0x75, 0x67, 0x6f, 0x2e, 0x47, 0x61, 0x6d, 0x65, 0x50, 0x72, 0x6f, 0x70, 0x65, 0x72, 0x74, 0x69,
+	0x65, 0x73, 0x1a, 0x15, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x61, 0x6e,
+	0x64, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x22, 0x5a, 0x20, 0x67, 0x69, 0x74,
+	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6c, 0x75, 0x67, 0x6f, 0x62, 0x6f, 0x74, 0x73,
+	0x2f, 0x6c, 0x75, 0x67, 0x6f, 0x34, 0x67, 0x6f, 0x2f, 0x6c, 0x75, 0x67, 0x6f, 0x62, 0x06, 0x70,
+	0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -444,46 +570,50 @@ func file_remote_proto_rawDescGZIP() []byte {
 }
 
 var file_remote_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_remote_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
+var file_remote_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_remote_proto_goTypes = []interface{}{
 	(CommandResponse_StatusCode)(0), // 0: lugo.CommandResponse.StatusCode
-	(*BallProperties)(nil),          // 1: lugo.BallProperties
-	(*PlayerProperties)(nil),        // 2: lugo.PlayerProperties
-	(*GameProperties)(nil),          // 3: lugo.GameProperties
-	(*CommandResponse)(nil),         // 4: lugo.CommandResponse
-	(*Point)(nil),                   // 5: lugo.Point
-	(*Velocity)(nil),                // 6: lugo.Velocity
-	(*Player)(nil),                  // 7: lugo.Player
-	(Team_Side)(0),                  // 8: lugo.Team.Side
-	(*GameSnapshot)(nil),            // 9: lugo.GameSnapshot
-	(*empty.Empty)(nil),             // 10: google.protobuf.Empty
+	(*PauseResumeRequest)(nil),      // 1: lugo.PauseResumeRequest
+	(*NextTurnRequest)(nil),         // 2: lugo.NextTurnRequest
+	(*NextOrderRequest)(nil),        // 3: lugo.NextOrderRequest
+	(*BallProperties)(nil),          // 4: lugo.BallProperties
+	(*PlayerProperties)(nil),        // 5: lugo.PlayerProperties
+	(*GameProperties)(nil),          // 6: lugo.GameProperties
+	(*CommandResponse)(nil),         // 7: lugo.CommandResponse
+	(*Point)(nil),                   // 8: lugo.Point
+	(*Velocity)(nil),                // 9: lugo.Velocity
+	(*Player)(nil),                  // 10: lugo.Player
+	(Team_Side)(0),                  // 11: lugo.Team.Side
+	(*ShotClock)(nil),               // 12: lugo.ShotClock
+	(*GameSnapshot)(nil),            // 13: lugo.GameSnapshot
 }
 var file_remote_proto_depIdxs = []int32{
-	5,  // 0: lugo.BallProperties.position:type_name -> lugo.Point
-	6,  // 1: lugo.BallProperties.velocity:type_name -> lugo.Velocity
-	7,  // 2: lugo.BallProperties.holder:type_name -> lugo.Player
-	8,  // 3: lugo.PlayerProperties.side:type_name -> lugo.Team.Side
-	5,  // 4: lugo.PlayerProperties.position:type_name -> lugo.Point
-	6,  // 5: lugo.PlayerProperties.velocity:type_name -> lugo.Velocity
-	0,  // 6: lugo.CommandResponse.code:type_name -> lugo.CommandResponse.StatusCode
-	9,  // 7: lugo.CommandResponse.game_snapshot:type_name -> lugo.GameSnapshot
-	10, // 8: lugo.Remote.PauseOrResume:input_type -> google.protobuf.Empty
-	10, // 9: lugo.Remote.NextTurn:input_type -> google.protobuf.Empty
-	10, // 10: lugo.Remote.NextOrder:input_type -> google.protobuf.Empty
-	1,  // 11: lugo.Remote.SetBallProperties:input_type -> lugo.BallProperties
-	2,  // 12: lugo.Remote.SetPlayerProperties:input_type -> lugo.PlayerProperties
-	3,  // 13: lugo.Remote.SetGameProperties:input_type -> lugo.GameProperties
-	4,  // 14: lugo.Remote.PauseOrResume:output_type -> lugo.CommandResponse
-	4,  // 15: lugo.Remote.NextTurn:output_type -> lugo.CommandResponse
-	4,  // 16: lugo.Remote.NextOrder:output_type -> lugo.CommandResponse
-	4,  // 17: lugo.Remote.SetBallProperties:output_type -> lugo.CommandResponse
-	4,  // 18: lugo.Remote.SetPlayerProperties:output_type -> lugo.CommandResponse
-	4,  // 19: lugo.Remote.SetGameProperties:output_type -> lugo.CommandResponse
-	14, // [14:20] is the sub-list for method output_type
-	8,  // [8:14] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	8,  // 0: lugo.BallProperties.position:type_name -> lugo.Point
+	9,  // 1: lugo.BallProperties.velocity:type_name -> lugo.Velocity
+	10, // 2: lugo.BallProperties.holder:type_name -> lugo.Player
+	11, // 3: lugo.PlayerProperties.side:type_name -> lugo.Team.Side
+	8,  // 4: lugo.PlayerProperties.position:type_name -> lugo.Point
+	9,  // 5: lugo.PlayerProperties.velocity:type_name -> lugo.Velocity
+	12, // 6: lugo.GameProperties.shot_clock:type_name -> lugo.ShotClock
+	0,  // 7: lugo.CommandResponse.code:type_name -> lugo.CommandResponse.StatusCode
+	13, // 8: lugo.CommandResponse.game_snapshot:type_name -> lugo.GameSnapshot
+	1,  // 9: lugo.Remote.PauseOrResume:input_type -> lugo.PauseResumeRequest
+	2,  // 10: lugo.Remote.NextTurn:input_type -> lugo.NextTurnRequest
+	3,  // 11: lugo.Remote.NextOrder:input_type -> lugo.NextOrderRequest
+	4,  // 12: lugo.Remote.SetBallProperties:input_type -> lugo.BallProperties
+	5,  // 13: lugo.Remote.SetPlayerProperties:input_type -> lugo.PlayerProperties
+	6,  // 14: lugo.Remote.SetGameProperties:input_type -> lugo.GameProperties
+	7,  // 15: lugo.Remote.PauseOrResume:output_type -> lugo.CommandResponse
+	7,  // 16: lugo.Remote.NextTurn:output_type -> lugo.CommandResponse
+	7,  // 17: lugo.Remote.NextOrder:output_type -> lugo.CommandResponse
+	7,  // 18: lugo.Remote.SetBallProperties:output_type -> lugo.CommandResponse
+	7,  // 19: lugo.Remote.SetPlayerProperties:output_type -> lugo.CommandResponse
+	7,  // 20: lugo.Remote.SetGameProperties:output_type -> lugo.CommandResponse
+	15, // [15:21] is the sub-list for method output_type
+	9,  // [9:15] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_remote_proto_init() }
@@ -495,7 +625,7 @@ func file_remote_proto_init() {
 	file_server_proto_init()
 	if !protoimpl.UnsafeEnabled {
 		file_remote_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*BallProperties); i {
+			switch v := v.(*PauseResumeRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -507,7 +637,7 @@ func file_remote_proto_init() {
 			}
 		}
 		file_remote_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*PlayerProperties); i {
+			switch v := v.(*NextTurnRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -519,7 +649,7 @@ func file_remote_proto_init() {
 			}
 		}
 		file_remote_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*GameProperties); i {
+			switch v := v.(*NextOrderRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -531,6 +661,42 @@ func file_remote_proto_init() {
 			}
 		}
 		file_remote_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*BallProperties); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_remote_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PlayerProperties); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_remote_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GameProperties); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_remote_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*CommandResponse); i {
 			case 0:
 				return &v.state
@@ -549,7 +715,7 @@ func file_remote_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_remote_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   4,
+			NumMessages:   7,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -576,9 +742,9 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type RemoteClient interface {
-	PauseOrResume(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*CommandResponse, error)
-	NextTurn(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*CommandResponse, error)
-	NextOrder(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*CommandResponse, error)
+	PauseOrResume(ctx context.Context, in *PauseResumeRequest, opts ...grpc.CallOption) (*CommandResponse, error)
+	NextTurn(ctx context.Context, in *NextTurnRequest, opts ...grpc.CallOption) (*CommandResponse, error)
+	NextOrder(ctx context.Context, in *NextOrderRequest, opts ...grpc.CallOption) (*CommandResponse, error)
 	SetBallProperties(ctx context.Context, in *BallProperties, opts ...grpc.CallOption) (*CommandResponse, error)
 	SetPlayerProperties(ctx context.Context, in *PlayerProperties, opts ...grpc.CallOption) (*CommandResponse, error)
 	SetGameProperties(ctx context.Context, in *GameProperties, opts ...grpc.CallOption) (*CommandResponse, error)
@@ -592,7 +758,7 @@ func NewRemoteClient(cc grpc.ClientConnInterface) RemoteClient {
 	return &remoteClient{cc}
 }
 
-func (c *remoteClient) PauseOrResume(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*CommandResponse, error) {
+func (c *remoteClient) PauseOrResume(ctx context.Context, in *PauseResumeRequest, opts ...grpc.CallOption) (*CommandResponse, error) {
 	out := new(CommandResponse)
 	err := c.cc.Invoke(ctx, "/lugo.Remote/PauseOrResume", in, out, opts...)
 	if err != nil {
@@ -601,7 +767,7 @@ func (c *remoteClient) PauseOrResume(ctx context.Context, in *empty.Empty, opts 
 	return out, nil
 }
 
-func (c *remoteClient) NextTurn(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*CommandResponse, error) {
+func (c *remoteClient) NextTurn(ctx context.Context, in *NextTurnRequest, opts ...grpc.CallOption) (*CommandResponse, error) {
 	out := new(CommandResponse)
 	err := c.cc.Invoke(ctx, "/lugo.Remote/NextTurn", in, out, opts...)
 	if err != nil {
@@ -610,7 +776,7 @@ func (c *remoteClient) NextTurn(ctx context.Context, in *empty.Empty, opts ...gr
 	return out, nil
 }
 
-func (c *remoteClient) NextOrder(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*CommandResponse, error) {
+func (c *remoteClient) NextOrder(ctx context.Context, in *NextOrderRequest, opts ...grpc.CallOption) (*CommandResponse, error) {
 	out := new(CommandResponse)
 	err := c.cc.Invoke(ctx, "/lugo.Remote/NextOrder", in, out, opts...)
 	if err != nil {
@@ -648,9 +814,9 @@ func (c *remoteClient) SetGameProperties(ctx context.Context, in *GameProperties
 
 // RemoteServer is the server API for Remote service.
 type RemoteServer interface {
-	PauseOrResume(context.Context, *empty.Empty) (*CommandResponse, error)
-	NextTurn(context.Context, *empty.Empty) (*CommandResponse, error)
-	NextOrder(context.Context, *empty.Empty) (*CommandResponse, error)
+	PauseOrResume(context.Context, *PauseResumeRequest) (*CommandResponse, error)
+	NextTurn(context.Context, *NextTurnRequest) (*CommandResponse, error)
+	NextOrder(context.Context, *NextOrderRequest) (*CommandResponse, error)
 	SetBallProperties(context.Context, *BallProperties) (*CommandResponse, error)
 	SetPlayerProperties(context.Context, *PlayerProperties) (*CommandResponse, error)
 	SetGameProperties(context.Context, *GameProperties) (*CommandResponse, error)
@@ -660,13 +826,13 @@ type RemoteServer interface {
 type UnimplementedRemoteServer struct {
 }
 
-func (*UnimplementedRemoteServer) PauseOrResume(context.Context, *empty.Empty) (*CommandResponse, error) {
+func (*UnimplementedRemoteServer) PauseOrResume(context.Context, *PauseResumeRequest) (*CommandResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PauseOrResume not implemented")
 }
-func (*UnimplementedRemoteServer) NextTurn(context.Context, *empty.Empty) (*CommandResponse, error) {
+func (*UnimplementedRemoteServer) NextTurn(context.Context, *NextTurnRequest) (*CommandResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NextTurn not implemented")
 }
-func (*UnimplementedRemoteServer) NextOrder(context.Context, *empty.Empty) (*CommandResponse, error) {
+func (*UnimplementedRemoteServer) NextOrder(context.Context, *NextOrderRequest) (*CommandResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method NextOrder not implemented")
 }
 func (*UnimplementedRemoteServer) SetBallProperties(context.Context, *BallProperties) (*CommandResponse, error) {
@@ -684,7 +850,7 @@ func RegisterRemoteServer(s *grpc.Server, srv RemoteServer) {
 }
 
 func _Remote_PauseOrResume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
+	in := new(PauseResumeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -696,13 +862,13 @@ func _Remote_PauseOrResume_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: "/lugo.Remote/PauseOrResume",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RemoteServer).PauseOrResume(ctx, req.(*empty.Empty))
+		return srv.(RemoteServer).PauseOrResume(ctx, req.(*PauseResumeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Remote_NextTurn_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
+	in := new(NextTurnRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -714,13 +880,13 @@ func _Remote_NextTurn_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: "/lugo.Remote/NextTurn",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RemoteServer).NextTurn(ctx, req.(*empty.Empty))
+		return srv.(RemoteServer).NextTurn(ctx, req.(*NextTurnRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _Remote_NextOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(empty.Empty)
+	in := new(NextOrderRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -732,7 +898,7 @@ func _Remote_NextOrder_Handler(srv interface{}, ctx context.Context, dec func(in
 		FullMethod: "/lugo.Remote/NextOrder",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RemoteServer).NextOrder(ctx, req.(*empty.Empty))
+		return srv.(RemoteServer).NextOrder(ctx, req.(*NextOrderRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

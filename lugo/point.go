@@ -22,7 +22,10 @@ func (m Point) MiddlePointTo(target Point) Point {
 }
 
 func (m Point) Copy() *Point {
-	return &m
+	return &Point{
+		X: m.X,
+		Y: m.Y,
+	}
 }
 
 // FindIntersection finds the point where two lines intersect each other.

@@ -1,9 +1,7 @@
 package bot
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/lugobots/coach"
@@ -11,9 +9,39 @@ import (
 	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"github.com/lugobots/lugo4go/v2/pkg/util"
 	"github.com/lugobots/lugo4go/v2/team"
+	tf "github.com/tensorflow/tensorflow/tensorflow/go"
 	"io/ioutil"
-	"net/http"
+	"log"
+	"path/filepath"
 )
+
+var session *tf.Session
+var graph *tf.Graph
+
+func init() {
+	path := "/home/rubens/projects/reading-modeal-experiments/model/"
+	//region op1
+	//Load a frozen graph to use for queries
+	modelpath := filepath.Join(path, "valendo-2020-07-18-15-59.pb")
+	//modelpath := filepath.Join(path, "saved_model_mapped.pb")
+	model, err := ioutil.ReadFile(modelpath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Construct an in-memory graph from the serialized form.
+	graph = tf.NewGraph()
+	if err := graph.Import(model, ""); err != nil {
+		log.Fatalf("graph: %s", err)
+	}
+
+	// Create a session for inference over graph.
+	session, err = tf.NewSession(graph, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	//defer session.Close()
+}
 
 type Bot struct {
 	Side   lugo.Team_Side
@@ -60,23 +88,27 @@ func (b *Bot) myDecider(ctx context.Context, sender team.OrderSender, snapshot *
 		return errorHandler(b.Logger, errors.New("bot not found in the game snapshot"))
 	}
 	if state == team.HoldingTheBall {
+
+		orderToKick, err := whereShouldIGo(snapshot, me.TeamSide, me.Number)
+
 		target := field.GetOpponentGoal(me.TeamSide).BottomPole
 		target.Y += 50
-		orderToKick, err := field.MakeOrderKick(*snapshot.Ball, target, field.BallMaxSpeed)
+		//orderToKick, err := field.MakeOrderKick(*snapshot.Ball, target, field.BallMaxSpeed)
 		if err != nil {
 			return errorHandler(b.Logger, fmt.Errorf("could not create kick order during turn %d: %s", snapshot.Turn, err))
 		}
 		orders = []lugo.PlayerOrder{orderToKick}
 	} else if me.Number == 10 {
 		if snapshot.ShotClock != nil && snapshot.ShotClock.TeamSide != me.TeamSide {
-			p, _ := b.arr.GetPointRegion(*me.Position)
-			dir, err := whereShouldIGo(p, me.TeamSide)
-
+			//p, _ := b.arr.GetPointRegion(*me.Position)
+			orderToMove, err := whereShouldIGo(snapshot, me.TeamSide, me.Number)
+			//
 			//orderToMove, err := field.MakeOrderMoveMaxSpeed(*me.Position, field.FieldCenter())
 			if err != nil {
 				return errorHandler(b.Logger, fmt.Errorf("staying in the centger %d: %s", snapshot.Turn, err))
 			}
-			orders = []lugo.PlayerOrder{dir, field.MakeOrderCatch()}
+			b.Logger.Infof("dir: %v", orderToMove.Move)
+			orders = []lugo.PlayerOrder{orderToMove, field.MakeOrderCatch()}
 		} else {
 			orderToMove, err := field.MakeOrderMoveMaxSpeed(*me.Position, *snapshot.Ball.Position)
 			if err != nil {
@@ -131,47 +163,44 @@ func (r Result) GetBest() int {
 
 var class_names = []string{"left", "right", "forward", "backward"}
 
-func whereShouldIGo(region team.FieldNav, side lugo.Team_Side) (*lugo.Order_Move, error) {
-	url := "http://localhost:8501/v1/models/saved_model:predict"
-	fmt.Printf("URL: %s", url)
+func whereShouldIGo(snap *lugo.GameSnapshot, side lugo.Team_Side, referenceNumber uint32) (*lugo.Order_Move, error) {
+	//url := "http://localhost:8501/v1/models/saved_model:predict"
+	//fmt.Printf("URL: %s", url)
 
-	r := req{Instances: []pointCoord{
-		{float32(region.Col()) / float32(team.MaxCols), float32(region.Row()) / float32(team.MaxRows)},
-	}}
+	ref, err := coach.PlayerReference(snap, side, referenceNumber)
+	inputs := ref.ExportGroups(
+		coach.GroupBall,
+		coach.GroupOpponentGoal,
+		coach.GroupMyTeam,
+		coach.GroupOpponentTeam)
 
-	//var jsonStr = []byte(`{"Instances":[[0.2374449339,0.7168710297]]}`)
-	jsonStr, err := json.Marshal(&r)
+	//inputs, _ := coach.NewMapped(snap, side, referenceNumber)
+
+	tensor, terr := tf.NewTensor([][][]float32{inputs})
+	if terr != nil {
+		fmt.Printf("Error creating input tensor: %s\n", terr.Error())
+		panic(terr)
+	}
+
+	output, err := session.Run(
+		map[tf.Output]*tf.Tensor{
+			graph.Operation("x").Output(0): tensor,
+		},
+		[]tf.Output{
+			//graph.Operation("sequential/dense/MatMul/ReadVariableOp").Output(0),
+			//graph.Operation("sequential/dense_1/BiasAdd/ReadVariableOp").Output(0),
+			graph.Operation("Identity").Output(0),
+		},
+		nil)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
+	t := output[0].Value().([][]float32)
 
-	fmt.Printf("\n\nReq:  %s\n", jsonStr)
+	best, score := higherindex(t[0])
+	fmt.Printf("Got %d (%f) (%v)\n", best, score, t[0])
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonStr))
-	req.Header.Set("X-Custom-Header", "myvalue")
-	req.Header.Set("Content-Type", "application/json")
-
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		panic(err)
-	}
-	defer resp.Body.Close()
-
-	fmt.Printf("response Status:  %s\n", resp.Status)
-	fmt.Printf("response Headers: %s\n", resp.Header)
-	body, _ := ioutil.ReadAll(resp.Body)
-
-	result := Result{}
-
-	if err := json.Unmarshal(body, &result); err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("response Body:  %s\n", string(body))
-	fmt.Printf("Result:  %v (%s)\n", result.GetBest(), class_names[result.GetBest()])
-
-	switch result.GetBest() {
+	switch best {
 	case LEFT:
 		return field.GoLeft(side), nil
 	case RIGHT:
@@ -181,7 +210,20 @@ func whereShouldIGo(region team.FieldNav, side lugo.Team_Side) (*lugo.Order_Move
 	case BACKWARD:
 		return field.GoBackward(side), nil
 	}
+	panic(best)
 	return nil, fmt.Errorf("oops")
+}
+
+func higherindex(values []float32) (int32, float32) {
+	score := float32(-999)
+	chosen := int32(-1)
+	for i, s := range values {
+		if s > score {
+			score = s
+			chosen = int32(i)
+		}
+	}
+	return chosen, values[chosen]
 }
 
 func errorHandler(logger util.Logger, err error) error {

@@ -11,36 +11,36 @@ import (
 	reflect "reflect"
 )
 
-// MockTurnHandler is a mock of TurnHandler interface
+// MockTurnHandler is a mock of TurnHandler interface.
 type MockTurnHandler struct {
 	ctrl     *gomock.Controller
 	recorder *MockTurnHandlerMockRecorder
 }
 
-// MockTurnHandlerMockRecorder is the mock recorder for MockTurnHandler
+// MockTurnHandlerMockRecorder is the mock recorder for MockTurnHandler.
 type MockTurnHandlerMockRecorder struct {
 	mock *MockTurnHandler
 }
 
-// NewMockTurnHandler creates a new mock instance
+// NewMockTurnHandler creates a new mock instance.
 func NewMockTurnHandler(ctrl *gomock.Controller) *MockTurnHandler {
 	mock := &MockTurnHandler{ctrl: ctrl}
 	mock.recorder = &MockTurnHandlerMockRecorder{mock}
 	return mock
 }
 
-// EXPECT returns an object that allows the caller to indicate expected use
+// EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockTurnHandler) EXPECT() *MockTurnHandlerMockRecorder {
 	return m.recorder
 }
 
-// Handle mocks base method
+// Handle mocks base method.
 func (m *MockTurnHandler) Handle(ctx context.Context, snapshot *lugo.GameSnapshot) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Handle", ctx, snapshot)
 }
 
-// Handle indicates an expected call of Handle
+// Handle indicates an expected call of Handle.
 func (mr *MockTurnHandlerMockRecorder) Handle(ctx, snapshot interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Handle", reflect.TypeOf((*MockTurnHandler)(nil).Handle), ctx, snapshot)
