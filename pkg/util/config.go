@@ -18,7 +18,7 @@ type Config struct {
 	Token           string         `json:"token"`
 	TeamSide        lugo.Team_Side `json:"-"`
 	Number          uint32         `json:"-"`
-	InitialPosition lugo.Point     `json:"-"`
+	InitialPosition *lugo.Point    `json:"-"`
 }
 
 type jsonConfig struct {

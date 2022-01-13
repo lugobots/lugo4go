@@ -12,17 +12,17 @@ import (
 // to ignore the errors during the game, and only test them in our unit tests.
 //
 // For doing that, in our bot, we may create a limited list of FieldArea coordinates that will be translated to Regions,
-// and than test all of them. The other direction is the conversion from a Point to a FieldArea. In this case, we
+// and then test all of them. The other direction is the conversion from a Point to a FieldArea. In this case, we
 // assume that the server will only send us valid points (within the field limits).
 
 const (
-	// Define the min number of cols allowed on the field division by the Arrangement
+	// MinCols Define the min number of cols allowed on the field division by the Arrangement
 	MinCols uint8 = 4
-	// Define the min number of rows allowed on the field division by the Arrangement
+	// MinRows Define the min number of rows allowed on the field division by the Arrangement
 	MinRows uint8 = 2
-	// Define the max number of cols allowed on the field division by the Arrangement
+	// MaxCols Define the max number of cols allowed on the field division by the Arrangement
 	MaxCols uint8 = 200
-	// Define the max number of rows allowed on the field division by the Arrangement
+	// MaxRows Define the max number of rows allowed on the field division by the Arrangement
 	MaxRows uint8 = 100
 )
 
@@ -66,7 +66,7 @@ func (p *Arrangement) GetRegion(col, row uint8) (FieldNav, error) {
 		return nil, ErrMaxRows
 	}
 
-	center := lugo.Point{
+	center := &lugo.Point{
 		X: int32(math.Round(float64(col)*p.regionWidth + p.regionWidth/2)),
 		Y: int32(math.Round(float64(row)*p.regionHeight + p.regionHeight/2)),
 	}
@@ -83,7 +83,7 @@ func (p *Arrangement) GetRegion(col, row uint8) (FieldNav, error) {
 	}, nil
 }
 
-func (p *Arrangement) GetPointRegion(point lugo.Point) (FieldNav, error) {
+func (p *Arrangement) GetPointRegion(point *lugo.Point) (FieldNav, error) {
 	if p.TeamSide == lugo.Team_AWAY {
 		point = mirrorCoordsToAway(point)
 	}
@@ -98,7 +98,7 @@ type FieldArea struct {
 	col        uint8
 	row        uint8
 	sideRef    lugo.Team_Side
-	center     lugo.Point
+	center     *lugo.Point
 	positioner *Arrangement
 }
 
@@ -110,8 +110,8 @@ func (r FieldArea) Row() uint8 {
 	return r.row
 }
 
-func (r FieldArea) Center() lugo.Point {
-	return r.center
+func (r FieldArea) Center() *lugo.Point {
+	return r.center.Copy()
 }
 
 func (r FieldArea) String() string {
@@ -147,9 +147,9 @@ func (r FieldArea) Right() FieldNav {
 }
 
 // Invert the coords X and Y as in a mirror to found out the same position seen from the away team field
-// Keep in mind that all coords in the field is based on the bottom left corner!
-func mirrorCoordsToAway(coords lugo.Point) lugo.Point {
-	return lugo.Point{
+// Keep in mind that all coords in the field are based in the bottom left corner!
+func mirrorCoordsToAway(coords *lugo.Point) *lugo.Point {
+	return &lugo.Point{
 		X: field.FieldWidth - coords.X,
 		Y: field.FieldHeight - coords.Y,
 	}

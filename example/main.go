@@ -1,11 +1,10 @@
 package main
 
 import (
-	"example/bot"
 	clientGo "github.com/lugobots/lugo4go/v2"
-	"github.com/lugobots/lugo4go/v2/lugo"
-	"github.com/lugobots/lugo4go/v2/pkg/field"
+	"github.com/lugobots/lugo4go/v2/example/bot"
 	"github.com/lugobots/lugo4go/v2/pkg/util"
+	"github.com/lugobots/lugo4go/v2/team"
 	"log"
 	"os"
 	"os/signal"
@@ -18,15 +17,20 @@ func main() {
 		log.Fatalf("could not init default config or logger: %s", err)
 	}
 
-	// just creating a position for example purposes
-	playerConfig.InitialPosition = lugo.Point{
-		X: field.FieldWidth / 4,
-		Y: int32(playerConfig.Number) * field.PlayerSize * 2,
-	}
+	arr, _ := team.NewArrangement(8, 4, playerConfig.TeamSide)
 
-	if playerConfig.TeamSide == lugo.Team_AWAY {
-		playerConfig.InitialPosition.X = field.FieldWidth - playerConfig.InitialPosition.X
-	}
+	region, _ := arr.GetRegion(uint8(1+(playerConfig.Number)%2), uint8(playerConfig.Number%4))
+
+	// just creating a position for example purposes
+	playerConfig.InitialPosition = region.Center()
+	//&lugo.Point{
+	//X: field.FieldWidth / 4,
+	//Y: int32(playerConfig.Number) * field.PlayerSize * 2,
+	//}
+
+	//if playerConfig.TeamSide == lugo.Team_AWAY {
+	//	playerConfig.InitialPosition.X = field.FieldWidth - playerConfig.InitialPosition.X
+	//}
 
 	player, err := clientGo.NewClient(playerConfig)
 	if err != nil {

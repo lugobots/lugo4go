@@ -6,9 +6,10 @@ package lugo4go_test
 
 import (
 	context "context"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	lugo "github.com/lugobots/lugo4go/v2/lugo"
-	reflect "reflect"
 )
 
 // MockTurnHandler is a mock of TurnHandler interface.

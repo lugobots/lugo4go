@@ -10,12 +10,16 @@ type OrderSender interface {
 	Send(ctx context.Context, turn uint32, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error)
 }
 
+type TurnOrdersSender interface {
+	Send(ctx context.Context, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error)
+}
+
 type Bot interface {
-	OnDisputing(ctx context.Context, sender OrderSender, snapshot *lugo.GameSnapshot) error
-	OnDefending(ctx context.Context, sender OrderSender, snapshot *lugo.GameSnapshot) error
-	OnHolding(ctx context.Context, sender OrderSender, snapshot *lugo.GameSnapshot) error
-	OnSupporting(ctx context.Context, sender OrderSender, snapshot *lugo.GameSnapshot) error
-	AsGoalkeeper(ctx context.Context, sender OrderSender, snapshot *lugo.GameSnapshot, state PlayerState) error
+	OnDisputing(ctx context.Context, sender TurnOrdersSender, snapshot *lugo.GameSnapshot) error
+	OnDefending(ctx context.Context, sender TurnOrdersSender, snapshot *lugo.GameSnapshot) error
+	OnHolding(ctx context.Context, sender TurnOrdersSender, snapshot *lugo.GameSnapshot) error
+	OnSupporting(ctx context.Context, sender TurnOrdersSender, snapshot *lugo.GameSnapshot) error
+	AsGoalkeeper(ctx context.Context, sender TurnOrdersSender, snapshot *lugo.GameSnapshot, state PlayerState) error
 }
 
 // Positioner Helps the bots to see the fields from their team perspective instead of using the cartesian plan provided
@@ -28,7 +32,7 @@ type Positioner interface {
 	// GetRegion Returns a FieldArea based on the coordinates and on the current field division
 	GetRegion(col, row uint8) (FieldNav, error)
 	// GetPointRegion returns the FieldArea where that point is in
-	GetPointRegion(point lugo.Point) (FieldNav, error)
+	GetPointRegion(point *lugo.Point) (FieldNav, error)
 }
 
 // FieldNav represent a quadrant on the field. It is not always squared form because you may define how many cols/rows
@@ -36,23 +40,23 @@ type Positioner interface {
 // and their coordinates will be zero-index (e.g. from 0 to 3 rows when divided in 4 rows).
 type FieldNav interface {
 	fmt.Stringer
-	// The col coordinate based on the field division
+	// Col The col coordinate based on the field division
 	Col() uint8
-	// The row coordinate based on the field division
+	// Row The row coordinate based on the field division
 	Row() uint8
-	// Return the point at the center of the quadrant represented by this FieldNav. It is not always precise.
-	Center() lugo.Point
+	// Center Return the point at the center of the quadrant represented by this FieldNav. It is not always precise.
+	Center() *lugo.Point
 
-	// The FieldArea immediately in front of this one from the player perspective
+	// Front is the FieldArea immediately in front of this one from the player perspective
 	// Important: The same FieldArea is returned if the requested FieldArea is not valid
 	Front() FieldNav
-	// The FieldArea immediately behind this one from the player perspective
+	// Back is the FieldArea immediately behind this one from the player perspective
 	// Important: The same FieldArea is returned if the requested FieldArea is not valid
 	Back() FieldNav
-	// The FieldArea immediately on left of this one from the player perspective
+	// Left is the FieldArea immediately on left of this one from the player perspective
 	// Important: The same FieldArea is returned if the requested FieldArea is not valid
 	Left() FieldNav
-	// The FieldArea immediately on right of this one from the player perspective
+	// Right is the FieldArea immediately on right of this one from the player perspective
 	// Important: The same FieldArea is returned if the requested FieldArea is not valid
 	Right() FieldNav
 }

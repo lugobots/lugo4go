@@ -17,7 +17,7 @@ func NewHandler(bot Bot, sender OrderSender, logger util.Logger, playerNumber ui
 	}
 }
 
-// Handler is a Lugo4go client handler that allow you to create an interface to follow an basic strategy based on team
+// Handler is a Lugo4go client handler that allow you to create an interface to follow a basic strategy based on team
 // states.
 type Handler struct {
 	Logger       util.Logger
@@ -42,17 +42,17 @@ func (h *Handler) Handle(ctx context.Context, snapshot *lugo.GameSnapshot) {
 		return
 	}
 	if field.GoalkeeperNumber == h.PlayerNumber {
-		err = h.Bot.AsGoalkeeper(ctx, h.Sender, snapshot, state)
+		err = h.Bot.AsGoalkeeper(ctx, wrapSender(h.Sender, snapshot.Turn), snapshot, state)
 	} else {
 		switch state {
 		case Supporting:
-			err = h.Bot.OnSupporting(ctx, h.Sender, snapshot)
+			err = h.Bot.OnSupporting(ctx, wrapSender(h.Sender, snapshot.Turn), snapshot)
 		case HoldingTheBall:
-			err = h.Bot.OnHolding(ctx, h.Sender, snapshot)
+			err = h.Bot.OnHolding(ctx, wrapSender(h.Sender, snapshot.Turn), snapshot)
 		case Defending:
-			err = h.Bot.OnDefending(ctx, h.Sender, snapshot)
+			err = h.Bot.OnDefending(ctx, wrapSender(h.Sender, snapshot.Turn), snapshot)
 		case DisputingTheBall:
-			err = h.Bot.OnDisputing(ctx, h.Sender, snapshot)
+			err = h.Bot.OnDisputing(ctx, wrapSender(h.Sender, snapshot.Turn), snapshot)
 		}
 	}
 	if err != nil {
@@ -60,11 +60,27 @@ func (h *Handler) Handle(ctx context.Context, snapshot *lugo.GameSnapshot) {
 	}
 }
 
+func wrapSender(sender OrderSender, turn uint32) senderWrapper {
+	return senderWrapper{
+		sender: sender,
+		turn:   turn,
+	}
+}
+
+type senderWrapper struct {
+	sender OrderSender
+	turn   uint32
+}
+
+func (s senderWrapper) Send(ctx context.Context, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error) {
+	return s.sender.Send(ctx, s.turn, orders, debugMsg)
+}
+
 // PlayerState defines states specific for players
 type PlayerState string
 
 const (
-	// Supporting identifies the player supporting the team mate
+	// Supporting identifies the player supporting the teammate
 	Supporting PlayerState = "supporting"
 	// HoldingTheBall identifies the player holding	the ball
 	HoldingTheBall PlayerState = "holding"

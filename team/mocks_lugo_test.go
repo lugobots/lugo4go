@@ -6,10 +6,11 @@ package team_test
 
 import (
 	context "context"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	lugo "github.com/lugobots/lugo4go/v2/lugo"
 	grpc "google.golang.org/grpc"
-	reflect "reflect"
 )
 
 // MockGameClient is a mock of GameClient interface.

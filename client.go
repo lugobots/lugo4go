@@ -44,7 +44,7 @@ func NewClient(config util.Config) (*Client, error) {
 	if c.Stream, err = c.GRPCClient.JoinATeam(context.Background(), &lugo.JoinRequest{
 		Token:           config.Token,
 		Number:          config.Number,
-		InitPosition:    &config.InitialPosition,
+		InitPosition:    config.InitialPosition,
 		TeamSide:        config.TeamSide,
 		ProtocolVersion: ProtocolVersion,
 	}); err != nil {
@@ -90,6 +90,7 @@ func (c *Client) Play(handler TurnHandler) error {
 		// to avoid race conditions we need to ensure that the loop can only start after the Go routine has started.
 		mustHasStarted := make(chan bool)
 		go func() {
+			// make this looks clear!
 			m.Lock()
 			close(mustHasStarted)
 			defer m.Unlock()

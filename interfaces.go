@@ -11,5 +11,5 @@ type TurnData struct {
 }
 
 type TurnHandler interface {
-	Handle(ctx context.Context, snapshot *lugo.GameSnapshot) // (orders []lugo.PlayerOrder, debugMsg string, err error)
+	Handle(ctx context.Context, snapshot *lugo.GameSnapshot)
 }
