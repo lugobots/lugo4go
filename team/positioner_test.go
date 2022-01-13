@@ -10,7 +10,7 @@ import (
 )
 
 func TestNewPositioner(t *testing.T) {
-	p, err := NewArrangement(MinCols, MinRows, lugo.Team_HOME)
+	p, err := NewMapper(MinCols, MinRows, lugo.Team_HOME)
 	assert.Nil(t, err)
 
 	assert.Equal(t, field.FieldWidth/int(MinCols), int(p.regionWidth))
@@ -18,19 +18,19 @@ func TestNewPositioner(t *testing.T) {
 }
 
 func TestNewPositioner_InvalidArgs(t *testing.T) {
-	p, err := NewArrangement(MinCols-1, MinRows, lugo.Team_HOME)
+	p, err := NewMapper(MinCols-1, MinRows, lugo.Team_HOME)
 	assert.Nil(t, p)
 	assert.Equal(t, ErrMinCols, err)
 
-	p, err = NewArrangement(MaxCols+1, MinRows, lugo.Team_HOME)
+	p, err = NewMapper(MaxCols+1, MinRows, lugo.Team_HOME)
 	assert.Nil(t, p)
 	assert.Equal(t, ErrMaxCols, err)
 
-	p, err = NewArrangement(MinCols, MinRows-1, lugo.Team_HOME)
+	p, err = NewMapper(MinCols, MinRows-1, lugo.Team_HOME)
 	assert.Nil(t, p)
 	assert.Equal(t, ErrMinRows, err)
 
-	p, err = NewArrangement(MinCols, MaxCols+1, lugo.Team_HOME)
+	p, err = NewMapper(MinCols, MaxCols+1, lugo.Team_HOME)
 	assert.Nil(t, p)
 	assert.Equal(t, ErrMaxRows, err)
 }
@@ -54,7 +54,7 @@ func TestRegion_Center_HomeTeam(t *testing.T) {
 
 	for testName, testSettings := range testCases {
 
-		p, err := NewArrangement(testSettings.cols, testSettings.rows, team)
+		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 		assert.Nil(t, err)
 		expectedPointDefenseRight := &lugo.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
 		expectedPointDefenseLeft := &lugo.Point{X: +testSettings.regionHalfWidth, Y: field.FieldHeight - testSettings.regionHalfHeight}
@@ -98,7 +98,7 @@ func TestRegion_Center_Away(t *testing.T) {
 
 	for testName, testSettings := range testCases {
 
-		p, err := NewArrangement(testSettings.cols, testSettings.rows, team)
+		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 		assert.Nil(t, err)
 		expectedPointDefenseRight := lugo.Point{X: field.FieldWidth - testSettings.regionHalfWidth, Y: field.FieldHeight - testSettings.regionHalfHeight}
 		expectedPointDefenseLeft := lugo.Point{X: field.FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
@@ -124,7 +124,7 @@ func TestRegion_Center_Away(t *testing.T) {
 }
 
 func TestPositioner_GetRegion_InvalidArgs(t *testing.T) {
-	p, err := NewArrangement(10, 10, lugo.Team_AWAY)
+	p, err := NewMapper(10, 10, lugo.Team_AWAY)
 	assert.Nil(t, err)
 
 	r, err := p.GetRegion(11, 5)
@@ -164,7 +164,7 @@ func TestPositioner_GetPointRegion_HomeTeam(t *testing.T) {
 
 	for testName, testSettings := range testCases {
 
-		p, err := NewArrangement(testSettings.cols, testSettings.rows, team)
+		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 		assert.Nil(t, err)
 		pointDefenseRight := &lugo.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
 		pointDefenseLeft := &lugo.Point{X: +testSettings.regionHalfWidth, Y: field.FieldHeight - testSettings.regionHalfHeight}
@@ -212,7 +212,7 @@ func TestPositioner_GetPointRegion_AwayTeam(t *testing.T) {
 
 	for testName, testSettings := range testCases {
 
-		p, err := NewArrangement(testSettings.cols, testSettings.rows, team)
+		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 		assert.Nil(t, err)
 		pointDefenseRight := &lugo.Point{X: field.FieldWidth - testSettings.regionHalfWidth, Y: field.FieldHeight - testSettings.regionHalfHeight}
 		pointDefenseLeft := &lugo.Point{X: field.FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
@@ -261,7 +261,7 @@ func TestRegion_Front(t *testing.T) {
 		"front-left-corner":  {9, 9, 9, 9, true},
 	}
 	testTeamRegions := func(teamSide lugo.Team_Side) {
-		p, err := NewArrangement(maxCol+1, maxRow+1, teamSide)
+		p, err := NewMapper(maxCol+1, maxRow+1, teamSide)
 		assert.Nil(t, err)
 		for testName, testSettings := range testCases {
 			regionTestCase, err := p.GetRegion(testSettings.col, testSettings.row)
@@ -296,7 +296,7 @@ func TestRegion_Back(t *testing.T) {
 		"front-left-corner":  {9, 9, 8, 9, false},
 	}
 	testTeamRegions := func(teamSide lugo.Team_Side) {
-		p, err := NewArrangement(maxCol+1, maxRow+1, teamSide)
+		p, err := NewMapper(maxCol+1, maxRow+1, teamSide)
 		assert.Nil(t, err)
 		for testName, testSettings := range testCases {
 			regionTestCase, err := p.GetRegion(testSettings.col, testSettings.row)
@@ -330,7 +330,7 @@ func TestRegion_Left(t *testing.T) {
 		"front-left-corner":  {9, 9, 9, 9, true},
 	}
 	testTeamRegions := func(teamSide lugo.Team_Side) {
-		p, err := NewArrangement(maxCol+1, maxRow+1, teamSide)
+		p, err := NewMapper(maxCol+1, maxRow+1, teamSide)
 		assert.Nil(t, err)
 		for testName, testSettings := range testCases {
 			regionTestCase, err := p.GetRegion(testSettings.col, testSettings.row)
@@ -364,7 +364,7 @@ func TestRegion_Right(t *testing.T) {
 		"front-left-corner":  {9, 9, 9, 8, false},
 	}
 	testTeamRegions := func(teamSide lugo.Team_Side) {
-		p, err := NewArrangement(maxCol+1, maxRow+1, teamSide)
+		p, err := NewMapper(maxCol+1, maxRow+1, teamSide)
 		assert.Nil(t, err)
 		for testName, testSettings := range testCases {
 			regionTestCase, err := p.GetRegion(testSettings.col, testSettings.row)

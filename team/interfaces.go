@@ -22,13 +22,13 @@ type Bot interface {
 	AsGoalkeeper(ctx context.Context, sender TurnOrdersSender, snapshot *lugo.GameSnapshot, state PlayerState) error
 }
 
-// Positioner Helps the bots to see the fields from their team perspective instead of using the cartesian plan provided
-// by the game server. Instead of base your logic on the axes X and Y, the Arrangement create a FieldArea map based
+// FieldMapper Helps the bots to see the fields from their team perspective instead of using the cartesian plan provided
+// by the game server. Instead of base your logic on the axes X and Y, the Mapper create a FieldArea map based
 // on the team side.
 // The FieldArea coordinates uses the defensive field's right corner as its origin.
 // This mechanism if specially useful to define players regions based on their roles, since you do not have to mirror
 // the coordinate, neither do extra logic to define regions on the field where the player should be.
-type Positioner interface {
+type FieldMapper interface {
 	// GetRegion Returns a FieldArea based on the coordinates and on the current field division
 	GetRegion(col, row uint8) (FieldNav, error)
 	// GetPointRegion returns the FieldArea where that point is in

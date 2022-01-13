@@ -17,9 +17,9 @@ func main() {
 		log.Fatalf("could not init default config or logger: %s", err)
 	}
 
-	arr, _ := team.NewArrangement(8, 4, playerConfig.TeamSide)
+	fieldMapper, _ := team.NewMapper(8, 4, playerConfig.TeamSide)
 
-	region, _ := arr.GetRegion(uint8(1+(playerConfig.Number)%2), uint8(playerConfig.Number%4))
+	region, _ := fieldMapper.GetRegion(uint8(1+(playerConfig.Number)%2), uint8(playerConfig.Number%4))
 
 	// just creating a position for example purposes
 	playerConfig.InitialPosition = region.Center()

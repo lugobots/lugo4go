@@ -16,18 +16,18 @@ import (
 // assume that the server will only send us valid points (within the field limits).
 
 const (
-	// MinCols Define the min number of cols allowed on the field division by the Arrangement
+	// MinCols Define the min number of cols allowed on the field division by the Mapper
 	MinCols uint8 = 4
-	// MinRows Define the min number of rows allowed on the field division by the Arrangement
+	// MinRows Define the min number of rows allowed on the field division by the Mapper
 	MinRows uint8 = 2
-	// MaxCols Define the max number of cols allowed on the field division by the Arrangement
+	// MaxCols Define the max number of cols allowed on the field division by the Mapper
 	MaxCols uint8 = 200
-	// MaxRows Define the max number of rows allowed on the field division by the Arrangement
+	// MaxRows Define the max number of rows allowed on the field division by the Mapper
 	MaxRows uint8 = 100
 )
 
-// NewArrangement creates a new Positioner that will map the field to provide Regions
-func NewArrangement(cols, rows uint8, sideRef lugo.Team_Side) (*Arrangement, error) {
+// NewMapper creates a new FieldMapper that will map the field to provide Regions
+func NewMapper(cols, rows uint8, sideRef lugo.Team_Side) (*Mapper, error) {
 	if cols < MinCols {
 		return nil, ErrMinCols
 	}
@@ -41,7 +41,7 @@ func NewArrangement(cols, rows uint8, sideRef lugo.Team_Side) (*Arrangement, err
 		return nil, ErrMaxRows
 	}
 
-	return &Arrangement{
+	return &Mapper{
 		TeamSide:     sideRef,
 		cols:         cols,
 		rows:         rows,
@@ -50,7 +50,7 @@ func NewArrangement(cols, rows uint8, sideRef lugo.Team_Side) (*Arrangement, err
 	}, nil
 }
 
-type Arrangement struct {
+type Mapper struct {
 	TeamSide     lugo.Team_Side
 	cols         uint8
 	rows         uint8
@@ -58,7 +58,7 @@ type Arrangement struct {
 	regionHeight float64
 }
 
-func (p *Arrangement) GetRegion(col, row uint8) (FieldNav, error) {
+func (p *Mapper) GetRegion(col, row uint8) (FieldNav, error) {
 	if col >= p.cols {
 		return nil, ErrMaxCols
 	}
@@ -83,7 +83,7 @@ func (p *Arrangement) GetRegion(col, row uint8) (FieldNav, error) {
 	}, nil
 }
 
-func (p *Arrangement) GetPointRegion(point *lugo.Point) (FieldNav, error) {
+func (p *Mapper) GetPointRegion(point *lugo.Point) (FieldNav, error) {
 	if p.TeamSide == lugo.Team_AWAY {
 		point = mirrorCoordsToAway(point)
 	}
@@ -99,7 +99,7 @@ type FieldArea struct {
 	row        uint8
 	sideRef    lugo.Team_Side
 	center     *lugo.Point
-	positioner *Arrangement
+	positioner *Mapper
 }
 
 func (r FieldArea) Col() uint8 {

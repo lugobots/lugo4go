@@ -59,7 +59,7 @@ func TestNewRawClient(t *testing.T) {
 		Insecure:        true,
 		TeamSide:        lugo.Team_HOME,
 		Number:          3,
-		InitialPosition: lugo.Point{X: 4000, Y: 4000},
+		InitialPosition: &lugo.Point{X: 4000, Y: 4000},
 	}
 
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
@@ -69,7 +69,7 @@ func TestNewRawClient(t *testing.T) {
 	srv.EXPECT().JoinATeam(util.NewMatcher(func(arg interface{}) bool {
 		expectedRequest := &lugo.JoinRequest{
 			Number:          config.Number,
-			InitPosition:    &config.InitialPosition,
+			InitPosition:    config.InitialPosition,
 			TeamSide:        config.TeamSide,
 			ProtocolVersion: lugo4go.ProtocolVersion,
 		}

@@ -14,11 +14,11 @@ type Bot struct {
 	Side   lugo.Team_Side
 	Number uint32
 	Logger util.Logger
-	arr    team.Positioner
+	arr    team.FieldMapper
 }
 
 func NewBot(logger util.Logger, side lugo.Team_Side, number uint32) *Bot {
-	arr, _ := team.NewArrangement(team.MaxCols, team.MaxRows, side)
+	arr, _ := team.NewMapper(team.MaxCols, team.MaxRows, side)
 	return &Bot{
 		Logger: logger,
 		Number: number,

@@ -182,7 +182,7 @@ func (mr *MockBotMockRecorder) OnSupporting(ctx, sender, snapshot interface{}) *
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnSupporting", reflect.TypeOf((*MockBot)(nil).OnSupporting), ctx, sender, snapshot)
 }
 
-// MockPositioner is a mock of Positioner interface.
+// MockPositioner is a mock of FieldMapper interface.
 type MockPositioner struct {
 	ctrl     *gomock.Controller
 	recorder *MockPositionerMockRecorder
