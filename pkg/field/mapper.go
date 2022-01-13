@@ -1,9 +1,8 @@
-package team
+package field
 
 import (
 	"fmt"
 	"github.com/lugobots/lugo4go/v2/lugo"
-	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"math"
 )
 
@@ -45,8 +44,8 @@ func NewMapper(cols, rows uint8, sideRef lugo.Team_Side) (*Mapper, error) {
 		TeamSide:     sideRef,
 		cols:         cols,
 		rows:         rows,
-		regionWidth:  field.FieldWidth / float64(cols),
-		regionHeight: field.FieldHeight / float64(rows),
+		regionWidth:  FieldWidth / float64(cols),
+		regionHeight: FieldHeight / float64(rows),
 	}, nil
 }
 
@@ -150,7 +149,7 @@ func (r FieldArea) Right() FieldNav {
 // Keep in mind that all coords in the field are based in the bottom left corner!
 func mirrorCoordsToAway(coords *lugo.Point) *lugo.Point {
 	return &lugo.Point{
-		X: field.FieldWidth - coords.X,
-		Y: field.FieldHeight - coords.Y,
+		X: FieldWidth - coords.X,
+		Y: FieldHeight - coords.Y,
 	}
 }

@@ -1,20 +1,20 @@
-package team_test
+package lugo4go_test
 
 import (
 	"context"
 	"errors"
 	"github.com/golang/mock/gomock"
+	"github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"github.com/lugobots/lugo4go/v2/pkg/util"
-	"github.com/lugobots/lugo4go/v2/team"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
 
 func TestCoachDefineMyState_AllStates(t *testing.T) {
-	var state team.PlayerState
+	var state lugo4go.PlayerState
 	var err error
 	home3 := &lugo.Player{Number: 3, TeamSide: lugo.Team_HOME}
 	home5 := &lugo.Player{Number: 5, TeamSide: lugo.Team_HOME}
@@ -28,51 +28,51 @@ func TestCoachDefineMyState_AllStates(t *testing.T) {
 	}
 
 	// everyone is disputing the ball
-	state, err = team.DefineMyState(snapshot, 3, lugo.Team_HOME)
+	state, err = lugo4go.DefineMyState(snapshot, 3, lugo.Team_HOME)
 	assert.Nil(t, err)
-	assert.Equal(t, team.DisputingTheBall, state)
+	assert.Equal(t, lugo4go.DisputingTheBall, state)
 
-	state, err = team.DefineMyState(snapshot, 5, lugo.Team_HOME)
+	state, err = lugo4go.DefineMyState(snapshot, 5, lugo.Team_HOME)
 	assert.Nil(t, err)
-	assert.Equal(t, team.DisputingTheBall, state)
+	assert.Equal(t, lugo4go.DisputingTheBall, state)
 
-	state, err = team.DefineMyState(snapshot, 5, lugo.Team_AWAY)
+	state, err = lugo4go.DefineMyState(snapshot, 5, lugo.Team_AWAY)
 	assert.Nil(t, err)
-	assert.Equal(t, team.DisputingTheBall, state)
+	assert.Equal(t, lugo4go.DisputingTheBall, state)
 
 	ball.Holder = home3
 
 	// Holding
-	state, err = team.DefineMyState(snapshot, 3, lugo.Team_HOME)
+	state, err = lugo4go.DefineMyState(snapshot, 3, lugo.Team_HOME)
 	assert.Nil(t, err)
-	assert.Equal(t, team.HoldingTheBall, state)
+	assert.Equal(t, lugo4go.HoldingTheBall, state)
 
 	// supporting
-	state, err = team.DefineMyState(snapshot, 5, lugo.Team_HOME)
+	state, err = lugo4go.DefineMyState(snapshot, 5, lugo.Team_HOME)
 	assert.Nil(t, err)
-	assert.Equal(t, team.Supporting, state)
+	assert.Equal(t, lugo4go.Supporting, state)
 
 	//
-	state, err = team.DefineMyState(snapshot, 5, lugo.Team_AWAY)
+	state, err = lugo4go.DefineMyState(snapshot, 5, lugo.Team_AWAY)
 	assert.Nil(t, err)
-	assert.Equal(t, team.Defending, state)
+	assert.Equal(t, lugo4go.Defending, state)
 }
 
 func TestCoachDefineMyState_ErrorInvalidSnapshot(t *testing.T) {
 	var err error
 
-	_, err = team.DefineMyState(nil, 3, lugo.Team_HOME)
-	assert.Equal(t, err, team.ErrNoBall)
+	_, err = lugo4go.DefineMyState(nil, 3, lugo.Team_HOME)
+	assert.Equal(t, err, lugo4go.ErrNoBall)
 
-	_, err = team.DefineMyState(&lugo.GameSnapshot{}, 3, lugo.Team_HOME)
-	assert.Equal(t, err, team.ErrNoBall)
+	_, err = lugo4go.DefineMyState(&lugo.GameSnapshot{}, 3, lugo.Team_HOME)
+	assert.Equal(t, err, lugo4go.ErrNoBall)
 }
 
 func TestCoachDefineMyState_ErrorNoPlayer(t *testing.T) {
 	var err error
 
-	_, err = team.DefineMyState(&lugo.GameSnapshot{Ball: &lugo.Ball{}}, 3, lugo.Team_HOME)
-	assert.Equal(t, err, team.ErrPlayerNotFound)
+	_, err = lugo4go.DefineMyState(&lugo.GameSnapshot{Ball: &lugo.Ball{}}, 3, lugo.Team_HOME)
+	assert.Equal(t, err, lugo4go.ErrPlayerNotFound)
 }
 
 func TestHandler_Handle_ShouldCallRightMethod(t *testing.T) {
@@ -87,8 +87,8 @@ func TestHandler_Handle_ShouldCallRightMethod(t *testing.T) {
 
 	config := util.Config{Number: 4, TeamSide: lugo.Team_HOME}
 
-	handler := team.NewHandler(mockBot, mockSender, mockLog, config.Number, config.TeamSide)
-	goalkeeperHandler := team.NewHandler(mockBotGoalkeeper, mockSender, mockLog, field.GoalkeeperNumber, config.TeamSide)
+	handler := lugo4go.NewHandler(mockBot, mockSender, mockLog, config.Number, config.TeamSide)
+	goalkeeperHandler := lugo4go.NewHandler(mockBotGoalkeeper, mockSender, mockLog, field.GoalkeeperNumber, config.TeamSide)
 
 	ctx, stop := context.WithTimeout(context.Background(), 1*time.Second)
 	defer stop()
@@ -109,7 +109,7 @@ func TestHandler_Handle_ShouldCallRightMethod(t *testing.T) {
 	mockBot.EXPECT().OnDisputing(ctx, gomock.Any(), snapshot)
 	handler.Handle(ctx, snapshot)
 
-	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, gomock.Any(), snapshot, team.DisputingTheBall)
+	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, gomock.Any(), snapshot, lugo4go.DisputingTheBall)
 	goalkeeperHandler.Handle(ctx, snapshot)
 
 	// supporting
@@ -117,7 +117,7 @@ func TestHandler_Handle_ShouldCallRightMethod(t *testing.T) {
 	mockBot.EXPECT().OnSupporting(ctx, gomock.Any(), snapshot)
 	handler.Handle(ctx, snapshot)
 
-	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, gomock.Any(), snapshot, team.Supporting)
+	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, gomock.Any(), snapshot, lugo4go.Supporting)
 	goalkeeperHandler.Handle(ctx, snapshot)
 
 	// Defending
@@ -125,7 +125,7 @@ func TestHandler_Handle_ShouldCallRightMethod(t *testing.T) {
 	mockBot.EXPECT().OnDefending(ctx, gomock.Any(), snapshot)
 	handler.Handle(ctx, snapshot)
 
-	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, gomock.Any(), snapshot, team.Defending)
+	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, gomock.Any(), snapshot, lugo4go.Defending)
 	goalkeeperHandler.Handle(ctx, snapshot)
 
 	// holding
@@ -133,7 +133,7 @@ func TestHandler_Handle_ShouldCallRightMethod(t *testing.T) {
 	mockBot.EXPECT().OnHolding(ctx, gomock.Any(), snapshot)
 	handler.Handle(ctx, snapshot)
 
-	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, gomock.Any(), snapshot, team.Supporting)
+	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, gomock.Any(), snapshot, lugo4go.Supporting)
 	goalkeeperHandler.Handle(ctx, snapshot)
 
 	// supporting (goalkeeper holding the ball
@@ -141,7 +141,7 @@ func TestHandler_Handle_ShouldCallRightMethod(t *testing.T) {
 	mockBot.EXPECT().OnSupporting(ctx, gomock.Any(), snapshot)
 	handler.Handle(ctx, snapshot)
 
-	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, gomock.Any(), snapshot, team.HoldingTheBall)
+	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, gomock.Any(), snapshot, lugo4go.HoldingTheBall)
 	goalkeeperHandler.Handle(ctx, snapshot)
 }
 
@@ -156,7 +156,7 @@ func TestHandler_Handle_ShouldLogErrors(t *testing.T) {
 	//mockSender := NewMockOrderSender(ctrl)
 
 	config := util.Config{Number: 4, TeamSide: lugo.Team_HOME}
-	handler := team.NewHandler(mockBot, mockSender, mockLog, config.Number, config.TeamSide)
+	handler := lugo4go.NewHandler(mockBot, mockSender, mockLog, config.Number, config.TeamSide)
 
 	//ball := &lugo.Ball{}
 	//snapshot := &lugo.GameSnapshot{
@@ -169,7 +169,7 @@ func TestHandler_Handle_ShouldLogErrors(t *testing.T) {
 		mockLog.EXPECT().Errorf(gomock.Any(), gomock.Any()).Do(func(s string, args ...interface{}) {
 			e, ok := args[0].(error)
 			assert.True(t, ok)
-			assert.Equal(t, team.ErrNilSnapshot, e)
+			assert.Equal(t, lugo4go.ErrNilSnapshot, e)
 		})
 		handler.Handle(ctx, nil)
 	})
@@ -183,7 +183,7 @@ func TestHandler_Handle_ShouldLogErrors(t *testing.T) {
 		mockLog.EXPECT().Errorf(gomock.Any(), gomock.Any()).Do(func(s string, args ...interface{}) {
 			e, ok := args[1].(error)
 			assert.True(t, ok)
-			assert.Equal(t, team.ErrNoBall, e)
+			assert.Equal(t, lugo4go.ErrNoBall, e)
 		})
 		handler.Handle(ctx, snapshot)
 	})

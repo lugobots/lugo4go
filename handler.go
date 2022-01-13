@@ -1,4 +1,4 @@
-package team
+package lugo4go
 
 import (
 	"context"

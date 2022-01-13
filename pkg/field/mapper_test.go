@@ -1,9 +1,8 @@
-package team
+package field
 
 import (
 	"fmt"
 	"github.com/lugobots/lugo4go/v2/lugo"
-	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
@@ -13,8 +12,8 @@ func TestNewPositioner(t *testing.T) {
 	p, err := NewMapper(MinCols, MinRows, lugo.Team_HOME)
 	assert.Nil(t, err)
 
-	assert.Equal(t, field.FieldWidth/int(MinCols), int(p.regionWidth))
-	assert.Equal(t, field.FieldHeight/int(MinRows), int(p.regionHeight))
+	assert.Equal(t, FieldWidth/int(MinCols), int(p.regionWidth))
+	assert.Equal(t, FieldHeight/int(MinRows), int(p.regionHeight))
 }
 
 func TestNewPositioner_InvalidArgs(t *testing.T) {
@@ -57,9 +56,9 @@ func TestRegion_Center_HomeTeam(t *testing.T) {
 		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 		assert.Nil(t, err)
 		expectedPointDefenseRight := &lugo.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		expectedPointDefenseLeft := &lugo.Point{X: +testSettings.regionHalfWidth, Y: field.FieldHeight - testSettings.regionHalfHeight}
-		expectedPointAttackLeft := &lugo.Point{X: field.FieldWidth - testSettings.regionHalfWidth, Y: field.FieldHeight - testSettings.regionHalfHeight}
-		expectedPointAttackRight := &lugo.Point{X: field.FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+		expectedPointDefenseLeft := &lugo.Point{X: +testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+		expectedPointAttackLeft := &lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+		expectedPointAttackRight := &lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
 
 		r, err := p.GetRegion(0, 0)
 		assert.Nil(t, err)
@@ -100,10 +99,10 @@ func TestRegion_Center_Away(t *testing.T) {
 
 		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 		assert.Nil(t, err)
-		expectedPointDefenseRight := lugo.Point{X: field.FieldWidth - testSettings.regionHalfWidth, Y: field.FieldHeight - testSettings.regionHalfHeight}
-		expectedPointDefenseLeft := lugo.Point{X: field.FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+		expectedPointDefenseRight := lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+		expectedPointDefenseLeft := lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
 		expectedPointAttackLeft := lugo.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		expectedPointAttackRight := lugo.Point{X: testSettings.regionHalfWidth, Y: field.FieldHeight - testSettings.regionHalfHeight}
+		expectedPointAttackRight := lugo.Point{X: testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
 
 		r, err := p.GetRegion(0, 0)
 		assert.Nil(t, err)
@@ -167,9 +166,9 @@ func TestPositioner_GetPointRegion_HomeTeam(t *testing.T) {
 		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 		assert.Nil(t, err)
 		pointDefenseRight := &lugo.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		pointDefenseLeft := &lugo.Point{X: +testSettings.regionHalfWidth, Y: field.FieldHeight - testSettings.regionHalfHeight}
-		pointAttackLeft := &lugo.Point{X: field.FieldWidth - testSettings.regionHalfWidth, Y: field.FieldHeight - testSettings.regionHalfHeight}
-		pointAttackRight := &lugo.Point{X: field.FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+		pointDefenseLeft := &lugo.Point{X: +testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+		pointAttackLeft := &lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+		pointAttackRight := &lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
 
 		r, err := p.GetPointRegion(pointDefenseRight)
 		assert.Nil(t, err)
@@ -214,10 +213,10 @@ func TestPositioner_GetPointRegion_AwayTeam(t *testing.T) {
 
 		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 		assert.Nil(t, err)
-		pointDefenseRight := &lugo.Point{X: field.FieldWidth - testSettings.regionHalfWidth, Y: field.FieldHeight - testSettings.regionHalfHeight}
-		pointDefenseLeft := &lugo.Point{X: field.FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+		pointDefenseRight := &lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+		pointDefenseLeft := &lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
 		pointAttackLeft := &lugo.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		pointAttackRight := &lugo.Point{X: testSettings.regionHalfWidth, Y: field.FieldHeight - testSettings.regionHalfHeight}
+		pointAttackRight := &lugo.Point{X: testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
 
 		r, err := p.GetPointRegion(pointDefenseRight)
 		assert.Nil(t, err)

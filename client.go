@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/pkg/util"
-	"github.com/lugobots/lugo4go/v2/team"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/stats"
 	"io"
@@ -53,7 +52,7 @@ func NewClient(config util.Config) (*Client, error) {
 	return c, nil
 }
 
-// Client handle the gRPC stuff and provide you a easy way to handle the game messages
+// Client handle the gRPC stuff and provide you an easy way to handle the game messages
 type Client struct {
 	Stream     lugo.Game_JoinATeamClient
 	GRPCClient lugo.GameClient
@@ -65,9 +64,9 @@ type Client struct {
 
 // PlayWithBot is a sugared Play mode that uses an TurnHandler from coach package.
 // Coach TurnHandler creates basic player states to help the development of new bots.
-func (c *Client) PlayWithBot(bot team.Bot, logger util.Logger) error {
-	sender := team.NewSender(c.GRPCClient)
-	handler := team.NewHandler(bot, sender, logger, c.config.Number, c.config.TeamSide)
+func (c *Client) PlayWithBot(bot Bot, logger util.Logger) error {
+	sender := NewSender(c.GRPCClient)
+	handler := NewHandler(bot, sender, logger, c.config.Number, c.config.TeamSide)
 	return c.Play(handler)
 }
 

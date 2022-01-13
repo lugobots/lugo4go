@@ -9,6 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	v2 "github.com/lugobots/lugo4go/v2"
 	lugo "github.com/lugobots/lugo4go/v2/lugo"
 )
 
@@ -45,4 +46,173 @@ func (m *MockTurnHandler) Handle(ctx context.Context, snapshot *lugo.GameSnapsho
 func (mr *MockTurnHandlerMockRecorder) Handle(ctx, snapshot interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Handle", reflect.TypeOf((*MockTurnHandler)(nil).Handle), ctx, snapshot)
+}
+
+// MockOrderSender is a mock of OrderSender interface.
+type MockOrderSender struct {
+	ctrl     *gomock.Controller
+	recorder *MockOrderSenderMockRecorder
+}
+
+// MockOrderSenderMockRecorder is the mock recorder for MockOrderSender.
+type MockOrderSenderMockRecorder struct {
+	mock *MockOrderSender
+}
+
+// NewMockOrderSender creates a new mock instance.
+func NewMockOrderSender(ctrl *gomock.Controller) *MockOrderSender {
+	mock := &MockOrderSender{ctrl: ctrl}
+	mock.recorder = &MockOrderSenderMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockOrderSender) EXPECT() *MockOrderSenderMockRecorder {
+	return m.recorder
+}
+
+// Send mocks base method.
+func (m *MockOrderSender) Send(ctx context.Context, turn uint32, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Send", ctx, turn, orders, debugMsg)
+	ret0, _ := ret[0].(*lugo.OrderResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Send indicates an expected call of Send.
+func (mr *MockOrderSenderMockRecorder) Send(ctx, turn, orders, debugMsg interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Send", reflect.TypeOf((*MockOrderSender)(nil).Send), ctx, turn, orders, debugMsg)
+}
+
+// MockTurnOrdersSender is a mock of TurnOrdersSender interface.
+type MockTurnOrdersSender struct {
+	ctrl     *gomock.Controller
+	recorder *MockTurnOrdersSenderMockRecorder
+}
+
+// MockTurnOrdersSenderMockRecorder is the mock recorder for MockTurnOrdersSender.
+type MockTurnOrdersSenderMockRecorder struct {
+	mock *MockTurnOrdersSender
+}
+
+// NewMockTurnOrdersSender creates a new mock instance.
+func NewMockTurnOrdersSender(ctrl *gomock.Controller) *MockTurnOrdersSender {
+	mock := &MockTurnOrdersSender{ctrl: ctrl}
+	mock.recorder = &MockTurnOrdersSenderMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTurnOrdersSender) EXPECT() *MockTurnOrdersSenderMockRecorder {
+	return m.recorder
+}
+
+// Send mocks base method.
+func (m *MockTurnOrdersSender) Send(ctx context.Context, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Send", ctx, orders, debugMsg)
+	ret0, _ := ret[0].(*lugo.OrderResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Send indicates an expected call of Send.
+func (mr *MockTurnOrdersSenderMockRecorder) Send(ctx, orders, debugMsg interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Send", reflect.TypeOf((*MockTurnOrdersSender)(nil).Send), ctx, orders, debugMsg)
+}
+
+// MockBot is a mock of Bot interface.
+type MockBot struct {
+	ctrl     *gomock.Controller
+	recorder *MockBotMockRecorder
+}
+
+// MockBotMockRecorder is the mock recorder for MockBot.
+type MockBotMockRecorder struct {
+	mock *MockBot
+}
+
+// NewMockBot creates a new mock instance.
+func NewMockBot(ctrl *gomock.Controller) *MockBot {
+	mock := &MockBot{ctrl: ctrl}
+	mock.recorder = &MockBotMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockBot) EXPECT() *MockBotMockRecorder {
+	return m.recorder
+}
+
+// AsGoalkeeper mocks base method.
+func (m *MockBot) AsGoalkeeper(ctx context.Context, sender v2.TurnOrdersSender, snapshot *lugo.GameSnapshot, state v2.PlayerState) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AsGoalkeeper", ctx, sender, snapshot, state)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AsGoalkeeper indicates an expected call of AsGoalkeeper.
+func (mr *MockBotMockRecorder) AsGoalkeeper(ctx, sender, snapshot, state interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AsGoalkeeper", reflect.TypeOf((*MockBot)(nil).AsGoalkeeper), ctx, sender, snapshot, state)
+}
+
+// OnDefending mocks base method.
+func (m *MockBot) OnDefending(ctx context.Context, sender v2.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OnDefending", ctx, sender, snapshot)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// OnDefending indicates an expected call of OnDefending.
+func (mr *MockBotMockRecorder) OnDefending(ctx, sender, snapshot interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnDefending", reflect.TypeOf((*MockBot)(nil).OnDefending), ctx, sender, snapshot)
+}
+
+// OnDisputing mocks base method.
+func (m *MockBot) OnDisputing(ctx context.Context, sender v2.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OnDisputing", ctx, sender, snapshot)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// OnDisputing indicates an expected call of OnDisputing.
+func (mr *MockBotMockRecorder) OnDisputing(ctx, sender, snapshot interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnDisputing", reflect.TypeOf((*MockBot)(nil).OnDisputing), ctx, sender, snapshot)
+}
+
+// OnHolding mocks base method.
+func (m *MockBot) OnHolding(ctx context.Context, sender v2.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OnHolding", ctx, sender, snapshot)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// OnHolding indicates an expected call of OnHolding.
+func (mr *MockBotMockRecorder) OnHolding(ctx, sender, snapshot interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnHolding", reflect.TypeOf((*MockBot)(nil).OnHolding), ctx, sender, snapshot)
+}
+
+// OnSupporting mocks base method.
+func (m *MockBot) OnSupporting(ctx context.Context, sender v2.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OnSupporting", ctx, sender, snapshot)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// OnSupporting indicates an expected call of OnSupporting.
+func (mr *MockBotMockRecorder) OnSupporting(ctx, sender, snapshot interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnSupporting", reflect.TypeOf((*MockBot)(nil).OnSupporting), ctx, sender, snapshot)
 }
