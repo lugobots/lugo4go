@@ -4,21 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
-	"github.com/lugobots/lugo4go/v2/pkg/util"
-	"github.com/lugobots/lugo4go/v2/team"
 )
 
 type Bot struct {
 	Side   lugo.Team_Side
 	Number uint32
-	Logger util.Logger
-	arr    team.FieldMapper
+	Logger lugo4go.Logger
+	arr    field.Mapper
 }
 
-func NewBot(logger util.Logger, side lugo.Team_Side, number uint32) *Bot {
-	arr, _ := team.NewMapper(team.MaxCols, team.MaxRows, side)
+func NewBot(logger lugo4go.Logger, side lugo.Team_Side, number uint32) *Bot {
+	arr, _ := field.NewMapper(field.MaxCols, field.MaxRows, side)
 	return &Bot{
 		Logger: logger,
 		Number: number,
@@ -27,34 +26,34 @@ func NewBot(logger util.Logger, side lugo.Team_Side, number uint32) *Bot {
 	}
 }
 
-func (b *Bot) OnDisputing(ctx context.Context, sender team.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
-	return b.myDecider(ctx, sender, snapshot, team.DisputingTheBall)
+func (b *Bot) OnDisputing(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
+	return b.myDecider(ctx, sender, snapshot, lugo4go.DisputingTheBall)
 }
 
-func (b *Bot) OnDefending(ctx context.Context, sender team.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
-	return b.myDecider(ctx, sender, snapshot, team.Defending)
+func (b *Bot) OnDefending(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
+	return b.myDecider(ctx, sender, snapshot, lugo4go.Defending)
 }
 
-func (b *Bot) OnHolding(ctx context.Context, sender team.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
-	return b.myDecider(ctx, sender, snapshot, team.HoldingTheBall)
+func (b *Bot) OnHolding(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
+	return b.myDecider(ctx, sender, snapshot, lugo4go.HoldingTheBall)
 }
 
-func (b *Bot) OnSupporting(ctx context.Context, sender team.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
-	return b.myDecider(ctx, sender, snapshot, team.Supporting)
+func (b *Bot) OnSupporting(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
+	return b.myDecider(ctx, sender, snapshot, lugo4go.Supporting)
 }
 
-func (b *Bot) AsGoalkeeper(ctx context.Context, sender team.TurnOrdersSender, snapshot *lugo.GameSnapshot, state team.PlayerState) error {
+func (b *Bot) AsGoalkeeper(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *lugo.GameSnapshot, state lugo4go.PlayerState) error {
 	return b.myDecider(ctx, sender, snapshot, state)
 }
 
-func (b *Bot) myDecider(ctx context.Context, sender team.TurnOrdersSender, snapshot *lugo.GameSnapshot, state team.PlayerState) error {
+func (b *Bot) myDecider(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *lugo.GameSnapshot, state lugo4go.PlayerState) error {
 	var orders []lugo.PlayerOrder
 	// we are going to kick the ball as soon as we catch it
 	me := field.GetPlayer(snapshot, b.Side, b.Number)
 	if me == nil {
 		return errorHandler(b.Logger, errors.New("bot not found in the game snapshot"))
 	}
-	if state == team.HoldingTheBall {
+	if state == lugo4go.HoldingTheBall {
 		orderToKick, err := field.MakeOrderKick(*snapshot.Ball, field.GetOpponentGoal(me.TeamSide).Center, field.BallMaxSpeed)
 		if err != nil {
 			return errorHandler(b.Logger, fmt.Errorf("could not create kick order during turn %d: %s", snapshot.Turn, err))
@@ -80,7 +79,7 @@ func (b *Bot) myDecider(ctx context.Context, sender team.TurnOrdersSender, snaps
 	return nil
 }
 
-func errorHandler(logger util.Logger, err error) error {
+func errorHandler(logger lugo4go.Logger, err error) error {
 	logger.Errorf("bot error: %s", err)
 	return err
 }

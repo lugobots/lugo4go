@@ -3,8 +3,8 @@ package main
 import (
 	clientGo "github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/example/bot"
+	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"github.com/lugobots/lugo4go/v2/pkg/util"
-	"github.com/lugobots/lugo4go/v2/team"
 	"log"
 	"os"
 	"os/signal"
@@ -17,7 +17,7 @@ func main() {
 		log.Fatalf("could not init default config or logger: %s", err)
 	}
 
-	fieldMapper, _ := team.NewMapper(8, 4, playerConfig.TeamSide)
+	fieldMapper, _ := field.NewMapper(8, 4, playerConfig.TeamSide)
 
 	region, _ := fieldMapper.GetRegion(uint8(1+(playerConfig.Number)%2), uint8(playerConfig.Number%4))
 

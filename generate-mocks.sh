@@ -1,7 +1,7 @@
 #!/bin/bash
 
 mockgen -package=lugo4go_test \
-        -source=./interfaces.go \
+        -source=./contracts.go \
         -destination=./mocks_test.go
 
 mockgen -package=lugo4go_test \

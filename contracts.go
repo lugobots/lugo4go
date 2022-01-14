@@ -29,3 +29,12 @@ type Bot interface {
 	OnSupporting(ctx context.Context, sender TurnOrdersSender, snapshot *lugo.GameSnapshot) error
 	AsGoalkeeper(ctx context.Context, sender TurnOrdersSender, snapshot *lugo.GameSnapshot, state PlayerState) error
 }
+
+type Logger interface {
+	Debug(args ...interface{})
+	Debugf(template string, args ...interface{})
+	Infof(template string, args ...interface{})
+	Warnf(template string, args ...interface{})
+	Errorf(template string, args ...interface{})
+	Fatalf(template string, args ...interface{})
+}
