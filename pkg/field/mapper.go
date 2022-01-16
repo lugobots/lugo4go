@@ -101,6 +101,10 @@ type FieldArea struct {
 	positioner *Map
 }
 
+func (r FieldArea) Eq(region Region) bool {
+	return region.Col() == r.col && region.Row() == r.Row()
+}
+
 func (r FieldArea) Col() uint8 {
 	return r.col
 }

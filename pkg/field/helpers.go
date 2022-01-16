@@ -89,6 +89,11 @@ func MakeOrderKick(ball lugo.Ball, target lugo.Point, speed float64) (*lugo.Orde
 	return &lugo.Order_Kick{Kick: &lugo.Kick{Velocity: &vel}}, nil
 }
 
+func MakeOrderKickMaxSpeed(ball lugo.Ball, target lugo.Point) (*lugo.Order_Kick, error) {
+	return MakeOrderKick(ball, target, BallMaxSpeed)
+
+}
+
 func MakeOrderCatch() *lugo.Order_Catch {
 	return &lugo.Order_Catch{Catch: &lugo.Catch{}}
 }

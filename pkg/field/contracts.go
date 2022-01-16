@@ -42,4 +42,7 @@ type Region interface {
 	// Right is the FieldArea immediately on right of this one from the player perspective
 	// Important: The same FieldArea is returned if the requested FieldArea is not valid
 	Right() Region
+
+	// Eq does not check if the passed region is on a map of same size!
+	Eq(region Region) bool
 }
