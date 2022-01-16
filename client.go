@@ -3,8 +3,8 @@ package lugo4go
 import (
 	"context"
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/pkg/util"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/stats"
 	"io"
@@ -38,9 +38,9 @@ func NewClient(config util.Config) (*Client, error) {
 		return nil, err
 	}
 
-	c.GRPCClient = lugo.NewGameClient(c.grpcConn)
+	c.GRPCClient = proto.NewGameClient(c.grpcConn)
 
-	if c.Stream, err = c.GRPCClient.JoinATeam(context.Background(), &lugo.JoinRequest{
+	if c.Stream, err = c.GRPCClient.JoinATeam(context.Background(), &proto.JoinRequest{
 		Token:           config.Token,
 		Number:          config.Number,
 		InitPosition:    config.InitialPosition,
@@ -54,8 +54,8 @@ func NewClient(config util.Config) (*Client, error) {
 
 // Client handle the gRPC stuff and provide you an easy way to handle the game messages
 type Client struct {
-	Stream     lugo.Game_JoinATeamClient
-	GRPCClient lugo.GameClient
+	Stream     proto.Game_JoinATeamClient
+	GRPCClient proto.GameClient
 	grpcConn   *grpc.ClientConn
 	Handler    TurnHandler
 	Logger     Logger

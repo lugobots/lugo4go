@@ -15,7 +15,7 @@ package main
 //
 //	srv := lugo4go.GymEnv{}
 //
-//	lugo.RegisterGymServer(grpcServer, srv)
+//	proto.RegisterGymServer(grpcServer, srv)
 //
 //	lis, err := net.Listen("tcp", fmt.Sprintf(":2329"))
 //	if err != nil {

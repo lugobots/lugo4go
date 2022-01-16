@@ -2,14 +2,14 @@ package field
 
 import (
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
 )
 
 func TestNewPositioner(t *testing.T) {
-	p, err := NewMapper(MinCols, MinRows, lugo.Team_HOME)
+	p, err := NewMapper(MinCols, MinRows, proto.Team_HOME)
 	assert.Nil(t, err)
 
 	assert.Equal(t, FieldWidth/int(MinCols), int(p.regionWidth))
@@ -17,19 +17,19 @@ func TestNewPositioner(t *testing.T) {
 }
 
 func TestNewPositioner_InvalidArgs(t *testing.T) {
-	p, err := NewMapper(MinCols-1, MinRows, lugo.Team_HOME)
+	p, err := NewMapper(MinCols-1, MinRows, proto.Team_HOME)
 	assert.Nil(t, p)
 	assert.Equal(t, ErrMinCols, err)
 
-	p, err = NewMapper(MaxCols+1, MinRows, lugo.Team_HOME)
+	p, err = NewMapper(MaxCols+1, MinRows, proto.Team_HOME)
 	assert.Nil(t, p)
 	assert.Equal(t, ErrMaxCols, err)
 
-	p, err = NewMapper(MinCols, MinRows-1, lugo.Team_HOME)
+	p, err = NewMapper(MinCols, MinRows-1, proto.Team_HOME)
 	assert.Nil(t, p)
 	assert.Equal(t, ErrMinRows, err)
 
-	p, err = NewMapper(MinCols, MaxCols+1, lugo.Team_HOME)
+	p, err = NewMapper(MinCols, MaxCols+1, proto.Team_HOME)
 	assert.Nil(t, p)
 	assert.Equal(t, ErrMaxRows, err)
 }
@@ -49,16 +49,16 @@ func TestRegion_Center_HomeTeam(t *testing.T) {
 		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: int32(833), regionHalfHeight: int32(833)},
 	}
 
-	team := lugo.Team_HOME
+	team := proto.Team_HOME
 
 	for testName, testSettings := range testCases {
 
 		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 		assert.Nil(t, err)
-		expectedPointDefenseRight := &lugo.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		expectedPointDefenseLeft := &lugo.Point{X: +testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
-		expectedPointAttackLeft := &lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
-		expectedPointAttackRight := &lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+		expectedPointDefenseRight := &proto.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+		expectedPointDefenseLeft := &proto.Point{X: +testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+		expectedPointAttackLeft := &proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+		expectedPointAttackRight := &proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
 
 		r, err := p.GetRegion(0, 0)
 		assert.Nil(t, err)
@@ -93,16 +93,16 @@ func TestRegion_Center_Away(t *testing.T) {
 		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: int32(833), regionHalfHeight: int32(833)},
 	}
 
-	team := lugo.Team_AWAY
+	team := proto.Team_AWAY
 
 	for testName, testSettings := range testCases {
 
 		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 		assert.Nil(t, err)
-		expectedPointDefenseRight := lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
-		expectedPointDefenseLeft := lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		expectedPointAttackLeft := lugo.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		expectedPointAttackRight := lugo.Point{X: testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+		expectedPointDefenseRight := proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+		expectedPointDefenseLeft := proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+		expectedPointAttackLeft := proto.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+		expectedPointAttackRight := proto.Point{X: testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
 
 		r, err := p.GetRegion(0, 0)
 		assert.Nil(t, err)
@@ -123,7 +123,7 @@ func TestRegion_Center_Away(t *testing.T) {
 }
 
 func TestPositioner_GetRegion_InvalidArgs(t *testing.T) {
-	p, err := NewMapper(10, 10, lugo.Team_AWAY)
+	p, err := NewMapper(10, 10, proto.Team_AWAY)
 	assert.Nil(t, err)
 
 	r, err := p.GetRegion(11, 5)
@@ -159,16 +159,16 @@ func TestPositioner_GetPointRegion_HomeTeam(t *testing.T) {
 		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: int32(833), regionHalfHeight: int32(833)},
 	}
 
-	team := lugo.Team_HOME
+	team := proto.Team_HOME
 
 	for testName, testSettings := range testCases {
 
 		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 		assert.Nil(t, err)
-		pointDefenseRight := &lugo.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		pointDefenseLeft := &lugo.Point{X: +testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
-		pointAttackLeft := &lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
-		pointAttackRight := &lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+		pointDefenseRight := &proto.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+		pointDefenseLeft := &proto.Point{X: +testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+		pointAttackLeft := &proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+		pointAttackRight := &proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
 
 		r, err := p.GetPointRegion(pointDefenseRight)
 		assert.Nil(t, err)
@@ -207,16 +207,16 @@ func TestPositioner_GetPointRegion_AwayTeam(t *testing.T) {
 		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: int32(833), regionHalfHeight: int32(833)},
 	}
 
-	team := lugo.Team_AWAY
+	team := proto.Team_AWAY
 
 	for testName, testSettings := range testCases {
 
 		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 		assert.Nil(t, err)
-		pointDefenseRight := &lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
-		pointDefenseLeft := &lugo.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		pointAttackLeft := &lugo.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		pointAttackRight := &lugo.Point{X: testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+		pointDefenseRight := &proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+		pointDefenseLeft := &proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+		pointAttackLeft := &proto.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+		pointAttackRight := &proto.Point{X: testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
 
 		r, err := p.GetPointRegion(pointDefenseRight)
 		assert.Nil(t, err)
@@ -259,7 +259,7 @@ func TestRegion_Front(t *testing.T) {
 		"front-right-corner": {9, 0, 9, 0, true},
 		"front-left-corner":  {9, 9, 9, 9, true},
 	}
-	testTeamRegions := func(teamSide lugo.Team_Side) {
+	testTeamRegions := func(teamSide proto.Team_Side) {
 		p, err := NewMapper(maxCol+1, maxRow+1, teamSide)
 		assert.Nil(t, err)
 		for testName, testSettings := range testCases {
@@ -271,8 +271,8 @@ func TestRegion_Front(t *testing.T) {
 			assert.Equal(t, testSettings.expectedSame, reflect.DeepEqual(regionActual, regionTestCase))
 		}
 	}
-	testTeamRegions(lugo.Team_HOME)
-	testTeamRegions(lugo.Team_AWAY)
+	testTeamRegions(proto.Team_HOME)
+	testTeamRegions(proto.Team_AWAY)
 }
 
 func TestRegion_Back(t *testing.T) {
@@ -294,7 +294,7 @@ func TestRegion_Back(t *testing.T) {
 		"front-right-corner": {9, 0, 8, 0, false},
 		"front-left-corner":  {9, 9, 8, 9, false},
 	}
-	testTeamRegions := func(teamSide lugo.Team_Side) {
+	testTeamRegions := func(teamSide proto.Team_Side) {
 		p, err := NewMapper(maxCol+1, maxRow+1, teamSide)
 		assert.Nil(t, err)
 		for testName, testSettings := range testCases {
@@ -306,8 +306,8 @@ func TestRegion_Back(t *testing.T) {
 			assert.Equal(t, testSettings.expectedSame, reflect.DeepEqual(regionActual, regionTestCase))
 		}
 	}
-	testTeamRegions(lugo.Team_HOME)
-	testTeamRegions(lugo.Team_AWAY)
+	testTeamRegions(proto.Team_HOME)
+	testTeamRegions(proto.Team_AWAY)
 }
 
 func TestRegion_Left(t *testing.T) {
@@ -328,7 +328,7 @@ func TestRegion_Left(t *testing.T) {
 		"front-right-corner": {9, 0, 9, 1, false},
 		"front-left-corner":  {9, 9, 9, 9, true},
 	}
-	testTeamRegions := func(teamSide lugo.Team_Side) {
+	testTeamRegions := func(teamSide proto.Team_Side) {
 		p, err := NewMapper(maxCol+1, maxRow+1, teamSide)
 		assert.Nil(t, err)
 		for testName, testSettings := range testCases {
@@ -340,8 +340,8 @@ func TestRegion_Left(t *testing.T) {
 			assert.Equal(t, testSettings.expectedSame, reflect.DeepEqual(regionActual, regionTestCase))
 		}
 	}
-	testTeamRegions(lugo.Team_HOME)
-	testTeamRegions(lugo.Team_AWAY)
+	testTeamRegions(proto.Team_HOME)
+	testTeamRegions(proto.Team_AWAY)
 }
 
 func TestRegion_Right(t *testing.T) {
@@ -362,7 +362,7 @@ func TestRegion_Right(t *testing.T) {
 		"front-right-corner": {9, 0, 9, 0, true},
 		"front-left-corner":  {9, 9, 9, 8, false},
 	}
-	testTeamRegions := func(teamSide lugo.Team_Side) {
+	testTeamRegions := func(teamSide proto.Team_Side) {
 		p, err := NewMapper(maxCol+1, maxRow+1, teamSide)
 		assert.Nil(t, err)
 		for testName, testSettings := range testCases {
@@ -374,6 +374,6 @@ func TestRegion_Right(t *testing.T) {
 			assert.Equal(t, testSettings.expectedSame, reflect.DeepEqual(regionActual, regionTestCase))
 		}
 	}
-	testTeamRegions(lugo.Team_HOME)
-	testTeamRegions(lugo.Team_AWAY)
+	testTeamRegions(proto.Team_HOME)
+	testTeamRegions(proto.Team_AWAY)
 }

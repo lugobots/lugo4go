@@ -2,27 +2,27 @@ package lugo4go
 
 import (
 	"context"
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
-func NewSender(grpcClient lugo.GameClient) *Sender {
+func NewSender(grpcClient proto.GameClient) *Sender {
 	return &Sender{
 		GRPCClient: grpcClient,
 	}
 }
 
 type Sender struct {
-	GRPCClient lugo.GameClient
+	GRPCClient proto.GameClient
 }
 
-func (s *Sender) Send(ctx context.Context, turn uint32, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error) {
-	orderSet := &lugo.OrderSet{
+func (s *Sender) Send(ctx context.Context, turn uint32, orders []proto.PlayerOrder, debugMsg string) (*proto.OrderResponse, error) {
+	orderSet := &proto.OrderSet{
 		Turn:         turn,
 		DebugMessage: debugMsg,
-		Orders:       []*lugo.Order{},
+		Orders:       []*proto.Order{},
 	}
 	for _, order := range orders {
-		orderSet.Orders = append(orderSet.Orders, &lugo.Order{Action: order})
+		orderSet.Orders = append(orderSet.Orders, &proto.Order{Action: order})
 	}
 	return s.GRPCClient.SendOrders(ctx, orderSet)
 }

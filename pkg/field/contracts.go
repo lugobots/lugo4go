@@ -2,7 +2,7 @@ package field
 
 import (
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
 // Mapper Helps the bots to see the fields from their team perspective instead of using the cartesian plan provided
@@ -15,7 +15,7 @@ type Mapper interface {
 	// GetRegion Returns a FieldArea based on the coordinates and on the current field division
 	GetRegion(col, row uint8) (Region, error)
 	// GetPointRegion returns the FieldArea where that point is in
-	GetPointRegion(point *lugo.Point) (Region, error)
+	GetPointRegion(point *proto.Point) (Region, error)
 }
 
 // Region represent a quadrant on the field. It is not always squared form because you may define how many cols/rows
@@ -28,7 +28,7 @@ type Region interface {
 	// Row The row coordinate based on the field division
 	Row() uint8
 	// Center Return the point at the center of the quadrant represented by this Region. It is not always precise.
-	Center() *lugo.Point
+	Center() *proto.Point
 
 	// Front is the FieldArea immediately in front of this one from the player perspective
 	// Important: The same FieldArea is returned if the requested FieldArea is not valid

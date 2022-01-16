@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"io/ioutil"
 	"strings"
 )
@@ -13,12 +13,12 @@ import (
 // Configuration is the set of values expected as a initial configuration of the player
 type Config struct {
 	// Full url to the gRPC server
-	GRPCAddress     string         `json:"grpc_address"`
-	Insecure        bool           `json:"insecure"`
-	Token           string         `json:"token"`
-	TeamSide        lugo.Team_Side `json:"-"`
-	Number          uint32         `json:"-"`
-	InitialPosition *lugo.Point    `json:"-"`
+	GRPCAddress     string          `json:"grpc_address"`
+	Insecure        bool            `json:"insecure"`
+	Token           string          `json:"token"`
+	TeamSide        proto.Team_Side `json:"-"`
+	Number          uint32          `json:"-"`
+	InitialPosition *proto.Point    `json:"-"`
 }
 
 type jsonConfig struct {
@@ -49,11 +49,11 @@ func (c *Config) ParseConfigFlags() (filepath string, err error) {
 }
 
 func (c *Config) transcribe(intermediate jsonConfig) error {
-	side, ok := lugo.Team_Side_value[strings.ToUpper(intermediate.Team)]
+	side, ok := proto.Team_Side_value[strings.ToUpper(intermediate.Team)]
 	if !ok {
 		return fmt.Errorf("invalid team option '%s'. Must be either HOME or AWAY", intermediate.Team)
 	}
-	c.TeamSide = lugo.Team_Side(side)
+	c.TeamSide = proto.Team_Side(side)
 
 	if intermediate.Num < 1 || intermediate.Num > field.MaxPlayers {
 		return fmt.Errorf("invalid player number '%d'. Must be 1 to %d", intermediate.Num, field.MaxPlayers)

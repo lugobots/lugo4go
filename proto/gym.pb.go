@@ -4,7 +4,7 @@
 // 	protoc        v3.11.4
 // source: gym.proto
 
-package lugo
+package proto
 
 import (
 	context "context"
@@ -596,34 +596,34 @@ func file_gym_proto_rawDescGZIP() []byte {
 
 var file_gym_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_gym_proto_goTypes = []interface{}{
-	(*StepRequest)(nil),    // 0: lugo.StepRequest
-	(*StepResponse)(nil),   // 1: lugo.StepResponse
-	(*SetupRequest)(nil),   // 2: lugo.SetupRequest
-	(*SetupResponse)(nil),  // 3: lugo.SetupResponse
-	(*ResetRequest)(nil),   // 4: lugo.ResetRequest
-	(*ResetResponse)(nil),  // 5: lugo.ResetResponse
-	(*RenderRequest)(nil),  // 6: lugo.RenderRequest
-	(*RenderResponse)(nil), // 7: lugo.RenderResponse
-	(*CloseRequest)(nil),   // 8: lugo.CloseRequest
-	(*CloseResponse)(nil),  // 9: lugo.CloseResponse
+	(*StepRequest)(nil),    // 0: proto.StepRequest
+	(*StepResponse)(nil),   // 1: proto.StepResponse
+	(*SetupRequest)(nil),   // 2: proto.SetupRequest
+	(*SetupResponse)(nil),  // 3: proto.SetupResponse
+	(*ResetRequest)(nil),   // 4: proto.ResetRequest
+	(*ResetResponse)(nil),  // 5: proto.ResetResponse
+	(*RenderRequest)(nil),  // 6: proto.RenderRequest
+	(*RenderResponse)(nil), // 7: proto.RenderResponse
+	(*CloseRequest)(nil),   // 8: proto.CloseRequest
+	(*CloseResponse)(nil),  // 9: proto.CloseResponse
 	(*any.Any)(nil),        // 10: google.protobuf.Any
 }
 var file_gym_proto_depIdxs = []int32{
-	10, // 0: lugo.StepResponse.ob:type_name -> google.protobuf.Any
-	10, // 1: lugo.StepResponse.info:type_name -> google.protobuf.Any
-	10, // 2: lugo.SetupResponse.observation_space_minimums:type_name -> google.protobuf.Any
-	10, // 3: lugo.SetupResponse.observation_space_maximums:type_name -> google.protobuf.Any
-	10, // 4: lugo.ResetResponse.ob:type_name -> google.protobuf.Any
-	2,  // 5: lugo.Gym.GetSetup:input_type -> lugo.SetupRequest
-	0,  // 6: lugo.Gym.Step:input_type -> lugo.StepRequest
-	4,  // 7: lugo.Gym.Reset:input_type -> lugo.ResetRequest
-	6,  // 8: lugo.Gym.Render:input_type -> lugo.RenderRequest
-	8,  // 9: lugo.Gym.Close:input_type -> lugo.CloseRequest
-	3,  // 10: lugo.Gym.GetSetup:output_type -> lugo.SetupResponse
-	1,  // 11: lugo.Gym.Step:output_type -> lugo.StepResponse
-	5,  // 12: lugo.Gym.Reset:output_type -> lugo.ResetResponse
-	7,  // 13: lugo.Gym.Render:output_type -> lugo.RenderResponse
-	9,  // 14: lugo.Gym.Close:output_type -> lugo.CloseResponse
+	10, // 0: proto.StepResponse.ob:type_name -> google.protobuf.Any
+	10, // 1: proto.StepResponse.info:type_name -> google.protobuf.Any
+	10, // 2: proto.SetupResponse.observation_space_minimums:type_name -> google.protobuf.Any
+	10, // 3: proto.SetupResponse.observation_space_maximums:type_name -> google.protobuf.Any
+	10, // 4: proto.ResetResponse.ob:type_name -> google.protobuf.Any
+	2,  // 5: proto.Gym.GetSetup:input_type -> proto.SetupRequest
+	0,  // 6: proto.Gym.Step:input_type -> proto.StepRequest
+	4,  // 7: proto.Gym.Reset:input_type -> proto.ResetRequest
+	6,  // 8: proto.Gym.Render:input_type -> proto.RenderRequest
+	8,  // 9: proto.Gym.Close:input_type -> proto.CloseRequest
+	3,  // 10: proto.Gym.GetSetup:output_type -> proto.SetupResponse
+	1,  // 11: proto.Gym.Step:output_type -> proto.StepResponse
+	5,  // 12: proto.Gym.Reset:output_type -> proto.ResetResponse
+	7,  // 13: proto.Gym.Render:output_type -> proto.RenderResponse
+	9,  // 14: proto.Gym.Close:output_type -> proto.CloseResponse
 	10, // [10:15] is the sub-list for method output_type
 	5,  // [5:10] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name
@@ -807,7 +807,7 @@ func NewGymClient(cc grpc.ClientConnInterface) GymClient {
 
 func (c *gymClient) GetSetup(ctx context.Context, in *SetupRequest, opts ...grpc.CallOption) (*SetupResponse, error) {
 	out := new(SetupResponse)
-	err := c.cc.Invoke(ctx, "/lugo.Gym/GetSetup", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Gym/GetSetup", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -816,7 +816,7 @@ func (c *gymClient) GetSetup(ctx context.Context, in *SetupRequest, opts ...grpc
 
 func (c *gymClient) Step(ctx context.Context, in *StepRequest, opts ...grpc.CallOption) (*StepResponse, error) {
 	out := new(StepResponse)
-	err := c.cc.Invoke(ctx, "/lugo.Gym/Step", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Gym/Step", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -825,7 +825,7 @@ func (c *gymClient) Step(ctx context.Context, in *StepRequest, opts ...grpc.Call
 
 func (c *gymClient) Reset(ctx context.Context, in *ResetRequest, opts ...grpc.CallOption) (*ResetResponse, error) {
 	out := new(ResetResponse)
-	err := c.cc.Invoke(ctx, "/lugo.Gym/Reset", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Gym/Reset", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -834,7 +834,7 @@ func (c *gymClient) Reset(ctx context.Context, in *ResetRequest, opts ...grpc.Ca
 
 func (c *gymClient) Render(ctx context.Context, in *RenderRequest, opts ...grpc.CallOption) (*RenderResponse, error) {
 	out := new(RenderResponse)
-	err := c.cc.Invoke(ctx, "/lugo.Gym/Render", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Gym/Render", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -843,7 +843,7 @@ func (c *gymClient) Render(ctx context.Context, in *RenderRequest, opts ...grpc.
 
 func (c *gymClient) Close(ctx context.Context, in *CloseRequest, opts ...grpc.CallOption) (*CloseResponse, error) {
 	out := new(CloseResponse)
-	err := c.cc.Invoke(ctx, "/lugo.Gym/Close", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.Gym/Close", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -893,7 +893,7 @@ func _Gym_GetSetup_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lugo.Gym/GetSetup",
+		FullMethod: "/proto.Gym/GetSetup",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GymServer).GetSetup(ctx, req.(*SetupRequest))
@@ -911,7 +911,7 @@ func _Gym_Step_Handler(srv interface{}, ctx context.Context, dec func(interface{
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lugo.Gym/Step",
+		FullMethod: "/proto.Gym/Step",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GymServer).Step(ctx, req.(*StepRequest))
@@ -929,7 +929,7 @@ func _Gym_Reset_Handler(srv interface{}, ctx context.Context, dec func(interface
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lugo.Gym/Reset",
+		FullMethod: "/proto.Gym/Reset",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GymServer).Reset(ctx, req.(*ResetRequest))
@@ -947,7 +947,7 @@ func _Gym_Render_Handler(srv interface{}, ctx context.Context, dec func(interfac
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lugo.Gym/Render",
+		FullMethod: "/proto.Gym/Render",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GymServer).Render(ctx, req.(*RenderRequest))
@@ -965,7 +965,7 @@ func _Gym_Close_Handler(srv interface{}, ctx context.Context, dec func(interface
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/lugo.Gym/Close",
+		FullMethod: "/proto.Gym/Close",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GymServer).Close(ctx, req.(*CloseRequest))
@@ -974,7 +974,7 @@ func _Gym_Close_Handler(srv interface{}, ctx context.Context, dec func(interface
 }
 
 var _Gym_serviceDesc = grpc.ServiceDesc{
-	ServiceName: "lugo.Gym",
+	ServiceName: "proto.Gym",
 	HandlerType: (*GymServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

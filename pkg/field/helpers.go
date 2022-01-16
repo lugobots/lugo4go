@@ -1,20 +1,20 @@
 package field
 
 import (
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
-func GetTeam(s *lugo.GameSnapshot, side lugo.Team_Side) *lugo.Team {
+func GetTeam(s *proto.GameSnapshot, side proto.Team_Side) *proto.Team {
 	if s == nil {
 		return nil
 	}
-	if side == lugo.Team_HOME {
+	if side == proto.Team_HOME {
 		return s.HomeTeam
 	}
 	return s.AwayTeam
 }
 
-func IsBallHolder(s *lugo.GameSnapshot, player *lugo.Player) bool {
+func IsBallHolder(s *proto.GameSnapshot, player *proto.Player) bool {
 	if s == nil {
 		return false
 	}
@@ -24,18 +24,18 @@ func IsBallHolder(s *lugo.GameSnapshot, player *lugo.Player) bool {
 		s.Ball.Holder.Number == player.Number
 }
 
-func GetOpponentSide(side lugo.Team_Side) lugo.Team_Side {
-	if side == lugo.Team_HOME {
-		return lugo.Team_AWAY
+func GetOpponentSide(side proto.Team_Side) proto.Team_Side {
+	if side == proto.Team_HOME {
+		return proto.Team_AWAY
 	}
-	return lugo.Team_HOME
+	return proto.Team_HOME
 }
 
-func GetOpponentGoal(mySide lugo.Team_Side) Goal {
+func GetOpponentGoal(mySide proto.Team_Side) Goal {
 	return GetTeamsGoal(GetOpponentSide(mySide))
 }
 
-func GetPlayer(s *lugo.GameSnapshot, side lugo.Team_Side, number uint32) *lugo.Player {
+func GetPlayer(s *proto.GameSnapshot, side proto.Team_Side, number uint32) *proto.Player {
 	team := GetTeam(s, side)
 	if team == nil {
 		return nil
@@ -48,32 +48,32 @@ func GetPlayer(s *lugo.GameSnapshot, side lugo.Team_Side, number uint32) *lugo.P
 	return nil
 }
 
-func MakeOrderMoveMaxSpeed(origin, target lugo.Point) (*lugo.Order_Move, error) {
+func MakeOrderMoveMaxSpeed(origin, target proto.Point) (*proto.Order_Move, error) {
 	return MakeOrderMove(origin, target, PlayerMaxSpeed)
 }
 
-func MakeOrderMove(origin, target lugo.Point, speed float64) (*lugo.Order_Move, error) {
-	vec, err := lugo.NewVector(origin, target)
+func MakeOrderMove(origin, target proto.Point, speed float64) (*proto.Order_Move, error) {
+	vec, err := proto.NewVector(origin, target)
 	if err != nil {
 		return nil, err
 	}
-	vel := lugo.NewZeroedVelocity(*vec.Normalize())
+	vel := proto.NewZeroedVelocity(*vec.Normalize())
 	vel.Speed = speed
-	return &lugo.Order_Move{Move: &lugo.Move{Velocity: &vel}}, nil
+	return &proto.Order_Move{Move: &proto.Move{Velocity: &vel}}, nil
 }
 
-func MakeOrderJump(origin, target lugo.Point, speed float64) (*lugo.Order_Jump, error) {
-	vec, err := lugo.NewVector(origin, target)
+func MakeOrderJump(origin, target proto.Point, speed float64) (*proto.Order_Jump, error) {
+	vec, err := proto.NewVector(origin, target)
 	if err != nil {
 		return nil, err
 	}
-	vel := lugo.NewZeroedVelocity(*vec.Normalize())
+	vel := proto.NewZeroedVelocity(*vec.Normalize())
 	vel.Speed = speed
-	return &lugo.Order_Jump{Jump: &lugo.Jump{Velocity: &vel}}, nil
+	return &proto.Order_Jump{Jump: &proto.Jump{Velocity: &vel}}, nil
 }
 
-func MakeOrderKick(ball lugo.Ball, target lugo.Point, speed float64) (*lugo.Order_Kick, error) {
-	ballExpectedDirection, err := lugo.NewVector(*ball.Position, target)
+func MakeOrderKick(ball proto.Ball, target proto.Point, speed float64) (*proto.Order_Kick, error) {
+	ballExpectedDirection, err := proto.NewVector(*ball.Position, target)
 	if err != nil {
 		return nil, err
 	}
@@ -82,58 +82,58 @@ func MakeOrderKick(ball lugo.Ball, target lugo.Point, speed float64) (*lugo.Orde
 	if err != nil {
 		return nil, err
 	}
-	vel := lugo.NewZeroedVelocity(*diffVector)
+	vel := proto.NewZeroedVelocity(*diffVector)
 	vel.Direction.Normalize()
 	vel.Speed = speed
 
-	return &lugo.Order_Kick{Kick: &lugo.Kick{Velocity: &vel}}, nil
+	return &proto.Order_Kick{Kick: &proto.Kick{Velocity: &vel}}, nil
 }
 
-func MakeOrderKickMaxSpeed(ball lugo.Ball, target lugo.Point) (*lugo.Order_Kick, error) {
+func MakeOrderKickMaxSpeed(ball proto.Ball, target proto.Point) (*proto.Order_Kick, error) {
 	return MakeOrderKick(ball, target, BallMaxSpeed)
 
 }
 
-func MakeOrderCatch() *lugo.Order_Catch {
-	return &lugo.Order_Catch{Catch: &lugo.Catch{}}
+func MakeOrderCatch() *proto.Order_Catch {
+	return &proto.Order_Catch{Catch: &proto.Catch{}}
 }
 
-func GoForward(side lugo.Team_Side) *lugo.Order_Move {
-	forward := lugo.East()
-	if side == lugo.Team_AWAY {
-		forward = lugo.West()
+func GoForward(side proto.Team_Side) *proto.Order_Move {
+	forward := proto.East()
+	if side == proto.Team_AWAY {
+		forward = proto.West()
 	}
-	vel := lugo.NewZeroedVelocity(forward)
+	vel := proto.NewZeroedVelocity(forward)
 	vel.Speed = PlayerMaxSpeed
-	return &lugo.Order_Move{Move: &lugo.Move{Velocity: &vel}}
+	return &proto.Order_Move{Move: &proto.Move{Velocity: &vel}}
 }
 
-func GoBackward(side lugo.Team_Side) *lugo.Order_Move {
-	backward := lugo.West()
-	if side == lugo.Team_AWAY {
-		backward = lugo.East()
+func GoBackward(side proto.Team_Side) *proto.Order_Move {
+	backward := proto.West()
+	if side == proto.Team_AWAY {
+		backward = proto.East()
 	}
-	vel := lugo.NewZeroedVelocity(backward)
+	vel := proto.NewZeroedVelocity(backward)
 	vel.Speed = PlayerMaxSpeed
-	return &lugo.Order_Move{Move: &lugo.Move{Velocity: &vel}}
+	return &proto.Order_Move{Move: &proto.Move{Velocity: &vel}}
 }
 
-func GoRight(side lugo.Team_Side) *lugo.Order_Move {
-	right := lugo.South()
-	if side == lugo.Team_AWAY {
-		right = lugo.North()
+func GoRight(side proto.Team_Side) *proto.Order_Move {
+	right := proto.South()
+	if side == proto.Team_AWAY {
+		right = proto.North()
 	}
-	vel := lugo.NewZeroedVelocity(right)
+	vel := proto.NewZeroedVelocity(right)
 	vel.Speed = PlayerMaxSpeed
-	return &lugo.Order_Move{Move: &lugo.Move{Velocity: &vel}}
+	return &proto.Order_Move{Move: &proto.Move{Velocity: &vel}}
 }
 
-func GoLeft(side lugo.Team_Side) *lugo.Order_Move {
-	left := lugo.North()
-	if side == lugo.Team_AWAY {
-		left = lugo.South()
+func GoLeft(side proto.Team_Side) *proto.Order_Move {
+	left := proto.North()
+	if side == proto.Team_AWAY {
+		left = proto.South()
 	}
-	vel := lugo.NewZeroedVelocity(left)
+	vel := proto.NewZeroedVelocity(left)
 	vel.Speed = PlayerMaxSpeed
-	return &lugo.Order_Move{Move: &lugo.Move{Velocity: &vel}}
+	return &proto.Order_Move{Move: &proto.Move{Velocity: &vel}}
 }

@@ -3,7 +3,7 @@ package lugo4go_test
 import (
 	"github.com/golang/mock/gomock"
 	"github.com/lugobots/lugo4go/v2"
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
 	"testing"
@@ -17,20 +17,20 @@ func TestSender_Send(t *testing.T) {
 	mockGRPCClient := NewMockGameClient(ctrl)
 	sender := lugo4go.Sender{GRPCClient: mockGRPCClient}
 
-	velocitySample := lugo.NewZeroedVelocity(lugo.North())
-	moveOrder := &lugo.Order_Move{
-		Move: &lugo.Move{
+	velocitySample := proto.NewZeroedVelocity(proto.North())
+	moveOrder := &proto.Order_Move{
+		Move: &proto.Move{
 			Velocity: &velocitySample,
 		},
 	}
-	catchOrder := &lugo.Order_Catch{}
-	kickOrder := &lugo.Order_Kick{
-		Kick: &lugo.Kick{
+	catchOrder := &proto.Order_Catch{}
+	kickOrder := &proto.Order_Kick{
+		Kick: &proto.Kick{
 			Velocity: &velocitySample,
 		},
 	}
-	jumpOder := &lugo.Order_Jump{
-		Jump: &lugo.Jump{
+	jumpOder := &proto.Order_Jump{
+		Jump: &proto.Jump{
 			Velocity: &velocitySample,
 		},
 	}
@@ -38,27 +38,27 @@ func TestSender_Send(t *testing.T) {
 		name string
 		//inputs
 		turn     uint32
-		orders   []lugo.PlayerOrder
+		orders   []proto.PlayerOrder
 		debugMsg string
 
 		//expected args
-		orderSet *lugo.OrderSet
+		orderSet *proto.OrderSet
 
 		//expected outputs
-		clientResp *lugo.OrderResponse
+		clientResp *proto.OrderResponse
 		clientErr  error
 	}{
 		{
 			name:     "no orders",
 			turn:     150,
-			orders:   []lugo.PlayerOrder{},
+			orders:   []proto.PlayerOrder{},
 			debugMsg: "hi",
-			orderSet: &lugo.OrderSet{
+			orderSet: &proto.OrderSet{
 				Turn:         150,
-				Orders:       []*lugo.Order{},
+				Orders:       []*proto.Order{},
 				DebugMessage: "hi",
 			},
-			clientResp: &lugo.OrderResponse{
+			clientResp: &proto.OrderResponse{
 				Code:    0,
 				Details: "",
 			},
@@ -69,9 +69,9 @@ func TestSender_Send(t *testing.T) {
 			turn:     150,
 			orders:   nil,
 			debugMsg: "hi2",
-			orderSet: &lugo.OrderSet{
+			orderSet: &proto.OrderSet{
 				Turn:         150,
-				Orders:       []*lugo.Order{},
+				Orders:       []*proto.Order{},
 				DebugMessage: "hi2",
 			},
 			clientResp: nil,
@@ -80,11 +80,11 @@ func TestSender_Send(t *testing.T) {
 		{
 			name:     "one move order",
 			turn:     150,
-			orders:   []lugo.PlayerOrder{moveOrder},
+			orders:   []proto.PlayerOrder{moveOrder},
 			debugMsg: "hi2",
-			orderSet: &lugo.OrderSet{
+			orderSet: &proto.OrderSet{
 				Turn: 150,
-				Orders: []*lugo.Order{
+				Orders: []*proto.Order{
 					{Action: moveOrder},
 				},
 				DebugMessage: "hi2",
@@ -95,11 +95,11 @@ func TestSender_Send(t *testing.T) {
 		{
 			name:     "one catch order",
 			turn:     150,
-			orders:   []lugo.PlayerOrder{catchOrder},
+			orders:   []proto.PlayerOrder{catchOrder},
 			debugMsg: "hi3",
-			orderSet: &lugo.OrderSet{
+			orderSet: &proto.OrderSet{
 				Turn: 150,
-				Orders: []*lugo.Order{
+				Orders: []*proto.Order{
 					{Action: catchOrder},
 				},
 				DebugMessage: "hi3",
@@ -110,11 +110,11 @@ func TestSender_Send(t *testing.T) {
 		{
 			name:     "one Kick order",
 			turn:     150,
-			orders:   []lugo.PlayerOrder{kickOrder},
+			orders:   []proto.PlayerOrder{kickOrder},
 			debugMsg: "hi3",
-			orderSet: &lugo.OrderSet{
+			orderSet: &proto.OrderSet{
 				Turn: 150,
-				Orders: []*lugo.Order{
+				Orders: []*proto.Order{
 					{Action: kickOrder},
 				},
 				DebugMessage: "hi3",
@@ -125,11 +125,11 @@ func TestSender_Send(t *testing.T) {
 		{
 			name:     "one jump order",
 			turn:     150,
-			orders:   []lugo.PlayerOrder{jumpOder},
+			orders:   []proto.PlayerOrder{jumpOder},
 			debugMsg: "hi3",
-			orderSet: &lugo.OrderSet{
+			orderSet: &proto.OrderSet{
 				Turn: 150,
-				Orders: []*lugo.Order{
+				Orders: []*proto.Order{
 					{Action: jumpOder},
 				},
 				DebugMessage: "hi3",
@@ -140,11 +140,11 @@ func TestSender_Send(t *testing.T) {
 		{
 			name:     "two order move and kick",
 			turn:     150,
-			orders:   []lugo.PlayerOrder{moveOrder, kickOrder},
+			orders:   []proto.PlayerOrder{moveOrder, kickOrder},
 			debugMsg: "hi3",
-			orderSet: &lugo.OrderSet{
+			orderSet: &proto.OrderSet{
 				Turn: 150,
-				Orders: []*lugo.Order{
+				Orders: []*proto.Order{
 					{Action: moveOrder},
 					{Action: kickOrder},
 				},
@@ -156,11 +156,11 @@ func TestSender_Send(t *testing.T) {
 		{
 			name:     "two order kick and move ",
 			turn:     150,
-			orders:   []lugo.PlayerOrder{kickOrder, moveOrder},
+			orders:   []proto.PlayerOrder{kickOrder, moveOrder},
 			debugMsg: "hi3",
-			orderSet: &lugo.OrderSet{
+			orderSet: &proto.OrderSet{
 				Turn: 150,
-				Orders: []*lugo.Order{
+				Orders: []*proto.Order{
 					{Action: kickOrder},
 					{Action: moveOrder},
 				},

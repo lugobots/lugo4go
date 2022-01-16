@@ -10,7 +10,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	v2 "github.com/lugobots/lugo4go/v2"
-	lugo "github.com/lugobots/lugo4go/v2/lugo"
+	lugo "github.com/lugobots/lugo4go/v2/proto"
 )
 
 // MockTurnHandler is a mock of TurnHandler interface.
@@ -37,7 +37,7 @@ func (m *MockTurnHandler) EXPECT() *MockTurnHandlerMockRecorder {
 }
 
 // Handle mocks base method.
-func (m *MockTurnHandler) Handle(ctx context.Context, snapshot *lugo.GameSnapshot) {
+func (m *MockTurnHandler) Handle(ctx context.Context, snapshot *proto.GameSnapshot) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "Handle", ctx, snapshot)
 }
@@ -72,10 +72,10 @@ func (m *MockOrderSender) EXPECT() *MockOrderSenderMockRecorder {
 }
 
 // Send mocks base method.
-func (m *MockOrderSender) Send(ctx context.Context, turn uint32, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error) {
+func (m *MockOrderSender) Send(ctx context.Context, turn uint32, orders []proto.PlayerOrder, debugMsg string) (*proto.OrderResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Send", ctx, turn, orders, debugMsg)
-	ret0, _ := ret[0].(*lugo.OrderResponse)
+	ret0, _ := ret[0].(*proto.OrderResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -110,10 +110,10 @@ func (m *MockTurnOrdersSender) EXPECT() *MockTurnOrdersSenderMockRecorder {
 }
 
 // Send mocks base method.
-func (m *MockTurnOrdersSender) Send(ctx context.Context, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error) {
+func (m *MockTurnOrdersSender) Send(ctx context.Context, orders []proto.PlayerOrder, debugMsg string) (*proto.OrderResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Send", ctx, orders, debugMsg)
-	ret0, _ := ret[0].(*lugo.OrderResponse)
+	ret0, _ := ret[0].(*proto.OrderResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -148,7 +148,7 @@ func (m *MockBot) EXPECT() *MockBotMockRecorder {
 }
 
 // AsGoalkeeper mocks base method.
-func (m *MockBot) AsGoalkeeper(ctx context.Context, sender v2.TurnOrdersSender, snapshot *lugo.GameSnapshot, state v2.PlayerState) error {
+func (m *MockBot) AsGoalkeeper(ctx context.Context, sender v2.TurnOrdersSender, snapshot *proto.GameSnapshot, state v2.PlayerState) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AsGoalkeeper", ctx, sender, snapshot, state)
 	ret0, _ := ret[0].(error)
@@ -162,7 +162,7 @@ func (mr *MockBotMockRecorder) AsGoalkeeper(ctx, sender, snapshot, state interfa
 }
 
 // OnDefending mocks base method.
-func (m *MockBot) OnDefending(ctx context.Context, sender v2.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
+func (m *MockBot) OnDefending(ctx context.Context, sender v2.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "OnDefending", ctx, sender, snapshot)
 	ret0, _ := ret[0].(error)
@@ -176,7 +176,7 @@ func (mr *MockBotMockRecorder) OnDefending(ctx, sender, snapshot interface{}) *g
 }
 
 // OnDisputing mocks base method.
-func (m *MockBot) OnDisputing(ctx context.Context, sender v2.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
+func (m *MockBot) OnDisputing(ctx context.Context, sender v2.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "OnDisputing", ctx, sender, snapshot)
 	ret0, _ := ret[0].(error)
@@ -190,7 +190,7 @@ func (mr *MockBotMockRecorder) OnDisputing(ctx, sender, snapshot interface{}) *g
 }
 
 // OnHolding mocks base method.
-func (m *MockBot) OnHolding(ctx context.Context, sender v2.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
+func (m *MockBot) OnHolding(ctx context.Context, sender v2.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "OnHolding", ctx, sender, snapshot)
 	ret0, _ := ret[0].(error)
@@ -204,7 +204,7 @@ func (mr *MockBotMockRecorder) OnHolding(ctx, sender, snapshot interface{}) *gom
 }
 
 // OnSupporting mocks base method.
-func (m *MockBot) OnSupporting(ctx context.Context, sender v2.TurnOrdersSender, snapshot *lugo.GameSnapshot) error {
+func (m *MockBot) OnSupporting(ctx context.Context, sender v2.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "OnSupporting", ctx, sender, snapshot)
 	ret0, _ := ret[0].(error)

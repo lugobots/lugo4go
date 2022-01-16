@@ -2,11 +2,11 @@ package lugo4go
 
 import (
 	"context"
-	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
-func NewHandler(bot Bot, sender OrderSender, logger Logger, playerNumber uint32, side lugo.Team_Side) *Handler {
+func NewHandler(bot Bot, sender OrderSender, logger Logger, playerNumber uint32, side proto.Team_Side) *Handler {
 	return &Handler{
 		Logger:       logger,
 		Sender:       sender,
@@ -22,11 +22,11 @@ type Handler struct {
 	Logger       Logger
 	Sender       OrderSender
 	PlayerNumber uint32
-	Side         lugo.Team_Side
+	Side         proto.Team_Side
 	Bot          Bot
 }
 
-func (h *Handler) Handle(ctx context.Context, snapshot *lugo.GameSnapshot) {
+func (h *Handler) Handle(ctx context.Context, snapshot *proto.GameSnapshot) {
 	var err error
 	var state PlayerState
 
@@ -71,7 +71,7 @@ type senderWrapper struct {
 	turn   uint32
 }
 
-func (s senderWrapper) Send(ctx context.Context, orders []lugo.PlayerOrder, debugMsg string) (*lugo.OrderResponse, error) {
+func (s senderWrapper) Send(ctx context.Context, orders []proto.PlayerOrder, debugMsg string) (*proto.OrderResponse, error) {
 	return s.sender.Send(ctx, s.turn, orders, debugMsg)
 }
 
@@ -89,7 +89,7 @@ const (
 	DisputingTheBall PlayerState = "disputing"
 )
 
-func DefineMyState(snapshot *lugo.GameSnapshot, playerNumber uint32, side lugo.Team_Side) (PlayerState, error) {
+func DefineMyState(snapshot *proto.GameSnapshot, playerNumber uint32, side proto.Team_Side) (PlayerState, error) {
 	if snapshot == nil || snapshot.Ball == nil {
 		return "", ErrNoBall
 	}

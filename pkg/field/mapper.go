@@ -2,7 +2,7 @@ package field
 
 import (
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/lugo"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"math"
 )
 
@@ -26,7 +26,7 @@ const (
 )
 
 // NewMapper creates a new Mapper that will map the field to provide Regions
-func NewMapper(cols, rows uint8, sideRef lugo.Team_Side) (*Map, error) {
+func NewMapper(cols, rows uint8, sideRef proto.Team_Side) (*Map, error) {
 	if cols < MinCols {
 		return nil, ErrMinCols
 	}
@@ -50,7 +50,7 @@ func NewMapper(cols, rows uint8, sideRef lugo.Team_Side) (*Map, error) {
 }
 
 type Map struct {
-	TeamSide     lugo.Team_Side
+	TeamSide     proto.Team_Side
 	cols         uint8
 	rows         uint8
 	regionWidth  float64
@@ -65,11 +65,11 @@ func (p *Map) GetRegion(col, row uint8) (Region, error) {
 		return nil, ErrMaxRows
 	}
 
-	center := &lugo.Point{
+	center := &proto.Point{
 		X: int32(math.Round(float64(col)*p.regionWidth + p.regionWidth/2)),
 		Y: int32(math.Round(float64(row)*p.regionHeight + p.regionHeight/2)),
 	}
-	if p.TeamSide == lugo.Team_AWAY {
+	if p.TeamSide == proto.Team_AWAY {
 		center = mirrorCoordsToAway(center)
 	}
 
@@ -82,8 +82,8 @@ func (p *Map) GetRegion(col, row uint8) (Region, error) {
 	}, nil
 }
 
-func (p *Map) GetPointRegion(point *lugo.Point) (Region, error) {
-	if p.TeamSide == lugo.Team_AWAY {
+func (p *Map) GetPointRegion(point *proto.Point) (Region, error) {
+	if p.TeamSide == proto.Team_AWAY {
 		point = mirrorCoordsToAway(point)
 	}
 	cx := float64(point.X) / p.regionWidth
@@ -96,8 +96,8 @@ func (p *Map) GetPointRegion(point *lugo.Point) (Region, error) {
 type FieldArea struct {
 	col        uint8
 	row        uint8
-	sideRef    lugo.Team_Side
-	center     *lugo.Point
+	sideRef    proto.Team_Side
+	center     *proto.Point
 	positioner *Map
 }
 
@@ -113,7 +113,7 @@ func (r FieldArea) Row() uint8 {
 	return r.row
 }
 
-func (r FieldArea) Center() *lugo.Point {
+func (r FieldArea) Center() *proto.Point {
 	return r.center.Copy()
 }
 
@@ -151,8 +151,8 @@ func (r FieldArea) Right() Region {
 
 // Invert the coords X and Y as in a mirror to found out the same position seen from the away team field
 // Keep in mind that all coords in the field are based in the bottom left corner!
-func mirrorCoordsToAway(coords *lugo.Point) *lugo.Point {
-	return &lugo.Point{
+func mirrorCoordsToAway(coords *proto.Point) *proto.Point {
+	return &proto.Point{
 		X: FieldWidth - coords.X,
 		Y: FieldHeight - coords.Y,
 	}
