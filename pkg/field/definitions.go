@@ -24,10 +24,27 @@ const (
 	PlayerMaxSpeed = 100.0
 
 	// FieldWidth is the width of the field (horizontal view)
-	FieldWidth = 200 * BaseUnit
+	// This value must be an odd number because the central coordinate must be neutral, and we want to have the same number
+	// of coordinates on both sides.
+	// e.g. If the field weight is 10, and the coordinates go from 0 to 9, there is no precise middle.
+	// Thus, the field would have to be 11, so the coordinate 5 is at the precise center
+	FieldWidth = (200 * BaseUnit) + 1
 
 	// FieldHeight is the height of the field (horizontal view)
-	FieldHeight = 100 * BaseUnit
+	// This value must be an odd number because we cant to a coordinate at the perfect middle of the field
+	// e.g. If the field height is 10, and the coordinates go from 0 to 9, there is no precise middle.
+	// Thus, the field would have to be 11, so the coordinate 5 is at the precise center
+	FieldHeight = (100 * BaseUnit) + 1
+
+	// MaxYCoordinate help us to remember that we should not use the field width to check the fiend boundaries!
+	// The field dimensions counts the total number of coordinates, but the coordinates are zero-indexed.
+	// e.g. If the field is 10, so the max coordinate will be 9
+	MaxYCoordinate = FieldHeight - 1
+
+	// MaxXCoordinate help us to remember that we should not use the field width to check the fiend boundaries!
+	// The field dimensions counts the total number of coordinates, but the coordinates are zero-indexed.
+	// e.g. If the field is 10, so the max coordinate will be 9
+	MaxXCoordinate = FieldWidth - 1
 
 	// FieldNeutralCenter is the radius of the neutral circle on the center of the field
 	FieldNeutralCenter = 100
