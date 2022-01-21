@@ -28,9 +28,9 @@ func HomeTeamGoal() Goal {
 func AwayTeamGoal() Goal {
 	return Goal{
 		Place:      proto.Team_AWAY,
-		Center:     proto.Point{X: FieldWidth, Y: FieldHeight / 2},
-		TopPole:    proto.Point{X: FieldWidth, Y: GoalMaxY},
-		BottomPole: proto.Point{X: FieldWidth, Y: GoalMinY},
+		Center:     proto.Point{X: MaxXCoordinate, Y: MaxYCoordinate / 2},
+		TopPole:    proto.Point{X: MaxXCoordinate, Y: GoalMaxY},
+		BottomPole: proto.Point{X: MaxXCoordinate, Y: GoalMinY},
 	}
 }
 

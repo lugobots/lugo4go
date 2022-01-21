@@ -13,7 +13,7 @@ import (
 )
 
 // ProtocolVersion defines the current game protocol
-const ProtocolVersion = "2.0"
+const ProtocolVersion = "0.0.1"
 
 // NewClient creates a Lugo4Go client that will hide common logic and let you focus on your bot.
 func NewClient(config util.Config) (*Client, error) {

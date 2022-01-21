@@ -153,7 +153,7 @@ func (r FieldArea) Right() Region {
 // Keep in mind that all coords in the field are based in the bottom left corner!
 func mirrorCoordsToAway(coords *proto.Point) *proto.Point {
 	return &proto.Point{
-		X: FieldWidth - coords.X,
-		Y: FieldHeight - coords.Y,
+		X: MaxXCoordinate - coords.X,
+		Y: MaxYCoordinate - coords.Y,
 	}
 }
