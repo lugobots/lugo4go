@@ -37,7 +37,7 @@ func (c *Config) ParseConfigFlags() (filepath string, err error) {
 	flag.StringVar(&filepath, "config-file", "", "Path to the config file")
 	flag.StringVar(&intermediate.Team, "team", "home", "Team (home or away)")
 	flag.UintVar(&intermediate.Num, "number", 1, "Player's number (1-11)")
-	flag.StringVar(&intermediate.GRPCAddress, "grpc_address", "localhost:9090", "Address to connect to the game server")
+	flag.StringVar(&intermediate.GRPCAddress, "grpc_address", "localhost:5000", "Address to connect to the game server")
 	flag.StringVar(&intermediate.Token, "token", "", "Token used by the server to identify the right connection")
 	flag.BoolVar(&intermediate.Insecure, "insecure", true, "Allow insecure connections (important for development environments)")
 	flag.Parse()

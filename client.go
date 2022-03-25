@@ -89,6 +89,11 @@ func (c *Client) Play(handler TurnHandler) error {
 		// to avoid race conditions we need to ensure that the loop can only start after the Go routine has started.
 		mustHasStarted := make(chan bool)
 		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					c.Logger.Warnf("panic recovered: %v", r)
+				}
+			}()
 			// make this looks clear!
 			m.Lock()
 			close(mustHasStarted)
