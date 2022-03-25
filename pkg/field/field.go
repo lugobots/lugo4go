@@ -18,7 +18,7 @@ type Goal struct {
 func HomeTeamGoal() Goal {
 	return Goal{
 		Place:      proto.Team_HOME,
-		Center:     proto.Point{X: 0, Y: FieldHeight / 2},
+		Center:     proto.Point{X: 0, Y: MaxYCoordinate / 2},
 		TopPole:    proto.Point{X: 0, Y: GoalMaxY},
 		BottomPole: proto.Point{X: 0, Y: GoalMinY},
 	}
@@ -44,5 +44,5 @@ func GetTeamsGoal(side proto.Team_Side) Goal {
 
 // FieldCenter works as a constant value to help to retrieve a Point struct with the values of the center of the court
 func FieldCenter() proto.Point {
-	return proto.Point{X: FieldWidth / 2, Y: FieldHeight / 2}
+	return proto.Point{X: MaxXCoordinate / 2, Y: MaxYCoordinate / 2}
 }
