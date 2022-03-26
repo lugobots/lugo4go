@@ -103,7 +103,7 @@ func (b *Bot) Handle(ctx context.Context, snapshot *proto.GameSnapshot) {
 
 ## Kick-start
 
-0. Copy one of the example in [the example directory](./examples) as a new Golang project.
+0. Copy one of the examples from [the example directory](./examples) as a new Golang project.
 
 1. Run the game server using the command 
     ```bash
@@ -128,8 +128,8 @@ func (b *Bot) Handle(ctx context.Context, snapshot *proto.GameSnapshot) {
 
 ## Field Library
 
-There are a many things that you will repeatedly need to do on your bot, e.g. get your bot position, creating a move/kick/catch order,
-find your teammates positions, etc. 
+There are a many things that you will repeatedly need to do on your bot code, e.g. getting your bot position,
+creating a move/kick/catch order, finding your teammates positions, etc. 
 
 The Field library brings a collection of functions that will help you get that data from the game snapshot:
 
@@ -147,7 +147,7 @@ moveOrder, err := field.MakeOrderMoveMaxSpeed(*me.Position, myTeamGoal)
 
 The Field library also provides a quite useful pair: the Mapper interface and Region struct.
 
-### The Mapper
+#### The Mapper
 
 `Mapper` slices the field in columns and rows, so your bot does not have to care about precise coordinates or the team
 side. The mapper will automatically translate the map position to the bot side.
@@ -163,7 +163,7 @@ aRegion, err := fieldMapper.GetRegion(2, 4)
 
 ```
 
-### The Region
+#### The Region
 
 The `Mapper` will slice the field into `Region`s. The Region struct helps your bot to move over the field without caring
 about coordinates or team side.
