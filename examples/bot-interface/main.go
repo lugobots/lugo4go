@@ -41,7 +41,7 @@ func main() {
 	ctx, stop := context.WithCancel(context.Background())
 	go func() {
 		defer stop()
-		if err := player.PlayWithBot(myBot, logger.Named("bot")); err != nil {
+		if err := player.PlayAsBot(myBot, logger.Named("bot")); err != nil {
 			log.Printf("bot stopped with an error: %s", err)
 		}
 	}()
