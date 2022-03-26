@@ -1,4 +1,4 @@
-# Lugo - Go Player Client
+# Lugo4Go - A Lugo Bots Client
 [![Build Status](https://travis-ci.org/lugobots/lugo4go.svg?branch=master)](https://travis-ci.org/lugobots/lugo4go)
 [![GoDoc](https://godoc.org/github.com/lugobots/lugo4go?status.svg)](https://godoc.org/github.com/lugobots/lugo4go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lugobots/lugo4go)](https://goreportcard.com/report/github.com/lugobots/lugo4go)
@@ -21,7 +21,7 @@ your strategy (see the project [The Dummies](https://github.com/lugobots/the-dum
 
 ### Requirements
 
-0. Go Lang >= 1.16 (https://golang.org/doc/install)
+* Go Lang >= 1.16 (https://golang.org/doc/install)
 
 ### Installation
 
@@ -46,26 +46,32 @@ type Bot struct {
 	
 }
 
+// OnDisputing is called when no one has the ball possession
 func (b *Bot) OnDisputing(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
 	// the magic code comes here
 	return ...
 }
 
+// OnDefending is called when an opponent player has the ball possession
 func (b *Bot) OnDefending(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
 	// the magic code comes here
 	return ...
 }
 
+// OnHolding is called when this bot has the ball possession
 func (b *Bot) OnHolding(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
 	// the magic code comes here
 	return ...
 }
 
+// OnSupporting is called when a teammate player has the ball possession
 func (b *Bot) OnSupporting(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
 	// the magic code comes here
 	return ...
 }
 
+// AsGoalkeeper is only called when this bot is the goalkeeper (number 1). This method is called on every turn,
+// and the player state is passed at the last parameter.
 func (b *Bot) AsGoalkeeper(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot, state lugo4go.PlayerState) error {
 	// the magic code comes here
 	return ...

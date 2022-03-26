@@ -10,7 +10,10 @@ type TurnData struct {
 	Snapshot *proto.GameSnapshot
 }
 
+// TurnHandler is required by the Lugo4Go client to handle each turn snapshot
 type TurnHandler interface {
+
+	// Handle is called every turn with the new game state
 	Handle(ctx context.Context, snapshot *proto.GameSnapshot)
 }
 
@@ -23,10 +26,16 @@ type TurnOrdersSender interface {
 }
 
 type Bot interface {
+	// OnDisputing is called when no one has the ball possession
 	OnDisputing(ctx context.Context, sender TurnOrdersSender, snapshot *proto.GameSnapshot) error
+	// OnDefending is called when an opponent player has the ball possession
 	OnDefending(ctx context.Context, sender TurnOrdersSender, snapshot *proto.GameSnapshot) error
+	// OnHolding is called when this bot has the ball possession
 	OnHolding(ctx context.Context, sender TurnOrdersSender, snapshot *proto.GameSnapshot) error
+	// OnSupporting is called when a teammate player has the ball possession
 	OnSupporting(ctx context.Context, sender TurnOrdersSender, snapshot *proto.GameSnapshot) error
+	// AsGoalkeeper is only called when this bot is the goalkeeper (number 1). This method is called on every turn,
+	// and the player state is passed at the last parameter.
 	AsGoalkeeper(ctx context.Context, sender TurnOrdersSender, snapshot *proto.GameSnapshot, state PlayerState) error
 }
 
