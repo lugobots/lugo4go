@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	clientGo "github.com/lugobots/lugo4go/v2"
-	"github.com/lugobots/lugo4go/v2/examples/implemeting-bot-interface/bot"
+	"github.com/lugobots/lugo4go/v2/examples/turn-handler/bot"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"github.com/lugobots/lugo4go/v2/pkg/util"
 	"log"
@@ -35,13 +35,16 @@ func main() {
 	}
 	logger.Info("connected to the game server")
 
+	// The order send will be used by the bot to send the order during each turn
+	orderSender := clientGo.NewSender(player.GRPCClient)
+
 	// Creating a bot to play
-	myBot := bot.NewBot(logger, playerConfig.TeamSide, playerConfig.Number)
+	myBot := bot.NewBot(orderSender, logger, playerConfig.TeamSide, playerConfig.Number)
 
 	ctx, stop := context.WithCancel(context.Background())
 	go func() {
 		defer stop()
-		if err := player.PlayWithBot(myBot, logger.Named("bot")); err != nil {
+		if err := player.Play(myBot); err != nil {
 			log.Printf("bot stopped with an error: %s", err)
 		}
 	}()
