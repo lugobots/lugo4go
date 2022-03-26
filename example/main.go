@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	clientGo "github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/example/bot"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
@@ -17,20 +18,15 @@ func main() {
 		log.Fatalf("could not init default config or logger: %s", err)
 	}
 
-	fieldMapper, _ := field.NewMapper(8, 4, playerConfig.TeamSide)
+	fieldGridCols := uint8(8)
+	fieldGridRows := uint8(8)
 
-	region, _ := fieldMapper.GetRegion(uint8(1+(playerConfig.Number)%2), uint8(playerConfig.Number%4))
+	fieldMapper, _ := field.NewMapper(fieldGridCols, fieldGridRows, playerConfig.TeamSide)
+
+	region, _ := fieldMapper.GetRegion(bot.FieldMap[playerConfig.Number].Col, bot.FieldMap[playerConfig.Number].Row)
 
 	// just creating a position for example purposes
 	playerConfig.InitialPosition = region.Center()
-	//&proto.Point{
-	//X: field.FieldWidth / 4,
-	//Y: int32(playerConfig.Number) * field.PlayerSize * 2,
-	//}
-
-	//if playerConfig.TeamSide == proto.Team_AWAY {
-	//	playerConfig.InitialPosition.X = field.FieldWidth - playerConfig.InitialPosition.X
-	//}
 
 	player, err := clientGo.NewClient(playerConfig)
 	if err != nil {
@@ -41,17 +37,18 @@ func main() {
 	// Creating a bot to play
 	myBot := bot.NewBot(logger, playerConfig.TeamSide, playerConfig.Number)
 
-	errChan := make(chan error)
+	ctx, stop := context.WithCancel(context.Background())
 	go func() {
-		errChan <- player.PlayWithBot(myBot, logger.Named("bot"))
+		defer stop()
+		if err := player.PlayWithBot(myBot, logger.Named("bot")); err != nil {
+			log.Printf("bot stopped with an error: %s", err)
+		}
 	}()
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 	select {
-	case err := <-errChan:
-		//that's a nice place to implement some logic to understand your bot errors
-		log.Printf("bot error: %s", err)
+	case <-ctx.Done():
 	case <-signalChan:
 		logger.Warnf("got interruption signal")
 		if err := player.Stop(); err != nil {

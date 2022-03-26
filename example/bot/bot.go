@@ -83,3 +83,19 @@ func errorHandler(logger lugo4go.Logger, err error) error {
 	logger.Errorf("bot error: %s", err)
 	return err
 }
+
+var FieldMap = map[uint32]struct {
+	Col uint8
+	Row uint8
+}{
+	2:  {Col: 1, Row: 1},
+	3:  {Col: 1, Row: 3},
+	4:  {Col: 1, Row: 4},
+	5:  {Col: 1, Row: 6},
+	6:  {Col: 2, Row: 2},
+	7:  {Col: 2, Row: 3},
+	8:  {Col: 2, Row: 4},
+	9:  {Col: 2, Row: 5},
+	10: {Col: 3, Row: 3},
+	11: {Col: 3, Row: 4},
+}

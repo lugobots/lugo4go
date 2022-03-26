@@ -1,4 +1,4 @@
-FROM golang:1.10 AS build
+FROM golang:1.17 AS build
 
 RUN go get github.com/golang/dep/cmd/dep
 
