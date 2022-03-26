@@ -13,3 +13,9 @@ const (
 	// ErrGRPCConnectionLost identifies that something unexpected broke the gRPC connection
 	ErrGRPCConnectionLost = Error("grpc stream error")
 )
+
+const (
+	ErrNilSnapshot    = Error("invalid snapshot state (nil)")
+	ErrPlayerNotFound = Error("player not found in the game snapshot")
+	ErrNoBall         = Error("no ball found in the snapshot")
+)

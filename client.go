@@ -3,17 +3,17 @@ package lugo4go
 import (
 	"context"
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/coach"
-	"github.com/lugobots/lugo4go/v2/lugo"
 	"github.com/lugobots/lugo4go/v2/pkg/util"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/stats"
 	"io"
 	"sync"
+	"time"
 )
 
 // ProtocolVersion defines the current game protocol
-const ProtocolVersion = "2.0"
+const ProtocolVersion = "0.0.1"
 
 // NewClient creates a Lugo4Go client that will hide common logic and let you focus on your bot.
 func NewClient(config util.Config) (*Client, error) {
@@ -25,22 +25,25 @@ func NewClient(config util.Config) (*Client, error) {
 	// A bot may eventually do not listen to server Stream (ignoring OnNewTurn). In this case, the Client must stop
 	// when the gRPC connection is closed.
 	connHandler := grpc.WithStatsHandler(c)
+
+	ctx, _ := context.WithTimeout(context.Background(), 3*time.Second)
+
 	// @todo there are some gRPC options that we should take a look tro improve this part.
 	if config.Insecure {
-		c.grpcConn, err = grpc.Dial(config.GRPCAddress, grpc.WithInsecure(), connHandler)
+		c.grpcConn, err = grpc.DialContext(ctx, config.GRPCAddress, grpc.WithBlock(), grpc.WithInsecure(), connHandler)
 	} else {
-		c.grpcConn, err = grpc.Dial(config.GRPCAddress, connHandler)
+		c.grpcConn, err = grpc.DialContext(ctx, config.GRPCAddress, grpc.WithBlock(), connHandler)
 	}
 	if err != nil {
 		return nil, err
 	}
 
-	c.GRPCClient = lugo.NewGameClient(c.grpcConn)
+	c.GRPCClient = proto.NewGameClient(c.grpcConn)
 
-	if c.Stream, err = c.GRPCClient.JoinATeam(context.Background(), &lugo.JoinRequest{
+	if c.Stream, err = c.GRPCClient.JoinATeam(context.Background(), &proto.JoinRequest{
 		Token:           config.Token,
 		Number:          config.Number,
-		InitPosition:    &config.InitialPosition,
+		InitPosition:    config.InitialPosition,
 		TeamSide:        config.TeamSide,
 		ProtocolVersion: ProtocolVersion,
 	}); err != nil {
@@ -49,21 +52,21 @@ func NewClient(config util.Config) (*Client, error) {
 	return c, nil
 }
 
-// Client handle the gRPC stuff and provide you a easy way to handle the game messages
+// Client handle the gRPC stuff and provide you an easy way to handle the game messages
 type Client struct {
-	Stream     lugo.Game_JoinATeamClient
-	GRPCClient lugo.GameClient
+	Stream     proto.Game_JoinATeamClient
+	GRPCClient proto.GameClient
 	grpcConn   *grpc.ClientConn
 	Handler    TurnHandler
-	Logger     util.Logger
+	Logger     Logger
 	config     util.Config
 }
 
-// PlayWithBot is a sugared Play mode that uses an TurnHandler from coach package.
+// PlayAsBot is a sugared Play mode that uses an TurnHandler from coach package.
 // Coach TurnHandler creates basic player states to help the development of new bots.
-func (c *Client) PlayWithBot(bot coach.Bot, logger util.Logger) error {
-	sender := coach.NewSender(c.GRPCClient)
-	handler := coach.NewHandler(bot, sender, logger, c.config.Number, c.config.TeamSide)
+func (c *Client) PlayAsBot(bot Bot, logger Logger) error {
+	sender := NewSender(c.GRPCClient)
+	handler := NewHandler(bot, sender, logger, c.config.Number, c.config.TeamSide)
 	return c.Play(handler)
 }
 
@@ -86,6 +89,12 @@ func (c *Client) Play(handler TurnHandler) error {
 		// to avoid race conditions we need to ensure that the loop can only start after the Go routine has started.
 		mustHasStarted := make(chan bool)
 		go func() {
+			defer func() {
+				if r := recover(); r != nil {
+					c.Logger.Warnf("panic recovered: %v", r)
+				}
+			}()
+			// make this looks clear!
 			m.Lock()
 			close(mustHasStarted)
 			defer m.Unlock()

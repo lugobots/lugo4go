@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"github.com/golang/mock/gomock"
 	"github.com/lugobots/lugo4go/v2"
-	"github.com/lugobots/lugo4go/v2/internal/util"
-	"github.com/lugobots/lugo4go/v2/lugo"
 	util2 "github.com/lugobots/lugo4go/v2/pkg/util"
+	"github.com/lugobots/lugo4go/v2/proto"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"io"
@@ -23,7 +22,7 @@ const testServerPort = 2222
 func NewMockServer(ctx context.Context, ctr *gomock.Controller, port int16) (*MockGameServer, error) {
 	mock := NewMockGameServer(ctr)
 	gRPCServer := grpc.NewServer()
-	lugo.RegisterGameServer(gRPCServer, mock)
+	proto.RegisterGameServer(gRPCServer, mock)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
@@ -57,19 +56,19 @@ func TestNewRawClient(t *testing.T) {
 	config := util2.Config{
 		GRPCAddress:     fmt.Sprintf(":%d", testServerPort),
 		Insecure:        true,
-		TeamSide:        lugo.Team_HOME,
+		TeamSide:        proto.Team_HOME,
 		Number:          3,
-		InitialPosition: lugo.Point{X: 4000, Y: 4000},
+		InitialPosition: &proto.Point{X: 4000, Y: 4000},
 	}
 
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
 
 	// the Client will try to join to a team, so our server need to expect it happens
-	srv.EXPECT().JoinATeam(util.NewMatcher(func(arg interface{}) bool {
-		expectedRequest := &lugo.JoinRequest{
+	srv.EXPECT().JoinATeam(NewMatcher(func(arg interface{}) bool {
+		expectedRequest := &proto.JoinRequest{
 			Number:          config.Number,
-			InitPosition:    &config.InitialPosition,
+			InitPosition:    config.InitialPosition,
 			TeamSide:        config.TeamSide,
 			ProtocolVersion: lugo4go.ProtocolVersion,
 		}
@@ -111,7 +110,7 @@ func TestClient_PlayCallsHandlerForEachMessage(t *testing.T) {
 	waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
 
 	// defining expectations
-	expectedSnapshot := &lugo.GameSnapshot{Turn: 200}
+	expectedSnapshot := &proto.GameSnapshot{Turn: 200}
 	mockStream.EXPECT().Recv().Return(expectedSnapshot, nil)
 	mockStream.EXPECT().Recv().DoAndReturn(func() {
 		//let's pretend some interval between messages
@@ -182,8 +181,8 @@ func TestClient_PlayShouldStopContextWhenANewTurnStarts(t *testing.T) {
 	waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
 
 	// defining expectations
-	expectedSnapshotA := &lugo.GameSnapshot{Turn: 200}
-	expectedSnapshotB := &lugo.GameSnapshot{Turn: 201}
+	expectedSnapshotA := &proto.GameSnapshot{Turn: 200}
+	expectedSnapshotB := &proto.GameSnapshot{Turn: 201}
 	mockStream.EXPECT().Recv().Return(expectedSnapshotA, nil)
 	mockStream.EXPECT().Recv().Return(expectedSnapshotB, nil)
 	mockStream.EXPECT().Recv().Return(nil, io.EOF)
@@ -195,7 +194,7 @@ func TestClient_PlayShouldStopContextWhenANewTurnStarts(t *testing.T) {
 	// if it does not, the next handler will unblock it, but it will be considered an error
 	mockHandler.EXPECT().
 		Handle(gomock.Any(), expectedSnapshotA).
-		DoAndReturn(func(ctx context.Context, snapshot *lugo.GameSnapshot) {
+		DoAndReturn(func(ctx context.Context, snapshot *proto.GameSnapshot) {
 			select {
 			case <-ctx.Done():
 				firstHandlerIsExpired = true
@@ -207,7 +206,7 @@ func TestClient_PlayShouldStopContextWhenANewTurnStarts(t *testing.T) {
 	// the second call to handler will close our channel just to ensure anything will be left behind in your test
 	mockHandler.EXPECT().
 		Handle(gomock.Any(), expectedSnapshotB).
-		DoAndReturn(func(ctx context.Context, snapshot *lugo.GameSnapshot) {
+		DoAndReturn(func(ctx context.Context, snapshot *proto.GameSnapshot) {
 			close(holder)
 		})
 

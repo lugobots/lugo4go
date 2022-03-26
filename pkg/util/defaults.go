@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"os"
 )
 
+// DefaultLogger creates a logger that is compatible with the lugo4go.Handler expected logger.
+// The bots are NOT obligated to use this logger though. You may implement your own logger.
 func DefaultLogger(config Config) (*zap.SugaredLogger, error) {
 	configZap := zap.NewDevelopmentConfig()
 	configZap.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
@@ -16,27 +19,15 @@ func DefaultLogger(config Config) (*zap.SugaredLogger, error) {
 	return zapLog.Sugar().Named(fmt.Sprintf("%s-%d", config.TeamSide, config.Number)), nil
 }
 
-func DefaultConfigurator() (Config, error) {
-	config := Config{}
-	configFile, err := config.ParseConfigFlags()
-	if err != nil {
-		return Config{}, fmt.Errorf("did not parsed well the flags for config: %s", err)
-	}
-
-	if configFile != "" {
-		err := LoadConfig("./config.json", &config)
-		if err != nil {
-			return Config{}, fmt.Errorf("did not load the config: %s", err)
-		}
-	}
-	return config, nil
-}
-
+// DefaultInitBundle created a basic configuration that may be used by the client to connect to the server.
+// It also creates a logger that is compatible with the lugo4go.Handler.
 func DefaultInitBundle() (Config, *zap.SugaredLogger, error) {
-	config, err := DefaultConfigurator()
-	if err != nil {
-		return config, nil, err
+	config := Config{}
+
+	if err := config.LoadConfig(os.Args[1:]); err != nil {
+		return config, nil, fmt.Errorf("did not parsed well the flags for config: %s", err)
 	}
+
 	logger, err := DefaultLogger(config)
 	if err != nil {
 		return config, nil, err

@@ -1,6 +1,0 @@
-{
-  "grpc_address": "localhost:1212",
-  "insecure": true,
-  "token": "UUID",
-  "number": 5
-}
