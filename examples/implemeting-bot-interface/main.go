@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	clientGo "github.com/lugobots/lugo4go/v2"
-	"github.com/lugobots/lugo4go/v2/example/bot"
+	"github.com/lugobots/lugo4go/v2/examples/implemeting-bot-interface/bot"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"github.com/lugobots/lugo4go/v2/pkg/util"
 	"log"
@@ -18,6 +18,7 @@ func main() {
 		log.Fatalf("could not init default config or logger: %s", err)
 	}
 
+	// Creating a field grid will help us to map the play positions
 	fieldGridCols := uint8(8)
 	fieldGridRows := uint8(8)
 

@@ -30,7 +30,7 @@ your strategy (see the project [The Dummies](https://github.com/lugobots/the-dum
 
 ### Kick start
 
-0. Copy [the example directory](./example) as a new Golang project
+0. Copy [the example directory](./examples) as a new Golang project
 
 0. Build your bot executing the command below inside the project directory
     ```bash 
@@ -53,7 +53,7 @@ your strategy (see the project [The Dummies](https://github.com/lugobots/the-dum
           
     **or**
     
-    **Option B**: You can use the script in [the example directory](./example) to do this automatically for you:
+    **Option B**: You can use the script in [the example directory](./examples) to do this automatically for you:
     `./play.sh home`
 0. And, **if your have not started the away team**, you may do the same for the other team. 
     
@@ -75,7 +75,7 @@ After developing your bot, you may share it with other developers.
 
 Using this client your code will be compiled into a binary file. So you do not have to share the bot source code.
 
-There is a Dockerfile template in [the example directory](./example) to guide you how to create a container. After
+There is a Dockerfile template in [the example directory](./examples) to guide you how to create a container. After
 having customized (or not) your Dockerfile, you just need to build the container:
 
 ```bash
