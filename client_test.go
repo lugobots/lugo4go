@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/golang/mock/gomock"
 	"github.com/lugobots/lugo4go/v2"
-	"github.com/lugobots/lugo4go/v2/internal/util"
 	util2 "github.com/lugobots/lugo4go/v2/pkg/util"
 	"github.com/lugobots/lugo4go/v2/proto"
 	"github.com/stretchr/testify/assert"
@@ -66,7 +65,7 @@ func TestNewRawClient(t *testing.T) {
 	waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
 
 	// the Client will try to join to a team, so our server need to expect it happens
-	srv.EXPECT().JoinATeam(util.NewMatcher(func(arg interface{}) bool {
+	srv.EXPECT().JoinATeam(NewMatcher(func(arg interface{}) bool {
 		expectedRequest := &proto.JoinRequest{
 			Number:          config.Number,
 			InitPosition:    config.InitialPosition,

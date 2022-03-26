@@ -44,8 +44,8 @@ func NewMapper(cols, rows uint8, sideRef proto.Team_Side) (*Map, error) {
 		TeamSide:     sideRef,
 		cols:         cols,
 		rows:         rows,
-		regionWidth:  FieldWidth / float64(cols),
-		regionHeight: FieldHeight / float64(rows),
+		regionWidth:  MaxXCoordinate / float64(cols),
+		regionHeight: MaxYCoordinate / float64(rows),
 	}, nil
 }
 

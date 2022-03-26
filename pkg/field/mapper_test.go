@@ -52,29 +52,31 @@ func TestRegion_Center_HomeTeam(t *testing.T) {
 	team := proto.Team_HOME
 
 	for testName, testSettings := range testCases {
+		t.Run(testName, func(t *testing.T) {
 
-		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
-		assert.Nil(t, err)
-		expectedPointDefenseRight := &proto.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		expectedPointDefenseLeft := &proto.Point{X: +testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
-		expectedPointAttackLeft := &proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
-		expectedPointAttackRight := &proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+			p, err := NewMapper(testSettings.cols, testSettings.rows, team)
+			assert.Nil(t, err)
+			expectedPointDefenseRight := &proto.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+			expectedPointDefenseLeft := &proto.Point{X: +testSettings.regionHalfWidth, Y: MaxYCoordinate - testSettings.regionHalfHeight}
+			expectedPointAttackLeft := &proto.Point{X: MaxXCoordinate - testSettings.regionHalfWidth, Y: MaxYCoordinate - testSettings.regionHalfHeight}
+			expectedPointAttackRight := &proto.Point{X: MaxXCoordinate - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
 
-		r, err := p.GetRegion(0, 0)
-		assert.Nil(t, err)
-		assert.Equal(t, expectedPointDefenseRight, r.Center(), testName)
+			r, err := p.GetRegion(0, 0)
+			assert.Nil(t, err)
+			assert.Equal(t, expectedPointDefenseRight, r.Center(), testName)
 
-		r, err = p.GetRegion(0, testSettings.rows-1)
-		assert.Nil(t, err)
-		assert.Equal(t, expectedPointDefenseLeft, r.Center(), testName)
+			r, err = p.GetRegion(0, testSettings.rows-1)
+			assert.Nil(t, err)
+			assert.Equal(t, expectedPointDefenseLeft, r.Center(), testName)
 
-		r, err = p.GetRegion(testSettings.cols-1, testSettings.rows-1)
-		assert.Nil(t, err)
-		assert.Equal(t, expectedPointAttackLeft, r.Center(), testName)
+			r, err = p.GetRegion(testSettings.cols-1, testSettings.rows-1)
+			assert.Nil(t, err)
+			assert.Equal(t, expectedPointAttackLeft, r.Center(), testName)
 
-		r, err = p.GetRegion(testSettings.cols-1, 0)
-		assert.Nil(t, err)
-		assert.Equal(t, expectedPointAttackRight, r.Center(), testName)
+			r, err = p.GetRegion(testSettings.cols-1, 0)
+			assert.Nil(t, err)
+			assert.Equal(t, expectedPointAttackRight, r.Center(), testName)
+		})
 	}
 }
 
@@ -96,29 +98,30 @@ func TestRegion_Center_Away(t *testing.T) {
 	team := proto.Team_AWAY
 
 	for testName, testSettings := range testCases {
+		t.Run(testName, func(t *testing.T) {
+			p, err := NewMapper(testSettings.cols, testSettings.rows, team)
+			assert.Nil(t, err)
+			expectedPointDefenseRight := proto.Point{X: MaxXCoordinate - testSettings.regionHalfWidth, Y: MaxYCoordinate - testSettings.regionHalfHeight}
+			expectedPointDefenseLeft := proto.Point{X: MaxXCoordinate - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+			expectedPointAttackLeft := proto.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+			expectedPointAttackRight := proto.Point{X: testSettings.regionHalfWidth, Y: MaxYCoordinate - testSettings.regionHalfHeight}
 
-		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
-		assert.Nil(t, err)
-		expectedPointDefenseRight := proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
-		expectedPointDefenseLeft := proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		expectedPointAttackLeft := proto.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		expectedPointAttackRight := proto.Point{X: testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+			r, err := p.GetRegion(0, 0)
+			assert.Nil(t, err)
+			assert.Equal(t, &expectedPointDefenseRight, r.Center(), testName)
 
-		r, err := p.GetRegion(0, 0)
-		assert.Nil(t, err)
-		assert.Equal(t, &expectedPointDefenseRight, r.Center(), testName)
+			r, err = p.GetRegion(0, testSettings.rows-1)
+			assert.Nil(t, err)
+			assert.Equal(t, &expectedPointDefenseLeft, r.Center(), testName)
 
-		r, err = p.GetRegion(0, testSettings.rows-1)
-		assert.Nil(t, err)
-		assert.Equal(t, &expectedPointDefenseLeft, r.Center(), testName)
+			r, err = p.GetRegion(testSettings.cols-1, testSettings.rows-1)
+			assert.Nil(t, err)
+			assert.Equal(t, &expectedPointAttackLeft, r.Center(), testName)
 
-		r, err = p.GetRegion(testSettings.cols-1, testSettings.rows-1)
-		assert.Nil(t, err)
-		assert.Equal(t, &expectedPointAttackLeft, r.Center(), testName)
-
-		r, err = p.GetRegion(testSettings.cols-1, 0)
-		assert.Nil(t, err)
-		assert.Equal(t, &expectedPointAttackRight, r.Center(), testName)
+			r, err = p.GetRegion(testSettings.cols-1, 0)
+			assert.Nil(t, err)
+			assert.Equal(t, &expectedPointAttackRight, r.Center(), testName)
+		})
 	}
 }
 

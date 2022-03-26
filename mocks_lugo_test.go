@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	lugo "github.com/lugobots/lugo4go/v2/proto"
+	proto "github.com/lugobots/lugo4go/v2/proto"
 	grpc "google.golang.org/grpc"
 	metadata "google.golang.org/grpc/metadata"
 )
@@ -481,6 +481,26 @@ func (mr *MockBroadcastClientMockRecorder) OnEvent(arg0, arg1 interface{}, arg2 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnEvent", reflect.TypeOf((*MockBroadcastClient)(nil).OnEvent), varargs...)
 }
 
+// StartGame mocks base method.
+func (m *MockBroadcastClient) StartGame(arg0 context.Context, arg1 *proto.StartRequest, arg2 ...grpc.CallOption) (*proto.GameSetup, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "StartGame", varargs...)
+	ret0, _ := ret[0].(*proto.GameSetup)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// StartGame indicates an expected call of StartGame.
+func (mr *MockBroadcastClientMockRecorder) StartGame(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartGame", reflect.TypeOf((*MockBroadcastClient)(nil).StartGame), varargs...)
+}
+
 // MockBroadcast_OnEventClient is a mock of Broadcast_OnEventClient interface.
 type MockBroadcast_OnEventClient struct {
 	ctrl     *gomock.Controller
@@ -654,6 +674,21 @@ func (m *MockBroadcastServer) OnEvent(arg0 *proto.WatcherRequest, arg1 proto.Bro
 func (mr *MockBroadcastServerMockRecorder) OnEvent(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnEvent", reflect.TypeOf((*MockBroadcastServer)(nil).OnEvent), arg0, arg1)
+}
+
+// StartGame mocks base method.
+func (m *MockBroadcastServer) StartGame(arg0 context.Context, arg1 *proto.StartRequest) (*proto.GameSetup, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "StartGame", arg0, arg1)
+	ret0, _ := ret[0].(*proto.GameSetup)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// StartGame indicates an expected call of StartGame.
+func (mr *MockBroadcastServerMockRecorder) StartGame(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StartGame", reflect.TypeOf((*MockBroadcastServer)(nil).StartGame), arg0, arg1)
 }
 
 // MockBroadcast_OnEventServer is a mock of Broadcast_OnEventServer interface.
