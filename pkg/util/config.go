@@ -19,7 +19,7 @@ const (
 	EnvVarBotToken        = "BOT_TOKEN"
 )
 
-// Configuration is the set of values expected as a initial configuration of the player
+// Config is the set of values expected as a initial configuration of the player
 type Config struct {
 	// Full url to the gRPC server
 	GRPCAddress     string          `json:"grpc_address"`

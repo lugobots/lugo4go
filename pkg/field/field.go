@@ -34,7 +34,7 @@ func AwayTeamGoal() Goal {
 	}
 }
 
-// Returns the goal struct to the team side passed as argument
+// GetTeamsGoal returns the goal struct to the team side passed as argument
 func GetTeamsGoal(side proto.Team_Side) Goal {
 	if side == proto.Team_HOME {
 		return HomeTeamGoal()

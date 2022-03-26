@@ -7,6 +7,8 @@ import (
 	"github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"github.com/lugobots/lugo4go/v2/proto"
+	"math/rand"
+	"time"
 )
 
 type Bot struct {
@@ -18,6 +20,7 @@ type Bot struct {
 
 func NewBot(logger lugo4go.Logger, side proto.Team_Side, number uint32) *Bot {
 	arr, _ := field.NewMapper(field.MaxCols, field.MaxRows, side)
+	rand.Seed(time.Now().UnixNano() * int64(number))
 	return &Bot{
 		Logger: logger,
 		Number: number,
@@ -68,6 +71,17 @@ func (b *Bot) myDecider(ctx context.Context, sender lugo4go.TurnOrdersSender, sn
 		orders = []proto.PlayerOrder{orderToMove, field.MakeOrderCatch()}
 	} else {
 		orders = []proto.PlayerOrder{field.MakeOrderCatch()}
+		orders = []proto.PlayerOrder{field.MakeOrderCatch()}
+		switch rand.Intn(30) {
+		case 0:
+			orders = append(orders, field.GoRight(b.Side))
+		case 1:
+			orders = append(orders, field.GoLeft(b.Side))
+		case 2:
+			orders = append(orders, field.GoForward(b.Side))
+		case 3:
+			orders = append(orders, field.GoBackward(b.Side))
+		}
 	}
 
 	resp, err := sender.Send(ctx, orders, "")
