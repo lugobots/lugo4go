@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"os"
 )
 
 func DefaultLogger(config Config) (*zap.SugaredLogger, error) {
@@ -16,27 +17,13 @@ func DefaultLogger(config Config) (*zap.SugaredLogger, error) {
 	return zapLog.Sugar().Named(fmt.Sprintf("%s-%d", config.TeamSide, config.Number)), nil
 }
 
-func DefaultConfigurator() (Config, error) {
-	config := Config{}
-	configFile, err := config.ParseConfigFlags()
-	if err != nil {
-		return Config{}, fmt.Errorf("did not parsed well the flags for config: %s", err)
-	}
-
-	if configFile != "" {
-		err := LoadConfig("./config.json", &config)
-		if err != nil {
-			return Config{}, fmt.Errorf("did not load the config: %s", err)
-		}
-	}
-	return config, nil
-}
-
 func DefaultInitBundle() (Config, *zap.SugaredLogger, error) {
-	config, err := DefaultConfigurator()
-	if err != nil {
-		return config, nil, err
+	config := Config{}
+
+	if err := config.LoadConfig(os.Args[1:]); err != nil {
+		return config, nil, fmt.Errorf("did not parsed well the flags for config: %s", err)
 	}
+
 	logger, err := DefaultLogger(config)
 	if err != nil {
 		return config, nil, err

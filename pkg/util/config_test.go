@@ -3,100 +3,134 @@ package util
 import (
 	"github.com/lugobots/lugo4go/v2/proto"
 	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
 )
 
-type testCase struct {
-	initialConfig  Config
-	path           string
-	expectedError  string
-	expectedConfig Config
-}
-
 func TestLoadConfig(t *testing.T) {
-	okHome := Config{
-		GRPCAddress: "localhost:1212",
-		Insecure:    true,
-		Token:       "UUID",
-		TeamSide:    proto.Team_HOME,
-		Number:      4,
-	}
-	okAway := okHome
-	okAway.TeamSide = proto.Team_AWAY
-	caseList := map[string]testCase{
-		"ok": {
-			initialConfig: Config{
+	caseList := map[string]struct {
+		args           []string
+		env            map[string]string
+		expectedError  string
+		expectedConfig Config
+	}{
+		"default values": {
+			expectedError: "",
+			expectedConfig: Config{
+				GRPCAddress: "localhost:5000",
+				TeamSide:    proto.Team_HOME,
+				Number:      0,
+				Token:       "",
+				Insecure:    false,
+			},
+		},
+		"every thing changed from flags": {
+			args: []string{
+				"--grpc_address", "localhost:1212",
+				"--team", "home",
+				"--number", "7",
+				"--token", "a-token",
+				"--insecure", "no",
+			},
+			expectedError: "",
+			expectedConfig: Config{
 				GRPCAddress: "localhost:1212",
-				Number:      2,
 				TeamSide:    proto.Team_AWAY,
+				Number:      7,
+				Token:       "a-token",
+				Insecure:    false,
 			},
-			path:           "testdata/config_test_ok.json",
-			expectedConfig: okHome,
 		},
-		"ok_away": {
-			initialConfig: Config{
-				GRPCAddress: "localhost:1212",
-				Number:      2,
+		"every thing changed from environment variables": {
+			env: map[string]string{
+				EnvVarBotGrpcUrl:      "another-host:5000",
+				EnvVarBotTeam:         "HOME",
+				EnvVarBotNumber:       "5",
+				EnvVarBotToken:        "another-token",
+				EnvVarBotGrpcInsecure: "false",
 			},
-			path:           "testdata/config_test_ok_away.json",
-			expectedConfig: okAway,
+			expectedError: "",
+			expectedConfig: Config{
+				GRPCAddress: "another-host:5000",
+				TeamSide:    proto.Team_HOME,
+				Number:      4,
+				Token:       "another-token",
+				Insecure:    false,
+			},
 		},
-		"ok_team_cap": {
-			initialConfig: Config{
-				GRPCAddress: "localhost:1212",
-				Number:      2,
+		"env variables should override params": {
+			args: []string{
+				"--grpc_address", "localhost:1212",
+				"--team", "away",
+				"--number", "7",
+				"--token", "a-token",
+				"--insecure", "yes",
 			},
-			path:           "testdata/config_test_ok_team_capitals.json",
-			expectedConfig: okHome,
+			env: map[string]string{
+				EnvVarBotGrpcUrl:      "another-host:5000",
+				EnvVarBotTeam:         "HOME",
+				EnvVarBotNumber:       "5",
+				EnvVarBotToken:        "another-token",
+				EnvVarBotGrpcInsecure: "false",
+			},
+			expectedError: "",
+			expectedConfig: Config{
+				GRPCAddress: "another-host:5000",
+				TeamSide:    proto.Team_HOME,
+				Number:      4,
+				Token:       "another-token",
+				Insecure:    false,
+			},
 		},
-		"team undefined": {
-			initialConfig: Config{
-				GRPCAddress: "localhost:1212",
-				Number:      2,
+		"invalid team": {
+			env: map[string]string{
+				EnvVarBotTeam: "another",
 			},
-			path:          "testdata/config_test_invalid_home_undefined.json",
-			expectedError: "invalid team option",
+			expectedError:  "invalid team option",
+			expectedConfig: Config{},
 		},
-		"number 0": {
-			initialConfig: Config{
-				GRPCAddress: "localhost:1212",
-				Number:      2,
+		"invalid player number - greater than 11": {
+			env: map[string]string{
+				EnvVarBotNumber: "12",
 			},
-			path:          "testdata/config_test_invalid_number_0.json",
-			expectedError: "invalid player number",
+			expectedError:  "invalid player number",
+			expectedConfig: Config{},
 		},
-		"number 12": {
-			initialConfig: Config{
-				GRPCAddress: "localhost:1212",
-				Number:      2,
+		"invalid player number - less than 1": {
+			env: map[string]string{
+				EnvVarBotNumber: "0",
 			},
-			path:          "testdata/config_test_invalid_number_12.json",
-			expectedError: "invalid player number",
+			expectedError:  "invalid player number",
+			expectedConfig: Config{},
 		},
-		"file not found": {
-			initialConfig: Config{
-				GRPCAddress: "localhost:1212",
-				Number:      2,
+		"invalid insecure flag": {
+			env: map[string]string{
+				EnvVarBotGrpcInsecure: "maybe",
 			},
-			path:          "testdata/no-file.json",
-			expectedError: "no such file or director",
-		},
-		"invalid json": {
-			initialConfig: Config{
-				GRPCAddress: "localhost:1212",
-				Number:      2,
-			},
-			path:          "testdata/config_test_invalid_json.json",
-			expectedError: "error parsing the config",
+			expectedError:  "invalid gRPC insecure flag",
+			expectedConfig: Config{},
 		},
 	}
 
-	for caseName, tCase := range caseList {
-		err := LoadConfig(tCase.path, &tCase.initialConfig)
-		if err == nil {
-			assert.Equal(t, tCase.expectedConfig, tCase.initialConfig, caseName)
-		} else {
-			assert.Contains(t, err.Error(), tCase.expectedError, caseName)
-		}
+	for caseName, tc := range caseList {
+		t.Run(caseName, func(t *testing.T) {
+			defer func() {
+				for varName := range tc.env {
+					_ = os.Unsetenv(varName)
+				}
+			}()
+			for varName, varValue := range tc.env {
+				_ = os.Setenv(varName, varValue)
+			}
+
+			config := Config{}
+			err := config.LoadConfig(tc.args)
+			if err == nil {
+				assert.Equal(t, tc.expectedConfig.GRPCAddress, config.GRPCAddress, caseName)
+			} else {
+				assert.Contains(t, err.Error(), tc.expectedError, caseName)
+			}
+		})
+
 	}
 }
