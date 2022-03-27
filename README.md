@@ -126,10 +126,24 @@ func (b *Bot) Handle(ctx context.Context, snapshot *proto.GameSnapshot) {
     ./play.sh away
    ```
 
+### Next steps
+
+As you may have noticed, the bot player in the example directory does not play well. 
+Now, you may start your bot by implementing its behaviour.  
+
+### Deploying you bots
+
+After developing your bot, you may share it with other developers.
+
+Please find the instructions for uploading your bot on [lugobots.dev](https://lugobots.dev).
+
+There is a Dockerfile template in [the example directory](./examples) to guide you how to create a container.
+
+
 ## Field Library
 
 There are a many things that you will repeatedly need to do on your bot code, e.g. getting your bot position,
-creating a move/kick/catch order, finding your teammates positions, etc. 
+creating a move/kick/catch order, finding your teammates positions, etc.
 
 The Field library brings a collection of functions that will help you get that data from the game snapshot:
 
@@ -175,18 +189,3 @@ regionInFrontOfMe _:= aRegion.Front()
 moveOrder, err_ := field.MakeOrderMoveMaxSpeed(*me.Position, regionInFrontOfMe.Center())
 
 ```
-
-## Next steps
-
-As you may have noticed, the bot player in the example directory does not play well. 
-Now, you may start your bot by implementing its behaviour.  
-
-## Deploying you bots
-
-After developing your bot, you may share it with other developers.
-
-Using this client your code will be compiled into a binary file. So you do not have to share the bot source code.
-
-There is a Dockerfile template in [the example directory](./examples) to guide you how to create a container.
-
-You may create an account on https://lugobots.dev and upload your bot.
