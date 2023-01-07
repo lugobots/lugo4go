@@ -103,7 +103,7 @@ type FieldArea struct {
 }
 
 func (r FieldArea) Eq(region Region) bool {
-	return region.Col() == r.Row() && region.Row() == r.Row()
+	return region.Col() == r.Col() && region.Row() == r.Row()
 }
 
 func (r FieldArea) Col() int {
