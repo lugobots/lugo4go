@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
+	"log"
+	"os"
+	"os/signal"
+
 	clientGo "github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/examples/turn-handler/bot"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"github.com/lugobots/lugo4go/v2/pkg/util"
-	"log"
-	"os"
-	"os/signal"
 )
 
 func main() {
@@ -19,8 +20,8 @@ func main() {
 	}
 
 	// Creating a field grid will help us to map the play positions
-	fieldGridCols := uint8(8)
-	fieldGridRows := uint8(8)
+	fieldGridCols := uint(8)
+	fieldGridRows := uint(8)
 
 	fieldMapper, _ := field.NewMapper(fieldGridCols, fieldGridRows, playerConfig.TeamSide)
 

@@ -2,8 +2,9 @@ package field
 
 import (
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/proto"
 	"math"
+
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
 // Important note: since our bot needs to have the best performance possible. We may ensure that some errors will never
@@ -16,17 +17,17 @@ import (
 
 const (
 	// MinCols Define the min number of cols allowed on the field division by the Map
-	MinCols uint8 = 4
+	MinCols uint = 4
 	// MinRows Define the min number of rows allowed on the field division by the Map
-	MinRows uint8 = 2
+	MinRows uint = 2
 	// MaxCols Define the max number of cols allowed on the field division by the Map
-	MaxCols uint8 = 200
+	MaxCols uint = 200
 	// MaxRows Define the max number of rows allowed on the field division by the Map
-	MaxRows uint8 = 100
+	MaxRows uint = 100
 )
 
 // NewMapper creates a new Mapper that will map the field to provide Regions
-func NewMapper(cols, rows uint8, sideRef proto.Team_Side) (*Map, error) {
+func NewMapper(cols, rows uint, sideRef proto.Team_Side) (*Map, error) {
 	if cols < MinCols {
 		return nil, ErrMinCols
 	}
@@ -51,17 +52,17 @@ func NewMapper(cols, rows uint8, sideRef proto.Team_Side) (*Map, error) {
 
 type Map struct {
 	TeamSide     proto.Team_Side
-	cols         uint8
-	rows         uint8
+	cols         uint
+	rows         uint
 	regionWidth  float64
 	regionHeight float64
 }
 
-func (p *Map) GetRegion(col, row uint8) (Region, error) {
-	if col >= p.cols {
+func (p *Map) GetRegion(col, row int) (Region, error) {
+	if uint(col) >= p.cols {
 		return nil, ErrMaxCols
 	}
-	if row >= p.rows {
+	if uint(row) >= p.rows {
 		return nil, ErrMaxRows
 	}
 
@@ -74,8 +75,8 @@ func (p *Map) GetRegion(col, row uint8) (Region, error) {
 	}
 
 	return FieldArea{
-		col:        col,
-		row:        row,
+		col:        uint(col),
+		row:        uint(row),
 		sideRef:    p.TeamSide,
 		center:     center,
 		positioner: p,
@@ -88,29 +89,29 @@ func (p *Map) GetPointRegion(point *proto.Point) (Region, error) {
 	}
 	cx := float64(point.X) / p.regionWidth
 	cy := float64(point.Y) / p.regionHeight
-	col := uint8(math.Min(cx, float64(p.cols-1)))
-	row := uint8(math.Min(cy, float64(p.rows-1)))
+	col := int(math.Min(cx, float64(p.cols-1)))
+	row := int(math.Min(cy, float64(p.rows-1)))
 	return p.GetRegion(col, row)
 }
 
 type FieldArea struct {
-	col        uint8
-	row        uint8
+	col        uint
+	row        uint
 	sideRef    proto.Team_Side
 	center     *proto.Point
 	positioner *Map
 }
 
 func (r FieldArea) Eq(region Region) bool {
-	return region.Col() == r.col && region.Row() == r.Row()
+	return region.Col() == r.Col() && region.Row() == r.Row()
 }
 
-func (r FieldArea) Col() uint8 {
-	return r.col
+func (r FieldArea) Col() int {
+	return int(r.col)
 }
 
-func (r FieldArea) Row() uint8 {
-	return r.row
+func (r FieldArea) Row() int {
+	return int(r.row)
 }
 
 func (r FieldArea) Center() *proto.Point {
@@ -122,28 +123,28 @@ func (r FieldArea) String() string {
 }
 
 func (r FieldArea) Front() Region {
-	if n, err := r.positioner.GetRegion(r.col+1, r.row); err == nil {
+	if n, err := r.positioner.GetRegion(int(r.col)+1, int(r.row)); err == nil {
 		return n
 	}
 	return r
 }
 
 func (r FieldArea) Back() Region {
-	if n, err := r.positioner.GetRegion(r.col-1, r.row); err == nil {
+	if n, err := r.positioner.GetRegion(int(r.col)-1, int(r.row)); err == nil {
 		return n
 	}
 	return r
 }
 
 func (r FieldArea) Left() Region {
-	if n, err := r.positioner.GetRegion(r.col, r.row+1); err == nil {
+	if n, err := r.positioner.GetRegion(int(r.col), int(r.row)+1); err == nil {
 		return n
 	}
 	return r
 }
 
 func (r FieldArea) Right() Region {
-	if n, err := r.positioner.GetRegion(r.col, r.row-1); err == nil {
+	if n, err := r.positioner.GetRegion(int(r.col), int(r.row)-1); err == nil {
 		return n
 	}
 	return r

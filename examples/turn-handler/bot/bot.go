@@ -2,11 +2,12 @@ package bot
 
 import (
 	"context"
+	"math/rand"
+	"time"
+
 	"github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"github.com/lugobots/lugo4go/v2/proto"
-	"math/rand"
-	"time"
 )
 
 type Bot struct {
@@ -78,8 +79,8 @@ func (b *Bot) Handle(ctx context.Context, snapshot *proto.GameSnapshot) {
 }
 
 var FieldMap = map[uint32]struct {
-	Col uint8
-	Row uint8
+	Col int
+	Row int
 }{
 	2:  {Col: 1, Row: 1},
 	3:  {Col: 1, Row: 3},

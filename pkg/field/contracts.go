@@ -2,6 +2,7 @@ package field
 
 import (
 	"fmt"
+
 	"github.com/lugobots/lugo4go/v2/proto"
 )
 
@@ -13,7 +14,7 @@ import (
 // the coordinate, neither do extra logic to define regions on the field where the player should be.
 type Mapper interface {
 	// GetRegion Returns a FieldArea based on the coordinates and on the current field division
-	GetRegion(col, row uint8) (Region, error)
+	GetRegion(col, row int) (Region, error)
 	// GetPointRegion returns the FieldArea where that point is in
 	GetPointRegion(point *proto.Point) (Region, error)
 }
@@ -24,9 +25,9 @@ type Mapper interface {
 type Region interface {
 	fmt.Stringer
 	// Col The col coordinate based on the field division
-	Col() uint8
+	Col() int
 	// Row The row coordinate based on the field division
-	Row() uint8
+	Row() int
 	// Center Return the point at the center of the quadrant represented by this Region. It is not always precise.
 	Center() *proto.Point
 
