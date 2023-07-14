@@ -46,8 +46,8 @@ const (
 	// Thus, the field height would have to be 11, so the coordinate 5 is at the precise center
 	FieldHeight = MaxYCoordinate + 1
 
-	// FieldNeutralCenter is the radius of the neutral circle on the center of the field
-	FieldNeutralCenter = 100
+	// FieldNeutralCenter is the radius of the neutral circle in the center of the field
+	FieldNeutralCenter = 1000
 
 	// BallSize size of the element ball
 	BallSize = 2 * BaseUnit
