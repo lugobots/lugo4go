@@ -3,14 +3,16 @@ package lugo4go_test
 import (
 	"context"
 	"errors"
+	"testing"
+	"time"
+
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"github.com/lugobots/lugo4go/v2/pkg/util"
 	"github.com/lugobots/lugo4go/v2/proto"
-	"github.com/stretchr/testify/assert"
-	"testing"
-	"time"
 )
 
 func TestCoachDefineMyState_AllStates(t *testing.T) {
@@ -100,48 +102,59 @@ func TestHandler_Handle_ShouldCallRightMethod(t *testing.T) {
 
 	ball := &proto.Ball{}
 	snapshot := &proto.GameSnapshot{
+		Turn:     100,
 		Ball:     ball,
 		HomeTeam: &proto.Team{Players: []*proto.Player{me, goalKeeper, myFriend}},
 		AwayTeam: &proto.Team{Players: []*proto.Player{myOpponent}},
 	}
 
 	// disputing
-	mockBot.EXPECT().OnDisputing(ctx, gomock.Any(), snapshot)
+	mockBot.EXPECT().OnDisputing(ctx, snapshot)
+	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
 	handler.Handle(ctx, snapshot)
 
-	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, gomock.Any(), snapshot, lugo4go.DisputingTheBall)
+	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, snapshot, lugo4go.DisputingTheBall)
+	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
 	goalkeeperHandler.Handle(ctx, snapshot)
 
 	// supporting
 	ball.Holder = myFriend
-	mockBot.EXPECT().OnSupporting(ctx, gomock.Any(), snapshot)
+	mockBot.EXPECT().OnSupporting(ctx, snapshot)
+	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
 	handler.Handle(ctx, snapshot)
 
-	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, gomock.Any(), snapshot, lugo4go.Supporting)
+	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, snapshot, lugo4go.Supporting)
+	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
 	goalkeeperHandler.Handle(ctx, snapshot)
 
 	// Defending
 	ball.Holder = myOpponent
-	mockBot.EXPECT().OnDefending(ctx, gomock.Any(), snapshot)
+	mockBot.EXPECT().OnDefending(ctx, snapshot)
+	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
 	handler.Handle(ctx, snapshot)
 
-	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, gomock.Any(), snapshot, lugo4go.Defending)
+	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, snapshot, lugo4go.Defending)
+	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
 	goalkeeperHandler.Handle(ctx, snapshot)
 
 	// holding
 	ball.Holder = me
-	mockBot.EXPECT().OnHolding(ctx, gomock.Any(), snapshot)
+	mockBot.EXPECT().OnHolding(ctx, snapshot)
+	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
 	handler.Handle(ctx, snapshot)
 
-	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, gomock.Any(), snapshot, lugo4go.Supporting)
+	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, snapshot, lugo4go.Supporting)
+	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
 	goalkeeperHandler.Handle(ctx, snapshot)
 
 	// supporting (goalkeeper holding the ball
 	ball.Holder = goalKeeper
-	mockBot.EXPECT().OnSupporting(ctx, gomock.Any(), snapshot)
+	mockBot.EXPECT().OnSupporting(ctx, snapshot)
+	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
 	handler.Handle(ctx, snapshot)
 
-	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, gomock.Any(), snapshot, lugo4go.HoldingTheBall)
+	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, snapshot, lugo4go.HoldingTheBall)
+	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
 	goalkeeperHandler.Handle(ctx, snapshot)
 }
 
@@ -194,7 +207,7 @@ func TestHandler_Handle_ShouldLogErrors(t *testing.T) {
 		Number:   config.Number},
 	}}
 	expectedError := errors.New("some-error")
-	mockBot.EXPECT().OnDisputing(gomock.Any(), gomock.Any(), snapshot).Return(expectedError)
+	mockBot.EXPECT().OnDisputing(gomock.Any(), snapshot).Return(nil, "", expectedError)
 	t.Run("bot method fails ", func(t *testing.T) {
 		mockLog.EXPECT().Errorf(gomock.Any(), gomock.Any()).Do(func(s string, args ...interface{}) {
 			e, ok := args[1].(error)

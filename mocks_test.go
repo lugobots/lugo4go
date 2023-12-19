@@ -148,73 +148,83 @@ func (m *MockBot) EXPECT() *MockBotMockRecorder {
 }
 
 // AsGoalkeeper mocks base method.
-func (m *MockBot) AsGoalkeeper(ctx context.Context, sender v2.TurnOrdersSender, snapshot *proto.GameSnapshot, state v2.PlayerState) error {
+func (m *MockBot) AsGoalkeeper(ctx context.Context, snapshot *proto.GameSnapshot, state v2.PlayerState) ([]proto.PlayerOrder, string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AsGoalkeeper", ctx, sender, snapshot, state)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "AsGoalkeeper", ctx, snapshot, state)
+	ret0, _ := ret[0].([]proto.PlayerOrder)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // AsGoalkeeper indicates an expected call of AsGoalkeeper.
-func (mr *MockBotMockRecorder) AsGoalkeeper(ctx, sender, snapshot, state interface{}) *gomock.Call {
+func (mr *MockBotMockRecorder) AsGoalkeeper(ctx, snapshot, state interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AsGoalkeeper", reflect.TypeOf((*MockBot)(nil).AsGoalkeeper), ctx, sender, snapshot, state)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AsGoalkeeper", reflect.TypeOf((*MockBot)(nil).AsGoalkeeper), ctx, snapshot, state)
 }
 
 // OnDefending mocks base method.
-func (m *MockBot) OnDefending(ctx context.Context, sender v2.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
+func (m *MockBot) OnDefending(ctx context.Context, snapshot *proto.GameSnapshot) ([]proto.PlayerOrder, string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "OnDefending", ctx, sender, snapshot)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "OnDefending", ctx, snapshot)
+	ret0, _ := ret[0].([]proto.PlayerOrder)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // OnDefending indicates an expected call of OnDefending.
-func (mr *MockBotMockRecorder) OnDefending(ctx, sender, snapshot interface{}) *gomock.Call {
+func (mr *MockBotMockRecorder) OnDefending(ctx, snapshot interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnDefending", reflect.TypeOf((*MockBot)(nil).OnDefending), ctx, sender, snapshot)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnDefending", reflect.TypeOf((*MockBot)(nil).OnDefending), ctx, snapshot)
 }
 
 // OnDisputing mocks base method.
-func (m *MockBot) OnDisputing(ctx context.Context, sender v2.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
+func (m *MockBot) OnDisputing(ctx context.Context, snapshot *proto.GameSnapshot) ([]proto.PlayerOrder, string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "OnDisputing", ctx, sender, snapshot)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "OnDisputing", ctx, snapshot)
+	ret0, _ := ret[0].([]proto.PlayerOrder)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // OnDisputing indicates an expected call of OnDisputing.
-func (mr *MockBotMockRecorder) OnDisputing(ctx, sender, snapshot interface{}) *gomock.Call {
+func (mr *MockBotMockRecorder) OnDisputing(ctx, snapshot interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnDisputing", reflect.TypeOf((*MockBot)(nil).OnDisputing), ctx, sender, snapshot)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnDisputing", reflect.TypeOf((*MockBot)(nil).OnDisputing), ctx, snapshot)
 }
 
 // OnHolding mocks base method.
-func (m *MockBot) OnHolding(ctx context.Context, sender v2.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
+func (m *MockBot) OnHolding(ctx context.Context, snapshot *proto.GameSnapshot) ([]proto.PlayerOrder, string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "OnHolding", ctx, sender, snapshot)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "OnHolding", ctx, snapshot)
+	ret0, _ := ret[0].([]proto.PlayerOrder)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // OnHolding indicates an expected call of OnHolding.
-func (mr *MockBotMockRecorder) OnHolding(ctx, sender, snapshot interface{}) *gomock.Call {
+func (mr *MockBotMockRecorder) OnHolding(ctx, snapshot interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnHolding", reflect.TypeOf((*MockBot)(nil).OnHolding), ctx, sender, snapshot)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnHolding", reflect.TypeOf((*MockBot)(nil).OnHolding), ctx, snapshot)
 }
 
 // OnSupporting mocks base method.
-func (m *MockBot) OnSupporting(ctx context.Context, sender v2.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
+func (m *MockBot) OnSupporting(ctx context.Context, snapshot *proto.GameSnapshot) ([]proto.PlayerOrder, string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "OnSupporting", ctx, sender, snapshot)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret := m.ctrl.Call(m, "OnSupporting", ctx, snapshot)
+	ret0, _ := ret[0].([]proto.PlayerOrder)
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(error)
+	return ret0, ret1, ret2
 }
 
 // OnSupporting indicates an expected call of OnSupporting.
-func (mr *MockBotMockRecorder) OnSupporting(ctx, sender, snapshot interface{}) *gomock.Call {
+func (mr *MockBotMockRecorder) OnSupporting(ctx, snapshot interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnSupporting", reflect.TypeOf((*MockBot)(nil).OnSupporting), ctx, sender, snapshot)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OnSupporting", reflect.TypeOf((*MockBot)(nil).OnSupporting), ctx, snapshot)
 }
 
 // MockLogger is a mock of Logger interface.

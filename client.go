@@ -3,13 +3,15 @@ package lugo4go
 import (
 	"context"
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/pkg/util"
-	"github.com/lugobots/lugo4go/v2/proto"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/stats"
 	"io"
 	"sync"
 	"time"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/stats"
+
+	"github.com/lugobots/lugo4go/v2/pkg/util"
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
 // ProtocolVersion defines the current game protocol

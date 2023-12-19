@@ -2,6 +2,7 @@ package lugo4go
 
 import (
 	"context"
+
 	"github.com/lugobots/lugo4go/v2/proto"
 )
 

@@ -2,10 +2,12 @@ package field
 
 import (
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/proto"
-	"github.com/stretchr/testify/assert"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
 func TestNewPositioner(t *testing.T) {
@@ -36,17 +38,17 @@ func TestNewPositioner_InvalidArgs(t *testing.T) {
 
 func TestRegion_Center_HomeTeam(t *testing.T) {
 	type testCase struct {
-		cols             uint8
-		rows             uint8
-		regionHalfWidth  int32
-		regionHalfHeight int32
+		cols             int
+		rows             int
+		regionHalfWidth  int
+		regionHalfHeight int
 	}
 
 	testCases := map[string]testCase{
-		"minimals":  {cols: MinCols, rows: MinRows, regionHalfWidth: int32(2500), regionHalfHeight: int32(2500)},
-		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: int32(50), regionHalfHeight: int32(50)},
-		"custom-1":  {cols: 10, rows: 10, regionHalfWidth: int32(1000), regionHalfHeight: int32(500)},
-		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: int32(833), regionHalfHeight: int32(833)},
+		"minimals":  {cols: MinCols, rows: MinRows, regionHalfWidth: 2500, regionHalfHeight: 2500},
+		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: 50, regionHalfHeight: 50},
+		"custom-1":  {cols: 10, rows: 10, regionHalfWidth: 1000, regionHalfHeight: 500},
+		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: 833, regionHalfHeight: 833},
 	}
 
 	team := proto.Team_HOME
@@ -56,10 +58,10 @@ func TestRegion_Center_HomeTeam(t *testing.T) {
 
 			p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 			assert.Nil(t, err)
-			expectedPointDefenseRight := &proto.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-			expectedPointDefenseLeft := &proto.Point{X: +testSettings.regionHalfWidth, Y: MaxYCoordinate - testSettings.regionHalfHeight}
-			expectedPointAttackLeft := &proto.Point{X: MaxXCoordinate - testSettings.regionHalfWidth, Y: MaxYCoordinate - testSettings.regionHalfHeight}
-			expectedPointAttackRight := &proto.Point{X: MaxXCoordinate - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+			expectedPointDefenseRight := &proto.Point{X: int32(testSettings.regionHalfWidth), Y: int32(testSettings.regionHalfHeight)}
+			expectedPointDefenseLeft := &proto.Point{X: int32(+testSettings.regionHalfWidth), Y: int32(MaxYCoordinate - testSettings.regionHalfHeight)}
+			expectedPointAttackLeft := &proto.Point{X: int32(MaxXCoordinate - testSettings.regionHalfWidth), Y: int32(MaxYCoordinate - testSettings.regionHalfHeight)}
+			expectedPointAttackRight := &proto.Point{X: int32(MaxXCoordinate - testSettings.regionHalfWidth), Y: int32(testSettings.regionHalfHeight)}
 
 			r, err := p.GetRegion(0, 0)
 			assert.Nil(t, err)
@@ -82,17 +84,17 @@ func TestRegion_Center_HomeTeam(t *testing.T) {
 
 func TestRegion_Center_Away(t *testing.T) {
 	type testCase struct {
-		cols             uint8
-		rows             uint8
-		regionHalfWidth  int32
-		regionHalfHeight int32
+		cols             int
+		rows             int
+		regionHalfWidth  int
+		regionHalfHeight int
 	}
 
 	testCases := map[string]testCase{
-		"minimals":  {cols: MinCols, rows: MinRows, regionHalfWidth: int32(2500), regionHalfHeight: int32(2500)},
-		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: int32(50), regionHalfHeight: int32(50)},
-		"custom-1":  {cols: 10, rows: 10, regionHalfWidth: int32(1000), regionHalfHeight: int32(500)},
-		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: int32(833), regionHalfHeight: int32(833)},
+		"minimals":  {cols: MinCols, rows: MinRows, regionHalfWidth: 2500, regionHalfHeight: 2500},
+		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: 50, regionHalfHeight: 50},
+		"custom-1":  {cols: 10, rows: 10, regionHalfWidth: 1000, regionHalfHeight: 500},
+		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: 833, regionHalfHeight: 833},
 	}
 
 	team := proto.Team_AWAY
@@ -101,10 +103,10 @@ func TestRegion_Center_Away(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 			assert.Nil(t, err)
-			expectedPointDefenseRight := proto.Point{X: MaxXCoordinate - testSettings.regionHalfWidth, Y: MaxYCoordinate - testSettings.regionHalfHeight}
-			expectedPointDefenseLeft := proto.Point{X: MaxXCoordinate - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-			expectedPointAttackLeft := proto.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-			expectedPointAttackRight := proto.Point{X: testSettings.regionHalfWidth, Y: MaxYCoordinate - testSettings.regionHalfHeight}
+			expectedPointDefenseRight := proto.Point{X: int32(MaxXCoordinate - testSettings.regionHalfWidth), Y: int32(MaxYCoordinate - testSettings.regionHalfHeight)}
+			expectedPointDefenseLeft := proto.Point{X: int32(MaxXCoordinate - testSettings.regionHalfWidth), Y: int32(testSettings.regionHalfHeight)}
+			expectedPointAttackLeft := proto.Point{X: int32(testSettings.regionHalfWidth), Y: int32(testSettings.regionHalfHeight)}
+			expectedPointAttackRight := proto.Point{X: int32(testSettings.regionHalfWidth), Y: int32(MaxYCoordinate - testSettings.regionHalfHeight)}
 
 			r, err := p.GetRegion(0, 0)
 			assert.Nil(t, err)
@@ -149,17 +151,17 @@ func TestPositioner_GetRegion_InvalidArgs(t *testing.T) {
 
 func TestPositioner_GetPointRegion_HomeTeam(t *testing.T) {
 	type testCase struct {
-		cols             uint8
-		rows             uint8
-		regionHalfWidth  int32
-		regionHalfHeight int32
+		cols             int
+		rows             int
+		regionHalfWidth  int
+		regionHalfHeight int
 	}
 
 	testCases := map[string]testCase{
-		"minimals":  {cols: MinCols, rows: MinRows, regionHalfWidth: int32(2500), regionHalfHeight: int32(2500)},
-		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: int32(50), regionHalfHeight: int32(50)},
-		"custom-1":  {cols: 10, rows: 10, regionHalfWidth: int32(1000), regionHalfHeight: int32(500)},
-		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: int32(833), regionHalfHeight: int32(833)},
+		"minimals":  {cols: MinCols, rows: MinRows, regionHalfWidth: 2500, regionHalfHeight: 2500},
+		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: 50, regionHalfHeight: 50},
+		"custom-1":  {cols: 10, rows: 10, regionHalfWidth: 1000, regionHalfHeight: 500},
+		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: 833, regionHalfHeight: 833},
 	}
 
 	team := proto.Team_HOME
@@ -168,19 +170,19 @@ func TestPositioner_GetPointRegion_HomeTeam(t *testing.T) {
 
 		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 		assert.Nil(t, err)
-		pointDefenseRight := &proto.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		pointDefenseLeft := &proto.Point{X: +testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
-		pointAttackLeft := &proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
-		pointAttackRight := &proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
+		pointDefenseRight := &proto.Point{X: int32(testSettings.regionHalfWidth), Y: int32(testSettings.regionHalfHeight)}
+		pointDefenseLeft := &proto.Point{X: int32(+testSettings.regionHalfWidth), Y: int32(FieldHeight - testSettings.regionHalfHeight)}
+		pointAttackLeft := &proto.Point{X: int32(FieldWidth - testSettings.regionHalfWidth), Y: int32(FieldHeight - testSettings.regionHalfHeight)}
+		pointAttackRight := &proto.Point{X: int32(FieldWidth - testSettings.regionHalfWidth), Y: int32(testSettings.regionHalfHeight)}
 
 		r, err := p.GetPointRegion(pointDefenseRight)
 		assert.Nil(t, err)
-		assert.Equal(t, uint8(0), r.Col(), testName)
-		assert.Equal(t, uint8(0), r.Row(), testName)
+		assert.Equal(t, int(0), r.Col(), testName)
+		assert.Equal(t, int(0), r.Row(), testName)
 
 		r, err = p.GetPointRegion(pointDefenseLeft)
 		assert.Nil(t, err)
-		assert.Equal(t, uint8(0), r.Col(), testName)
+		assert.Equal(t, int(0), r.Col(), testName)
 		assert.Equal(t, testSettings.rows-1, r.Row(), testName)
 
 		r, err = p.GetPointRegion(pointAttackLeft)
@@ -191,23 +193,23 @@ func TestPositioner_GetPointRegion_HomeTeam(t *testing.T) {
 		r, err = p.GetPointRegion(pointAttackRight)
 		assert.Nil(t, err)
 		assert.Equal(t, testSettings.cols-1, r.Col(), testName)
-		assert.Equal(t, uint8(0), r.Row(), testName)
+		assert.Equal(t, int(0), r.Row(), testName)
 	}
 }
 
 func TestPositioner_GetPointRegion_AwayTeam(t *testing.T) {
 	type testCase struct {
-		cols             uint8
-		rows             uint8
-		regionHalfWidth  int32
-		regionHalfHeight int32
+		cols             int
+		rows             int
+		regionHalfWidth  int
+		regionHalfHeight int
 	}
 
 	testCases := map[string]testCase{
-		"minimals":  {cols: MinCols, rows: MinRows, regionHalfWidth: int32(2500), regionHalfHeight: int32(2500)},
-		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: int32(50), regionHalfHeight: int32(50)},
-		"custom-1":  {cols: 10, rows: 10, regionHalfWidth: int32(1000), regionHalfHeight: int32(500)},
-		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: int32(833), regionHalfHeight: int32(833)},
+		"minimals":  {cols: MinCols, rows: MinRows, regionHalfWidth: int(2500), regionHalfHeight: int(2500)},
+		"maximums":  {cols: MaxCols, rows: MaxRows, regionHalfWidth: int(50), regionHalfHeight: int(50)},
+		"custom-1":  {cols: 10, rows: 10, regionHalfWidth: int(1000), regionHalfHeight: int(500)},
+		"inexact-2": {cols: 12, rows: 6, regionHalfWidth: int(833), regionHalfHeight: int(833)},
 	}
 
 	team := proto.Team_AWAY
@@ -216,19 +218,19 @@ func TestPositioner_GetPointRegion_AwayTeam(t *testing.T) {
 
 		p, err := NewMapper(testSettings.cols, testSettings.rows, team)
 		assert.Nil(t, err)
-		pointDefenseRight := &proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
-		pointDefenseLeft := &proto.Point{X: FieldWidth - testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		pointAttackLeft := &proto.Point{X: testSettings.regionHalfWidth, Y: testSettings.regionHalfHeight}
-		pointAttackRight := &proto.Point{X: testSettings.regionHalfWidth, Y: FieldHeight - testSettings.regionHalfHeight}
+		pointDefenseRight := &proto.Point{X: int32(FieldWidth - testSettings.regionHalfWidth), Y: int32(FieldHeight - testSettings.regionHalfHeight)}
+		pointDefenseLeft := &proto.Point{X: int32(FieldWidth - testSettings.regionHalfWidth), Y: int32(testSettings.regionHalfHeight)}
+		pointAttackLeft := &proto.Point{X: int32(testSettings.regionHalfWidth), Y: int32(testSettings.regionHalfHeight)}
+		pointAttackRight := &proto.Point{X: int32(testSettings.regionHalfWidth), Y: int32(FieldHeight - testSettings.regionHalfHeight)}
 
 		r, err := p.GetPointRegion(pointDefenseRight)
 		assert.Nil(t, err)
-		assert.Equal(t, uint8(0), r.Col(), testName)
-		assert.Equal(t, uint8(0), r.Row(), testName)
+		assert.Equal(t, int(0), r.Col(), testName)
+		assert.Equal(t, int(0), r.Row(), testName)
 
 		r, err = p.GetPointRegion(pointDefenseLeft)
 		assert.Nil(t, err)
-		assert.Equal(t, uint8(0), r.Col(), testName)
+		assert.Equal(t, int(0), r.Col(), testName)
 		assert.Equal(t, testSettings.rows-1, r.Row(), testName)
 
 		r, err = p.GetPointRegion(pointAttackLeft)
@@ -239,19 +241,19 @@ func TestPositioner_GetPointRegion_AwayTeam(t *testing.T) {
 		r, err = p.GetPointRegion(pointAttackRight)
 		assert.Nil(t, err)
 		assert.Equal(t, testSettings.cols-1, r.Col(), testName)
-		assert.Equal(t, uint8(0), r.Row(), testName)
+		assert.Equal(t, int(0), r.Row(), testName)
 	}
 }
 
 func TestRegion_Front(t *testing.T) {
-	maxCol := uint8(9)
-	maxRow := uint8(9)
+	maxCol := int(9)
+	maxRow := int(9)
 
 	type testCase struct {
-		col          uint8
-		row          uint8
-		expectedCol  uint8
-		expectedRow  uint8
+		col          int
+		row          int
+		expectedCol  int
+		expectedRow  int
 		expectedSame bool
 	}
 
@@ -279,14 +281,14 @@ func TestRegion_Front(t *testing.T) {
 }
 
 func TestRegion_Back(t *testing.T) {
-	maxCol := uint8(9)
-	maxRow := uint8(9)
+	maxCol := 9
+	maxRow := 9
 
 	type testCase struct {
-		col          uint8
-		row          uint8
-		expectedCol  uint8
-		expectedRow  uint8
+		col          int
+		row          int
+		expectedCol  int
+		expectedRow  int
 		expectedSame bool
 	}
 
@@ -314,13 +316,13 @@ func TestRegion_Back(t *testing.T) {
 }
 
 func TestRegion_Left(t *testing.T) {
-	maxCol := uint8(9)
-	maxRow := uint8(9)
+	maxCol := int(9)
+	maxRow := int(9)
 	type testCase struct {
-		col          uint8
-		row          uint8
-		expectedCol  uint8
-		expectedRow  uint8
+		col          int
+		row          int
+		expectedCol  int
+		expectedRow  int
 		expectedSame bool
 	}
 
@@ -348,13 +350,13 @@ func TestRegion_Left(t *testing.T) {
 }
 
 func TestRegion_Right(t *testing.T) {
-	maxCol := uint8(9)
-	maxRow := uint8(9)
+	maxCol := int(9)
+	maxRow := int(9)
 	type testCase struct {
-		col          uint8
-		row          uint8
-		expectedCol  uint8
-		expectedRow  uint8
+		col          int
+		row          int
+		expectedCol  int
+		expectedRow  int
 		expectedSame bool
 	}
 

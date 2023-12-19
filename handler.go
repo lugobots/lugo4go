@@ -2,6 +2,7 @@ package lugo4go
 
 import (
 	"context"
+
 	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"github.com/lugobots/lugo4go/v2/proto"
 )
@@ -40,39 +41,34 @@ func (h *Handler) Handle(ctx context.Context, snapshot *proto.GameSnapshot) {
 		h.Logger.Errorf("error processing turn %d: %s", snapshot.Turn, err)
 		return
 	}
+	var orders []proto.PlayerOrder
+	var debugMsg string
 	if field.GoalkeeperNumber == h.PlayerNumber {
-		err = h.Bot.AsGoalkeeper(ctx, wrapSender(h.Sender, snapshot.Turn), snapshot, state)
+		orders, debugMsg, err = h.Bot.AsGoalkeeper(ctx, snapshot, state)
 	} else {
 		switch state {
 		case Supporting:
-			err = h.Bot.OnSupporting(ctx, wrapSender(h.Sender, snapshot.Turn), snapshot)
+			orders, debugMsg, err = h.Bot.OnSupporting(ctx, snapshot)
 		case HoldingTheBall:
-			err = h.Bot.OnHolding(ctx, wrapSender(h.Sender, snapshot.Turn), snapshot)
+			orders, debugMsg, err = h.Bot.OnHolding(ctx, snapshot)
 		case Defending:
-			err = h.Bot.OnDefending(ctx, wrapSender(h.Sender, snapshot.Turn), snapshot)
+			orders, debugMsg, err = h.Bot.OnDefending(ctx, snapshot)
 		case DisputingTheBall:
-			err = h.Bot.OnDisputing(ctx, wrapSender(h.Sender, snapshot.Turn), snapshot)
+			orders, debugMsg, err = h.Bot.OnDisputing(ctx, snapshot)
 		}
 	}
 	if err != nil {
 		h.Logger.Errorf("error processing turn %d: %s", snapshot.Turn, err)
+		return
 	}
-}
-
-func wrapSender(sender OrderSender, turn uint32) senderWrapper {
-	return senderWrapper{
-		sender: sender,
-		turn:   turn,
+	resp, errSend := h.Sender.Send(ctx, snapshot.Turn, orders, debugMsg)
+	if errSend != nil {
+		h.Logger.Errorf("error sending orders to turn %d: %s", snapshot.Turn, errSend)
+		return
+	} else if resp.Code != proto.OrderResponse_SUCCESS {
+		h.Logger.Errorf("order not sent during turn %d: %s", snapshot.Turn, resp.String())
+		return
 	}
-}
-
-type senderWrapper struct {
-	sender OrderSender
-	turn   uint32
-}
-
-func (s senderWrapper) Send(ctx context.Context, orders []proto.PlayerOrder, debugMsg string) (*proto.OrderResponse, error) {
-	return s.sender.Send(ctx, s.turn, orders, debugMsg)
 }
 
 // PlayerState defines states specific for players

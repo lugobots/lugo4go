@@ -9,6 +9,3 @@ mockgen -package=lugo4go_test \
         github.com/lugobots/lugo4go/v2/proto PlayerOrder,GameServer,GameClient,Game_JoinATeamClient,\
 Game_JoinATeamServer,BroadcastClient,Broadcast_OnEventClient,BroadcastServer,Broadcast_OnEventServer
 
-mockgen -package=lugo4go_test \
-        -destination=./mocks_log_test.go \
-        github.com/lugobots/lugo4go/v2/pkg/util Logger

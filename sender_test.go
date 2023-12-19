@@ -1,13 +1,15 @@
 package lugo4go_test
 
 import (
-	"github.com/golang/mock/gomock"
-	"github.com/lugobots/lugo4go/v2"
-	"github.com/lugobots/lugo4go/v2/proto"
-	"github.com/stretchr/testify/assert"
-	"golang.org/x/net/context"
 	"testing"
 	"time"
+
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+	"golang.org/x/net/context"
+
+	"github.com/lugobots/lugo4go/v2"
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
 func TestSender_Send(t *testing.T) {

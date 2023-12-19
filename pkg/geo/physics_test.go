@@ -1,9 +1,11 @@
 package geo
 
 import (
-	"github.com/lugobots/lugo4go/v2/proto"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
 func TestAngleWithRoute(t *testing.T) {

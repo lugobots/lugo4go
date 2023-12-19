@@ -1,10 +1,12 @@
 package util
 
 import (
-	"github.com/lugobots/lugo4go/v2/proto"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/lugobots/lugo4go/v2/proto"
 )
 
 func TestLoadConfig(t *testing.T) {

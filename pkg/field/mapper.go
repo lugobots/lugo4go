@@ -11,23 +11,23 @@ import (
 // happen based on our configuration. Once the errors are in a controlled and limited list of methods, we are able
 // to ignore the errors during the game, and only test them in our unit tests.
 //
-// For doing that, in our bot, we may create a limited list of FieldArea coordinates that will be translated to Regions,
-// and then test all of them. The other direction is the conversion from a Point to a FieldArea. In this case, we
+// For doing that, in our bot, we may create a limited list of MapArea coordinates that will be translated to Regions,
+// and then test all of them. The other direction is the conversion from a Point to a MapArea. In this case, we
 // assume that the server will only send us valid points (within the field limits).
 
 const (
 	// MinCols Define the min number of cols allowed on the field division by the Map
-	MinCols uint = 4
+	MinCols int = 4
 	// MinRows Define the min number of rows allowed on the field division by the Map
-	MinRows uint = 2
+	MinRows int = 2
 	// MaxCols Define the max number of cols allowed on the field division by the Map
-	MaxCols uint = 200
+	MaxCols int = 200
 	// MaxRows Define the max number of rows allowed on the field division by the Map
-	MaxRows uint = 100
+	MaxRows int = 100
 )
 
 // NewMapper creates a new Mapper that will map the field to provide Regions
-func NewMapper(cols, rows uint, sideRef proto.Team_Side) (*Map, error) {
+func NewMapper(cols, rows int, sideRef proto.Team_Side) (*Map, error) {
 	if cols < MinCols {
 		return nil, ErrMinCols
 	}
@@ -52,18 +52,25 @@ func NewMapper(cols, rows uint, sideRef proto.Team_Side) (*Map, error) {
 
 type Map struct {
 	TeamSide     proto.Team_Side
-	cols         uint
-	rows         uint
+	cols         int
+	rows         int
 	regionWidth  float64
 	regionHeight float64
 }
 
 func (p *Map) GetRegion(col, row int) (Region, error) {
-	if uint(col) >= p.cols {
+	if col >= p.cols {
 		return nil, ErrMaxCols
 	}
-	if uint(row) >= p.rows {
+	if row >= p.rows {
 		return nil, ErrMaxRows
+	}
+
+	if col < 0 {
+		col = 0
+	}
+	if row < 0 {
+		row = 0
 	}
 
 	center := &proto.Point{
@@ -74,9 +81,9 @@ func (p *Map) GetRegion(col, row int) (Region, error) {
 		center = mirrorCoordsToAway(center)
 	}
 
-	return FieldArea{
-		col:        uint(col),
-		row:        uint(row),
+	return MapArea{
+		col:        col,
+		row:        row,
 		sideRef:    p.TeamSide,
 		center:     center,
 		positioner: p,
@@ -94,57 +101,57 @@ func (p *Map) GetPointRegion(point *proto.Point) (Region, error) {
 	return p.GetRegion(col, row)
 }
 
-type FieldArea struct {
-	col        uint
-	row        uint
+type MapArea struct {
+	col        int
+	row        int
 	sideRef    proto.Team_Side
 	center     *proto.Point
 	positioner *Map
 }
 
-func (r FieldArea) Eq(region Region) bool {
+func (r MapArea) Eq(region Region) bool {
 	return region.Col() == r.Col() && region.Row() == r.Row()
 }
 
-func (r FieldArea) Col() int {
-	return int(r.col)
+func (r MapArea) Col() int {
+	return r.col
 }
 
-func (r FieldArea) Row() int {
-	return int(r.row)
+func (r MapArea) Row() int {
+	return r.row
 }
 
-func (r FieldArea) Center() *proto.Point {
+func (r MapArea) Center() *proto.Point {
 	return r.center.Copy()
 }
 
-func (r FieldArea) String() string {
+func (r MapArea) String() string {
 	return fmt.Sprintf("{%d,%d-%s}", r.col, r.row, r.sideRef)
 }
 
-func (r FieldArea) Front() Region {
-	if n, err := r.positioner.GetRegion(int(r.col)+1, int(r.row)); err == nil {
+func (r MapArea) Front() Region {
+	if n, err := r.positioner.GetRegion(r.col+1, r.row); err == nil {
 		return n
 	}
 	return r
 }
 
-func (r FieldArea) Back() Region {
-	if n, err := r.positioner.GetRegion(int(r.col)-1, int(r.row)); err == nil {
+func (r MapArea) Back() Region {
+	if n, err := r.positioner.GetRegion(r.col-1, r.row); err == nil {
 		return n
 	}
 	return r
 }
 
-func (r FieldArea) Left() Region {
-	if n, err := r.positioner.GetRegion(int(r.col), int(r.row)+1); err == nil {
+func (r MapArea) Left() Region {
+	if n, err := r.positioner.GetRegion(r.col, r.row+1); err == nil {
 		return n
 	}
 	return r
 }
 
-func (r FieldArea) Right() Region {
-	if n, err := r.positioner.GetRegion(int(r.col), int(r.row)-1); err == nil {
+func (r MapArea) Right() Region {
+	if n, err := r.positioner.GetRegion(r.col, r.row-1); err == nil {
 		return n
 	}
 	return r

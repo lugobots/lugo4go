@@ -2,9 +2,10 @@ package util
 
 import (
 	"fmt"
+	"os"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"os"
 )
 
 // DefaultLogger creates a logger that is compatible with the lugo4go.Handler expected logger.

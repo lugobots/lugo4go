@@ -1,9 +1,10 @@
 package proto
 
 import (
-	"github.com/stretchr/testify/assert"
 	"math"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestVector_AngleWith_ZeroDegree(t *testing.T) {
