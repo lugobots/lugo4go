@@ -10,6 +10,9 @@ const (
 	// PlayerSize is the size of each player
 	PlayerSize = 4 * BaseUnit
 
+	// GoalkeeperSize is the width of the goalkeeper
+	GoalkeeperSize = PlayerSize * 2.3
+
 	// PlayerReconnectionWaitTime is a penalty time imposed to the player that needs to reconnect during the match.
 	// this interval ensure players won't drop connection in purpose to be reallocated to their initial position.
 	PlayerReconnectionWaitTime = 20 * time.Second
