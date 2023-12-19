@@ -3,8 +3,8 @@ package lugo4go
 import (
 	"context"
 
-	"github.com/lugobots/lugo4go/v2/proto"
-	"github.com/lugobots/lugo4go/v2/specs"
+	"github.com/lugobots/lugo4go/v3/proto"
+	"github.com/lugobots/lugo4go/v3/specs"
 )
 
 func hewTurnHandler(bot Bot, sender orderSender, logger Logger, playerNumber uint32, side proto.Team_Side) *handler {

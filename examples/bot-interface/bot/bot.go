@@ -7,12 +7,12 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/lugobots/lugo4go/v2/pkg/field"
+	"github.com/lugobots/lugo4go/v3/pkg/field"
 
-	"github.com/lugobots/lugo4go/v2"
-	"github.com/lugobots/lugo4go/v2/mapper"
-	"github.com/lugobots/lugo4go/v2/proto"
-	"github.com/lugobots/lugo4go/v2/specs"
+	"github.com/lugobots/lugo4go/v3"
+	"github.com/lugobots/lugo4go/v3/mapper"
+	"github.com/lugobots/lugo4go/v3/proto"
+	"github.com/lugobots/lugo4go/v3/specs"
 )
 
 type Bot struct {

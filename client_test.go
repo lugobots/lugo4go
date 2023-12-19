@@ -14,8 +14,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 
-	util2 "github.com/lugobots/lugo4go/v2/pkg/util"
-	"github.com/lugobots/lugo4go/v2/proto"
+	util2 "github.com/lugobots/lugo4go/v3/pkg/util"
+	"github.com/lugobots/lugo4go/v3/proto"
 )
 
 const testServerPort = 2222

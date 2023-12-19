@@ -7,8 +7,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/lugobots/lugo4go/v2/proto"
-	"github.com/lugobots/lugo4go/v2/specs"
+	"github.com/lugobots/lugo4go/v3/proto"
+	"github.com/lugobots/lugo4go/v3/specs"
 )
 
 func TestNewPositioner(t *testing.T) {

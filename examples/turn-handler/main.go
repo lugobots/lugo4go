@@ -6,9 +6,9 @@ import (
 	"os"
 	"os/signal"
 
-	clientGo "github.com/lugobots/lugo4go/v2"
-	"github.com/lugobots/lugo4go/v2/examples/turn-handler/bot"
-	"github.com/lugobots/lugo4go/v2/pkg/util"
+	clientGo "github.com/lugobots/lugo4go/v3"
+	"github.com/lugobots/lugo4go/v3/examples/turn-handler/bot"
+	"github.com/lugobots/lugo4go/v3/pkg/util"
 )
 
 func main() {

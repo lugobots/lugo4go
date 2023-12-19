@@ -1,6 +1,6 @@
 package geo
 
-import "github.com/lugobots/lugo4go/v2/proto"
+import "github.com/lugobots/lugo4go/v3/proto"
 
 // AngleWithRoute this function returns the angle to a particular target to a given a direction and an origin point,
 // The angle adopts the direction as the base axis, so a positive angle indicates the obstacle is on the left side,

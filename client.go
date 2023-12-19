@@ -10,8 +10,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/stats"
 
-	"github.com/lugobots/lugo4go/v2/pkg/util"
-	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v3/pkg/util"
+	"github.com/lugobots/lugo4go/v3/proto"
 )
 
 // ProtocolVersion defines the current game protocol

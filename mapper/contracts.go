@@ -3,7 +3,7 @@ package mapper
 import (
 	"fmt"
 
-	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v3/proto"
 )
 
 // Mapper Helps the bots to see the fields from their team perspective instead of using the cartesian plan provided

@@ -10,8 +10,8 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 
-	mapper "github.com/lugobots/lugo4go/v2/mapper"
-	proto "github.com/lugobots/lugo4go/v2/proto"
+	mapper "github.com/lugobots/lugo4go/v3/mapper"
+	proto "github.com/lugobots/lugo4go/v3/proto"
 )
 
 // MockTurnHandler is a mock of TurnHandler interface.
