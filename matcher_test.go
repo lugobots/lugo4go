@@ -1,4 +1,4 @@
-package lugo4go_test
+package lugo4go
 
 import "github.com/golang/mock/gomock"
 

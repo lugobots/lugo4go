@@ -8,7 +8,6 @@ import (
 
 	clientGo "github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/examples/turn-handler/bot"
-	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"github.com/lugobots/lugo4go/v2/pkg/util"
 )
 
@@ -23,7 +22,7 @@ func main() {
 	fieldGridCols := uint(8)
 	fieldGridRows := uint(8)
 
-	fieldMapper, _ := field.NewMapper(fieldGridCols, fieldGridRows, playerConfig.TeamSide)
+	fieldMapper, _ := mapper.NewMapper(fieldGridCols, fieldGridRows, playerConfig.TeamSide)
 
 	region, _ := fieldMapper.GetRegion(bot.FieldMap[playerConfig.Number].Col, bot.FieldMap[playerConfig.Number].Row)
 

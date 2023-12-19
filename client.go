@@ -68,7 +68,7 @@ type Client struct {
 // Coach TurnHandler creates basic player states to help the development of new bots.
 func (c *Client) PlayAsBot(bot Bot, logger Logger) error {
 	sender := NewSender(c.GRPCClient)
-	handler := NewHandler(bot, sender, logger, c.config.Number, c.config.TeamSide)
+	handler := hewTurnHandler(bot, sender, logger, c.config.Number, c.config.TeamSide)
 	return c.Play(handler)
 }
 

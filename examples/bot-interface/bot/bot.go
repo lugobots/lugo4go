@@ -7,21 +7,25 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/pkg/field"
+
+	"github.com/lugobots/lugo4go/v2"
+	"github.com/lugobots/lugo4go/v2/mapper"
 	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v2/specs"
 )
 
 type Bot struct {
 	Side   proto.Team_Side
 	Number uint32
 	Logger lugo4go.Logger
-	arr    field.Mapper
+	arr    mapper.Mapper
 }
 
 func NewBot(logger lugo4go.Logger, side proto.Team_Side, number uint32) *Bot {
-	arr, _ := field.NewMapper(field.MaxCols, field.MaxRows, side)
+	arr, _ := mapper.NewMapper(mapper.MaxCols, mapper.MaxRows, side)
 	rand.Seed(time.Now().UnixNano() * int64(number))
+
 	return &Bot{
 		Logger: logger,
 		Number: number,
@@ -58,7 +62,7 @@ func (b *Bot) myDecider(ctx context.Context, sender lugo4go.TurnOrdersSender, sn
 		return errorHandler(b.Logger, errors.New("bot not found in the game snapshot"))
 	}
 	if state == lugo4go.HoldingTheBall {
-		orderToKick, err := field.MakeOrderKick(*snapshot.Ball, field.GetOpponentGoal(me.TeamSide).Center, field.BallMaxSpeed)
+		orderToKick, err := field.MakeOrderKick(*snapshot.Ball, field.GetOpponentGoal(me.TeamSide).Center, specs.BallMaxSpeed)
 		if err != nil {
 			return errorHandler(b.Logger, fmt.Errorf("could not create kick order during turn %d: %s", snapshot.Turn, err))
 		}

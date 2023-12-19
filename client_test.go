@@ -1,4 +1,4 @@
-package lugo4go_test
+package lugo4go
 
 import (
 	"context"
@@ -14,7 +14,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 
-	"github.com/lugobots/lugo4go/v2"
 	util2 "github.com/lugobots/lugo4go/v2/pkg/util"
 	"github.com/lugobots/lugo4go/v2/proto"
 )
@@ -72,14 +71,14 @@ func TestNewRawClient(t *testing.T) {
 			Number:          config.Number,
 			InitPosition:    config.InitialPosition,
 			TeamSide:        config.TeamSide,
-			ProtocolVersion: lugo4go.ProtocolVersion,
+			ProtocolVersion: ProtocolVersion,
 		}
 		defer done()
 		return fmt.Sprintf("%s", arg) == fmt.Sprintf("%s", expectedRequest)
 	}), gomock.Any()).Return(nil)
 
 	// Now we may create the Client to connect to our fake server
-	playerClient, err := lugo4go.NewClient(config)
+	playerClient, err := NewClient(config)
 
 	// This last lines may run really quickly, and the server may not have ran the expected methods yet
 	// Let's give some time to the server run it before finish the test function
@@ -102,7 +101,7 @@ func TestClient_PlayCallsHandlerForEachMessage(t *testing.T) {
 	mockGRPCClient := NewMockGameClient(ctrl)
 	mockHandler := NewMockTurnHandler(ctrl)
 
-	c := &lugo4go.Client{
+	c := &Client{
 		Stream:     mockStream,
 		GRPCClient: mockGRPCClient,
 		Handler:    mockHandler,
@@ -123,7 +122,7 @@ func TestClient_PlayCallsHandlerForEachMessage(t *testing.T) {
 
 	err := c.Play(mockHandler)
 	done()
-	assert.Equal(t, lugo4go.ErrGRPCConnectionClosed, err)
+	assert.Equal(t, ErrGRPCConnectionClosed, err)
 	if waiting.Err() != context.Canceled {
 		t.Errorf("Unexpected waiting - Expected %v, Got %v", context.Canceled, waiting.Err())
 	}
@@ -139,7 +138,7 @@ func TestClient_PlayReturnsTheRightError(t *testing.T) {
 	mockGRPCClient := NewMockGameClient(ctrl)
 	mockHandler := NewMockTurnHandler(ctrl)
 
-	c := &lugo4go.Client{
+	c := &Client{
 		Stream:     mockStream,
 		GRPCClient: mockGRPCClient,
 		Handler:    mockHandler,
@@ -157,7 +156,7 @@ func TestClient_PlayReturnsTheRightError(t *testing.T) {
 
 	err := c.Play(mockHandler)
 	done()
-	assert.True(t, errors.Is(err, lugo4go.ErrGRPCConnectionLost))
+	assert.True(t, errors.Is(err, ErrGRPCConnectionLost))
 	if waiting.Err() != context.Canceled {
 		t.Errorf("Unexpected waiting - Expected %v, Got %v", context.Canceled, waiting.Err())
 	}
@@ -173,7 +172,7 @@ func TestClient_PlayShouldStopContextWhenANewTurnStarts(t *testing.T) {
 	mockGRPCClient := NewMockGameClient(ctrl)
 	mockHandler := NewMockTurnHandler(ctrl)
 
-	c := &lugo4go.Client{
+	c := &Client{
 		Stream:     mockStream,
 		GRPCClient: mockGRPCClient,
 		Handler:    mockHandler,
@@ -214,7 +213,7 @@ func TestClient_PlayShouldStopContextWhenANewTurnStarts(t *testing.T) {
 
 	err := c.Play(mockHandler)
 	done()
-	assert.Equal(t, lugo4go.ErrGRPCConnectionClosed, err)
+	assert.Equal(t, ErrGRPCConnectionClosed, err)
 	assert.True(t, firstHandlerIsExpired)
 	if waiting.Err() != context.Canceled {
 		t.Errorf("Unexpected waiting - Expected %v, Got %v", context.Canceled, waiting.Err())

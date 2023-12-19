@@ -3,12 +3,12 @@ package lugo4go
 import (
 	"context"
 
-	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v2/specs"
 )
 
-func NewHandler(bot Bot, sender OrderSender, logger Logger, playerNumber uint32, side proto.Team_Side) *Handler {
-	return &Handler{
+func hewTurnHandler(bot Bot, sender orderSender, logger Logger, playerNumber uint32, side proto.Team_Side) *handler {
+	return &handler{
 		Logger:       logger,
 		Sender:       sender,
 		PlayerNumber: playerNumber,
@@ -17,17 +17,17 @@ func NewHandler(bot Bot, sender OrderSender, logger Logger, playerNumber uint32,
 	}
 }
 
-// Handler is a Lugo4go client handler that allow you to create an interface to follow a basic strategy based on team
+// handler is a Lugo4go client handler that allow you to create an interface to follow a basic strategy based on team
 // states.
-type Handler struct {
+type handler struct {
 	Logger       Logger
-	Sender       OrderSender
+	Sender       orderSender
 	PlayerNumber uint32
 	Side         proto.Team_Side
 	Bot          Bot
 }
 
-func (h *Handler) Handle(ctx context.Context, snapshot *proto.GameSnapshot) {
+func (h *handler) Handle(ctx context.Context, snapshot *proto.GameSnapshot) {
 	var err error
 	var state PlayerState
 
@@ -36,25 +36,32 @@ func (h *Handler) Handle(ctx context.Context, snapshot *proto.GameSnapshot) {
 		return
 	}
 
-	state, err = DefineMyState(snapshot, h.PlayerNumber, h.Side)
+	state, err = defineMyState(snapshot, h.PlayerNumber, h.Side)
 	if err != nil {
 		h.Logger.Errorf("error processing turn %d: %s", snapshot.Turn, err)
 		return
 	}
+	// TODO bad practice - create a SnapshotToolMaker to allow it to be created externally
+	snapshotTools, err := newInspector(h.Side, int(h.PlayerNumber), snapshot)
+	if err != nil {
+		h.Logger.Errorf("failed to create an inspector for the game snapshot: %s", err)
+		return
+	}
+
 	var orders []proto.PlayerOrder
 	var debugMsg string
-	if field.GoalkeeperNumber == h.PlayerNumber {
-		orders, debugMsg, err = h.Bot.AsGoalkeeper(ctx, snapshot, state)
+	if specs.GoalkeeperNumber == h.PlayerNumber {
+		orders, debugMsg, err = h.Bot.AsGoalkeeper(ctx, snapshotTools, state)
 	} else {
 		switch state {
 		case Supporting:
-			orders, debugMsg, err = h.Bot.OnSupporting(ctx, snapshot)
+			orders, debugMsg, err = h.Bot.OnSupporting(ctx, snapshotTools)
 		case HoldingTheBall:
-			orders, debugMsg, err = h.Bot.OnHolding(ctx, snapshot)
+			orders, debugMsg, err = h.Bot.OnHolding(ctx, snapshotTools)
 		case Defending:
-			orders, debugMsg, err = h.Bot.OnDefending(ctx, snapshot)
+			orders, debugMsg, err = h.Bot.OnDefending(ctx, snapshotTools)
 		case DisputingTheBall:
-			orders, debugMsg, err = h.Bot.OnDisputing(ctx, snapshot)
+			orders, debugMsg, err = h.Bot.OnDisputing(ctx, snapshotTools)
 		}
 	}
 	if err != nil {
@@ -85,12 +92,24 @@ const (
 	DisputingTheBall PlayerState = "disputing"
 )
 
-func DefineMyState(snapshot *proto.GameSnapshot, playerNumber uint32, side proto.Team_Side) (PlayerState, error) {
+func defineMyState(snapshot *proto.GameSnapshot, playerNumber uint32, side proto.Team_Side) (PlayerState, error) {
 	if snapshot == nil || snapshot.Ball == nil {
 		return "", ErrNoBall
 	}
 
-	me := field.GetPlayer(snapshot, side, playerNumber)
+	myTeam := snapshot.HomeTeam
+	if side == proto.Team_AWAY {
+		myTeam = snapshot.AwayTeam
+	}
+
+	var me *proto.Player
+	for _, player := range myTeam.GetPlayers() {
+		if player.Number == playerNumber {
+			me = player
+			break
+		}
+	}
+
 	if me == nil {
 		return "", ErrPlayerNotFound
 	}

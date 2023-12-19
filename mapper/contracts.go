@@ -1,4 +1,4 @@
-package field
+package mapper
 
 import (
 	"fmt"
@@ -17,6 +17,14 @@ type Mapper interface {
 	GetRegion(col, row int) (Region, error)
 	// GetPointRegion returns the MapArea where that point is in
 	GetPointRegion(point *proto.Point) (Region, error)
+
+	GetMyTeamGoal() Goal
+	GetOpponentGoal() Goal
+
+	AwayTeamGoal() Goal
+	HomeTeamGoal() Goal
+	GetTeamsGoal(side proto.Team_Side) Goal
+	FieldCenter() proto.Point
 }
 
 // Region represent a quadrant on the field. It is not always squared form because you may define how many cols/rows

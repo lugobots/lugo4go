@@ -1,4 +1,4 @@
-package lugo4go_test
+package lugo4go
 
 import (
 	"testing"
@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/net/context"
 
-	"github.com/lugobots/lugo4go/v2"
 	"github.com/lugobots/lugo4go/v2/proto"
 )
 
@@ -17,7 +16,7 @@ func TestSender_Send(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockGRPCClient := NewMockGameClient(ctrl)
-	sender := lugo4go.Sender{GRPCClient: mockGRPCClient}
+	sender := Sender{GRPCClient: mockGRPCClient}
 
 	velocitySample := proto.NewZeroedVelocity(proto.North())
 	moveOrder := &proto.Order_Move{

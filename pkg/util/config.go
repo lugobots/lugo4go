@@ -9,8 +9,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/lugobots/lugo4go/v2/pkg/field"
 	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v2/specs"
 )
 
 const (
@@ -100,8 +100,8 @@ func (c *Config) LoadConfig(args []string) error {
 	}
 	c.TeamSide = proto.Team_Side(side)
 
-	if c.readValues.Num < 1 || c.readValues.Num > field.MaxPlayers {
-		return fmt.Errorf("invalid player number '%d'. Must be 1 to %d", c.readValues.Num, field.MaxPlayers)
+	if c.readValues.Num < 1 || c.readValues.Num > specs.MaxPlayers {
+		return fmt.Errorf("invalid player number '%d'. Must be 1 to %d", c.readValues.Num, specs.MaxPlayers)
 	}
 	c.Number = uint32(c.readValues.Num)
 

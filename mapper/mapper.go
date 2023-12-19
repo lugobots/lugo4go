@@ -1,11 +1,84 @@
-package field
+package mapper
 
 import (
 	"fmt"
 	"math"
 
 	"github.com/lugobots/lugo4go/v2/proto"
+	"github.com/lugobots/lugo4go/v2/specs"
 )
+
+type Direction string
+
+const (
+	Forward       Direction = "forward"
+	Backward      Direction = "backward"
+	Left          Direction = "left"
+	Right         Direction = "right"
+	BackwardLeft  Direction = "backward_left"
+	BackwardRight Direction = "backward_right"
+	ForwardLeft   Direction = "forward_left"
+	ForwardRight  Direction = "forward_right"
+)
+
+type Orientation proto.Vector
+
+var (
+	North = Orientation(proto.North())
+	South = Orientation(proto.South())
+	East  = Orientation(proto.East())
+	West  = Orientation(proto.West())
+
+	NorthEast = Orientation(proto.NorthEast())
+	SouthEast = Orientation(proto.SouthEast())
+	NorthWest = Orientation(proto.NorthWest())
+	SouthWest = Orientation(proto.SouthWest())
+)
+
+// Goal is a set of value about a goal from a team
+type Goal struct {
+	// Center the is coordinate of the center of the goal
+	Center proto.Point
+	// Place identifies the team of this goal (the team that should defend this goal)
+	Place proto.Team_Side
+	// TopPole is the coordinates of the pole with a higher Y coordinate
+	TopPole proto.Point
+	// BottomPole is the coordinates of the pole  with a lower Y coordinate
+	BottomPole proto.Point
+}
+
+// HomeTeamGoal works as a constant value to help to retrieve a Goal struct with the values of the Home team goal
+func HomeTeamGoal() Goal {
+	return Goal{
+		Place:      proto.Team_HOME,
+		Center:     proto.Point{X: 0, Y: specs.MaxYCoordinate / 2},
+		TopPole:    proto.Point{X: 0, Y: specs.GoalMaxY},
+		BottomPole: proto.Point{X: 0, Y: specs.GoalMinY},
+	}
+}
+
+// AwayTeamGoal works as a constant value to help to retrieve a Goal struct with the values of the Away team goal
+func AwayTeamGoal() Goal {
+	return Goal{
+		Place:      proto.Team_AWAY,
+		Center:     proto.Point{X: specs.MaxXCoordinate, Y: specs.MaxYCoordinate / 2},
+		TopPole:    proto.Point{X: specs.MaxXCoordinate, Y: specs.GoalMaxY},
+		BottomPole: proto.Point{X: specs.MaxXCoordinate, Y: specs.GoalMinY},
+	}
+}
+
+// GetTeamsGoal returns the goal struct to the team side passed as argument
+func GetTeamsGoal(side proto.Team_Side) Goal {
+	if side == proto.Team_HOME {
+		return HomeTeamGoal()
+	}
+	return AwayTeamGoal()
+}
+
+// FieldCenter works as a constant value to help to retrieve a Point struct with the values of the center of the court
+func FieldCenter() proto.Point {
+	return proto.Point{X: specs.MaxXCoordinate / 2, Y: specs.MaxYCoordinate / 2}
+}
 
 // Important note: since our bot needs to have the best performance possible. We may ensure that some errors will never
 // happen based on our configuration. Once the errors are in a controlled and limited list of methods, we are able
@@ -45,8 +118,8 @@ func NewMapper(cols, rows int, sideRef proto.Team_Side) (*Map, error) {
 		TeamSide:     sideRef,
 		cols:         cols,
 		rows:         rows,
-		regionWidth:  MaxXCoordinate / float64(cols),
-		regionHeight: MaxYCoordinate / float64(rows),
+		regionWidth:  specs.MaxXCoordinate / float64(cols),
+		regionHeight: specs.MaxYCoordinate / float64(rows),
 	}, nil
 }
 
@@ -161,7 +234,7 @@ func (r MapArea) Right() Region {
 // Keep in mind that all coords in the field are based in the bottom left corner!
 func mirrorCoordsToAway(coords *proto.Point) *proto.Point {
 	return &proto.Point{
-		X: MaxXCoordinate - coords.X,
-		Y: MaxYCoordinate - coords.Y,
+		X: specs.MaxXCoordinate - coords.X,
+		Y: specs.MaxYCoordinate - coords.Y,
 	}
 }

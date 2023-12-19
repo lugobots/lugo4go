@@ -1,21 +1,19 @@
 package lugo4go
 
-// Error is used to identify internal errors
-type Error string
-
-// Error implements the native golang error interface
-func (e Error) Error() string { return string(e) }
-
-const (
-	// ErrGRPCConnectionClosed identifies when the error returned is cased by the connection has been closed
-	ErrGRPCConnectionClosed = Error("grpc connection closed by the server")
-
-	// ErrGRPCConnectionLost identifies that something unexpected broke the gRPC connection
-	ErrGRPCConnectionLost = Error("grpc stream error")
+import (
+	"errors"
 )
 
-const (
-	ErrNilSnapshot    = Error("invalid snapshot state (nil)")
-	ErrPlayerNotFound = Error("player not found in the game snapshot")
-	ErrNoBall         = Error("no ball found in the snapshot")
+var (
+	// ErrGRPCConnectionClosed identifies when the error returned is cased by the connection has been closed
+	ErrGRPCConnectionClosed = errors.New("grpc connection closed by the server")
+
+	// ErrGRPCConnectionLost identifies that something unexpected broke the gRPC connection
+	ErrGRPCConnectionLost = errors.New("grpc stream error")
+)
+
+var (
+	ErrNilSnapshot    = errors.New("invalid snapshot state (nil)")
+	ErrPlayerNotFound = errors.New("player not found in the game snapshot")
+	ErrNoBall         = errors.New("no ball found in the snapshot")
 )
