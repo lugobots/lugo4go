@@ -8,6 +8,7 @@ import (
 
 	clientGo "github.com/lugobots/lugo4go/v3"
 	"github.com/lugobots/lugo4go/v3/examples/turn-handler/bot"
+	"github.com/lugobots/lugo4go/v3/mapper"
 	"github.com/lugobots/lugo4go/v3/pkg/util"
 )
 

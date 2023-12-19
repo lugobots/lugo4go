@@ -47,39 +47,6 @@ type Goal struct {
 	BottomPole proto.Point
 }
 
-// HomeTeamGoal works as a constant value to help to retrieve a Goal struct with the values of the Home team goal
-func HomeTeamGoal() Goal {
-	return Goal{
-		Place:      proto.Team_HOME,
-		Center:     proto.Point{X: 0, Y: specs.MaxYCoordinate / 2},
-		TopPole:    proto.Point{X: 0, Y: specs.GoalMaxY},
-		BottomPole: proto.Point{X: 0, Y: specs.GoalMinY},
-	}
-}
-
-// AwayTeamGoal works as a constant value to help to retrieve a Goal struct with the values of the Away team goal
-func AwayTeamGoal() Goal {
-	return Goal{
-		Place:      proto.Team_AWAY,
-		Center:     proto.Point{X: specs.MaxXCoordinate, Y: specs.MaxYCoordinate / 2},
-		TopPole:    proto.Point{X: specs.MaxXCoordinate, Y: specs.GoalMaxY},
-		BottomPole: proto.Point{X: specs.MaxXCoordinate, Y: specs.GoalMinY},
-	}
-}
-
-// GetTeamsGoal returns the goal struct to the team side passed as argument
-func GetTeamsGoal(side proto.Team_Side) Goal {
-	if side == proto.Team_HOME {
-		return HomeTeamGoal()
-	}
-	return AwayTeamGoal()
-}
-
-// FieldCenter works as a constant value to help to retrieve a Point struct with the values of the center of the court
-func FieldCenter() proto.Point {
-	return proto.Point{X: specs.MaxXCoordinate / 2, Y: specs.MaxYCoordinate / 2}
-}
-
 // Important note: since our bot needs to have the best performance possible. We may ensure that some errors will never
 // happen based on our configuration. Once the errors are in a controlled and limited list of methods, we are able
 // to ignore the errors during the game, and only test them in our unit tests.
@@ -131,11 +98,54 @@ type Map struct {
 	regionHeight float64
 }
 
-func (p *Map) GetRegion(col, row int) (Region, error) {
-	if col >= p.cols {
+func (m *Map) GetMyTeamGoal() Goal {
+	if m.TeamSide == proto.Team_HOME {
+		return m.HomeTeamGoal()
+	}
+	return m.AwayTeamGoal()
+}
+
+func (m *Map) GetOpponentGoal() Goal {
+	if m.TeamSide != proto.Team_HOME {
+		return m.HomeTeamGoal()
+	}
+	return m.AwayTeamGoal()
+}
+
+func (m *Map) AwayTeamGoal() Goal {
+	return Goal{
+		Place:      proto.Team_HOME,
+		Center:     proto.Point{X: 0, Y: specs.MaxYCoordinate / 2},
+		TopPole:    proto.Point{X: 0, Y: specs.GoalMaxY},
+		BottomPole: proto.Point{X: 0, Y: specs.GoalMinY},
+	}
+}
+
+func (m *Map) HomeTeamGoal() Goal {
+	return Goal{
+		Place:      proto.Team_AWAY,
+		Center:     proto.Point{X: specs.MaxXCoordinate, Y: specs.MaxYCoordinate / 2},
+		TopPole:    proto.Point{X: specs.MaxXCoordinate, Y: specs.GoalMaxY},
+		BottomPole: proto.Point{X: specs.MaxXCoordinate, Y: specs.GoalMinY},
+	}
+}
+
+func (m *Map) GetTeamsGoal(side proto.Team_Side) Goal {
+	if side == proto.Team_HOME {
+		return m.HomeTeamGoal()
+	}
+	return m.AwayTeamGoal()
+}
+
+func (m *Map) FieldCenter() proto.Point {
+	return proto.Point{X: specs.MaxXCoordinate / 2, Y: specs.MaxYCoordinate / 2}
+}
+
+func (m *Map) GetRegion(col, row int) (Region, error) {
+	if col >= m.cols {
 		return nil, ErrMaxCols
 	}
-	if row >= p.rows {
+	if row >= m.rows {
 		return nil, ErrMaxRows
 	}
 
@@ -147,31 +157,31 @@ func (p *Map) GetRegion(col, row int) (Region, error) {
 	}
 
 	center := &proto.Point{
-		X: int32(math.Round(float64(col)*p.regionWidth + p.regionWidth/2)),
-		Y: int32(math.Round(float64(row)*p.regionHeight + p.regionHeight/2)),
+		X: int32(math.Round(float64(col)*m.regionWidth + m.regionWidth/2)),
+		Y: int32(math.Round(float64(row)*m.regionHeight + m.regionHeight/2)),
 	}
-	if p.TeamSide == proto.Team_AWAY {
+	if m.TeamSide == proto.Team_AWAY {
 		center = mirrorCoordsToAway(center)
 	}
 
 	return MapArea{
 		col:        col,
 		row:        row,
-		sideRef:    p.TeamSide,
+		sideRef:    m.TeamSide,
 		center:     center,
-		positioner: p,
+		positioner: m,
 	}, nil
 }
 
-func (p *Map) GetPointRegion(point *proto.Point) (Region, error) {
-	if p.TeamSide == proto.Team_AWAY {
+func (m *Map) GetPointRegion(point *proto.Point) (Region, error) {
+	if m.TeamSide == proto.Team_AWAY {
 		point = mirrorCoordsToAway(point)
 	}
-	cx := float64(point.X) / p.regionWidth
-	cy := float64(point.Y) / p.regionHeight
-	col := int(math.Min(cx, float64(p.cols-1)))
-	row := int(math.Min(cy, float64(p.rows-1)))
-	return p.GetRegion(col, row)
+	cx := float64(point.X) / m.regionWidth
+	cy := float64(point.Y) / m.regionHeight
+	col := int(math.Min(cx, float64(m.cols-1)))
+	row := int(math.Min(cy, float64(m.rows-1)))
+	return m.GetRegion(col, row)
 }
 
 type MapArea struct {

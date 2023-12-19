@@ -19,7 +19,7 @@ type TurnHandler interface {
 	Handle(ctx context.Context, snapshot *proto.GameSnapshot)
 }
 
-type orderSender interface {
+type OrderSender interface {
 	Send(ctx context.Context, turn uint32, orders []proto.PlayerOrder, debugMsg string) (*proto.OrderResponse, error)
 }
 

@@ -7,7 +7,7 @@ import (
 	"github.com/lugobots/lugo4go/v3/specs"
 )
 
-func hewTurnHandler(bot Bot, sender orderSender, logger Logger, playerNumber uint32, side proto.Team_Side) *handler {
+func hewTurnHandler(bot Bot, sender OrderSender, logger Logger, playerNumber uint32, side proto.Team_Side) *handler {
 	return &handler{
 		Logger:       logger,
 		Sender:       sender,
@@ -21,7 +21,7 @@ func hewTurnHandler(bot Bot, sender orderSender, logger Logger, playerNumber uin
 // states.
 type handler struct {
 	Logger       Logger
-	Sender       orderSender
+	Sender       OrderSender
 	PlayerNumber uint32
 	Side         proto.Team_Side
 	Bot          Bot

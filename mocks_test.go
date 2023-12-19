@@ -49,7 +49,7 @@ func (mr *MockTurnHandlerMockRecorder) Handle(ctx, snapshot interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Handle", reflect.TypeOf((*MockTurnHandler)(nil).Handle), ctx, snapshot)
 }
 
-// MockOrderSender is a mock of orderSender interface.
+// MockOrderSender is a mock of OrderSender interface.
 type MockOrderSender struct {
 	ctrl     *gomock.Controller
 	recorder *MockOrderSenderMockRecorder
