@@ -70,8 +70,8 @@ type Client struct {
 
 // PlayAsBot is a sugared Play mode that uses an RawBot from coach package.
 // Coach RawBot creates basic player states to help the development of new bots.
-func (c *Client) PlayAsBot(bot Bot, logger Logger) error {
-	handler := hewRawBotWrapper(bot, logger, c.config.Number, c.config.TeamSide)
+func (c *Client) PlayAsBot(bot Bot) error {
+	handler := hewRawBotWrapper(bot, c.Logger, c.config.Number, c.config.TeamSide)
 	return c.Play(handler)
 }
 

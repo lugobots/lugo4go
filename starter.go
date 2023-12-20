@@ -11,45 +11,56 @@ import (
 	"github.com/lugobots/lugo4go/v3/mapper"
 )
 
-func NewTurnHandlerConfig() (*Starter, error) {
+func NewDefaultStarter() (*Starter, mapper.Mapper, error) {
 	playerConfig, defaultMapper, logger, err := DefaultInitBundle()
 	if err != nil {
-		return nil, fmt.Errorf("could not init default config or logger: %w", err)
+		return nil, nil, fmt.Errorf("could not init default config or logger: %w", err)
 	}
 
 	return &Starter{
-		Config:      playerConfig,
-		FieldMapper: defaultMapper,
-		Logger:      logger,
-	}, nil
+		Config: playerConfig,
+		Logger: logger,
+	}, defaultMapper, nil
 }
 
 type Starter struct {
-	Config      Config
-	FieldMapper mapper.Mapper
-	Logger      *zap.SugaredLogger
+	Config Config
+	Logger *zap.SugaredLogger
 }
 
-func (s *Starter) Run(handler RawBot) error {
-	player, err := NewClient(s.Config, s.Logger)
+func (s *Starter) Run(bot Bot) error {
+	return s.defaultRun(func(client *Client, stop context.CancelFunc) {
+		defer stop()
+		if err := client.PlayAsBot(bot); err != nil {
+			s.Logger.Errorf("bot stopped with an error: %s", err)
+		}
+	})
+}
+
+func (s *Starter) RunJustTurnHandler(handler RawBot) error {
+	return s.defaultRun(func(client *Client, stop context.CancelFunc) {
+		defer stop()
+		if err := client.Play(handler); err != nil {
+			s.Logger.Errorf("bot stopped with an error: %s", err)
+		}
+	})
+}
+
+func (s *Starter) defaultRun(runner func(client *Client, stop context.CancelFunc)) error {
+	client, err := NewClient(s.Config, s.Logger)
 	if err != nil {
 		return fmt.Errorf("could not init the client: %w", err)
 	}
 
 	ctx, stop := context.WithCancel(context.Background())
-	go func() {
-		defer stop()
-		if err := player.Play(handler); err != nil {
-			s.Logger.Errorf("bot stopped with an error: %s", err)
-		}
-	}()
+	go runner(client, stop)
 
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt)
 	select {
 	case <-ctx.Done():
 	case <-signalChan:
-		if err := player.Stop(); err != nil {
+		if err := client.Stop(); err != nil {
 			s.Logger.Errorf("error stopping bot: %s", err)
 		}
 	}

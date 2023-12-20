@@ -23,8 +23,6 @@ const (
 
 // Config is the set of values expected as a initial configuration of the player
 type Config struct {
-	FieldMapCols     int
-	FieldMapRows     int
 	PlayerPositionFn func(playerNumber int, inspector SnapshotInspector) *proto.Point
 
 	// Full url to the gRPC server

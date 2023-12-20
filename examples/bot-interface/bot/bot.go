@@ -2,12 +2,11 @@ package bot
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math/rand"
 	"time"
 
-	"github.com/lugobots/lugo4go/v3/pkg/field"
+	"go.uber.org/zap"
 
 	"github.com/lugobots/lugo4go/v3"
 	"github.com/lugobots/lugo4go/v3/mapper"
@@ -15,106 +14,84 @@ import (
 	"github.com/lugobots/lugo4go/v3/specs"
 )
 
-type Bot struct {
-	Side   proto.Team_Side
-	Number uint32
-	Logger lugo4go.Logger
-	arr    mapper.Mapper
-}
-
-func NewBot(logger lugo4go.Logger, side proto.Team_Side, number uint32) *Bot {
-	arr, _ := mapper.NewMapper(mapper.MaxCols, mapper.MaxRows, side)
-	rand.Seed(time.Now().UnixNano() * int64(number))
-
+func NewBot(FieldMapper mapper.Mapper, Config lugo4go.Config, Logger *zap.SugaredLogger) *Bot {
 	return &Bot{
-		Logger: logger,
-		Number: number,
-		Side:   side,
-		arr:    arr,
+		FieldMapper: FieldMapper,
+		Config:      Config,
+		Logger:      Logger,
+		random:      rand.New(rand.NewSource(time.Now().UnixNano())),
 	}
 }
 
-func (b *Bot) OnDisputing(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
-	return b.myDecider(ctx, sender, snapshot, lugo4go.DisputingTheBall)
+type Bot struct {
+	FieldMapper mapper.Mapper
+	Config      lugo4go.Config
+	Logger      *zap.SugaredLogger
+
+	random *rand.Rand
 }
 
-func (b *Bot) OnDefending(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
-	return b.myDecider(ctx, sender, snapshot, lugo4go.Defending)
+func (b *Bot) OnDisputing(ctx context.Context, snapshot lugo4go.SnapshotInspector) ([]proto.PlayerOrder, string, error) {
+	return b.myDecider(ctx, snapshot, lugo4go.DisputingTheBall)
 }
 
-func (b *Bot) OnHolding(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
-	return b.myDecider(ctx, sender, snapshot, lugo4go.HoldingTheBall)
+func (b *Bot) OnDefending(ctx context.Context, snapshot lugo4go.SnapshotInspector) ([]proto.PlayerOrder, string, error) {
+	return b.myDecider(ctx, snapshot, lugo4go.Defending)
 }
 
-func (b *Bot) OnSupporting(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
-	return b.myDecider(ctx, sender, snapshot, lugo4go.Supporting)
+func (b *Bot) OnHolding(ctx context.Context, snapshot lugo4go.SnapshotInspector) ([]proto.PlayerOrder, string, error) {
+	return b.myDecider(ctx, snapshot, lugo4go.HoldingTheBall)
 }
 
-func (b *Bot) AsGoalkeeper(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot, state lugo4go.PlayerState) error {
-	return b.myDecider(ctx, sender, snapshot, state)
+func (b *Bot) OnSupporting(ctx context.Context, snapshot lugo4go.SnapshotInspector) ([]proto.PlayerOrder, string, error) {
+	return b.myDecider(ctx, snapshot, lugo4go.Supporting)
 }
 
-func (b *Bot) myDecider(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot, state lugo4go.PlayerState) error {
+func (b *Bot) AsGoalkeeper(ctx context.Context, snapshot lugo4go.SnapshotInspector, state lugo4go.PlayerState) ([]proto.PlayerOrder, string, error) {
+	return b.myDecider(ctx, snapshot, state)
+}
+
+func (b *Bot) OnGetReady(ctx context.Context, snapshot lugo4go.SnapshotInspector) {
+	b.Logger.Debug("the game is ready to start or the score has changed")
+}
+
+func (b *Bot) myDecider(ctx context.Context, inspector lugo4go.SnapshotInspector, state lugo4go.PlayerState) ([]proto.PlayerOrder, string, error) {
 	var orders []proto.PlayerOrder
 	// we are going to kick the ball as soon as we catch it
-	me := field.GetPlayer(snapshot, b.Side, b.Number)
-	if me == nil {
-		return errorHandler(b.Logger, errors.New("bot not found in the game snapshot"))
-	}
+	me := inspector.GetMe()
+
 	if state == lugo4go.HoldingTheBall {
-		orderToKick, err := field.MakeOrderKick(*snapshot.Ball, field.GetOpponentGoal(me.TeamSide).Center, specs.BallMaxSpeed)
+		orderToKick, err := inspector.MakeOrderKick(b.FieldMapper.GetOpponentGoal().Center, specs.BallMaxSpeed)
 		if err != nil {
-			return errorHandler(b.Logger, fmt.Errorf("could not create kick order during turn %d: %s", snapshot.Turn, err))
+			return nil, "", fmt.Errorf("could not create kick order during turn %d: %s", inspector.GetSnapshot().Turn, err)
 		}
-		orders = []proto.PlayerOrder{orderToKick}
-	} else if me.Number == 10 {
+		return []proto.PlayerOrder{orderToKick}, "kicking the ball", nil
+	}
+	if me.Number == 10 {
 		// otherwise, let's run towards the ball like kids
-		orderToMove, err := field.MakeOrderMoveMaxSpeed(*me.Position, *snapshot.Ball.Position)
+		orderToMove, err := inspector.MakeOrderMoveMaxSpeed(*inspector.GetBall().Position)
 		if err != nil {
-			return errorHandler(b.Logger, fmt.Errorf("could not create move order during turn %d: %s", snapshot.Turn, err))
+			return nil, "", fmt.Errorf("could not create move order during turn %d: %s", inspector.GetSnapshot().Turn, err)
 		}
-		orders = []proto.PlayerOrder{orderToMove, field.MakeOrderCatch()}
-	} else {
-		orders = []proto.PlayerOrder{field.MakeOrderCatch()}
-		orders = []proto.PlayerOrder{field.MakeOrderCatch()}
-		switch rand.Intn(30) {
-		case 0:
-			orders = append(orders, field.GoRight(b.Side))
-		case 1:
-			orders = append(orders, field.GoLeft(b.Side))
-		case 2:
-			orders = append(orders, field.GoForward(b.Side))
-		case 3:
-			orders = append(orders, field.GoBackward(b.Side))
-		}
+		return []proto.PlayerOrder{orderToMove, inspector.MakeOrderCatch()}, "I am the player 10, running", nil
 	}
 
-	resp, err := sender.Send(ctx, orders, "")
-	if err != nil {
-		return errorHandler(b.Logger, fmt.Errorf("could not send kick order during turn %d: %s", snapshot.Turn, err))
-	} else if resp.Code != proto.OrderResponse_SUCCESS {
-		return errorHandler(b.Logger, fmt.Errorf("order sent not  order during turn %d: %s", snapshot.Turn, err))
+	orders = []proto.PlayerOrder{inspector.MakeOrderCatch()}
+	debugMsg := "keeping direction"
+	switch b.random.Intn(30) {
+	case 0:
+		orders = append(orders, inspector.MakeOrderMoveByDirection(mapper.Forward, specs.BallMaxSpeed))
+		debugMsg = "moving Forward"
+	case 1:
+		orders = append(orders, inspector.MakeOrderMoveByDirection(mapper.Backward, specs.BallMaxSpeed))
+		debugMsg = "moving Backward"
+	case 2:
+		orders = append(orders, inspector.MakeOrderMoveByDirection(mapper.Right, specs.BallMaxSpeed))
+		debugMsg = "moving to the right"
+	case 3:
+		orders = append(orders, inspector.MakeOrderMoveByDirection(mapper.Left, specs.BallMaxSpeed))
+		debugMsg = "moving to the left"
 	}
-	return nil
-}
 
-func errorHandler(logger lugo4go.Logger, err error) error {
-	logger.Errorf("bot error: %s", err)
-	return err
-}
-
-var FieldMap = map[uint32]struct {
-	Col uint8
-	Row uint8
-}{
-	2:  {Col: 1, Row: 1},
-	3:  {Col: 1, Row: 3},
-	4:  {Col: 1, Row: 4},
-	5:  {Col: 1, Row: 6},
-	6:  {Col: 2, Row: 2},
-	7:  {Col: 2, Row: 3},
-	8:  {Col: 2, Row: 4},
-	9:  {Col: 2, Row: 5},
-	10: {Col: 3, Row: 3},
-	11: {Col: 3, Row: 4},
+	return orders, debugMsg, nil
 }

@@ -16,23 +16,20 @@ import (
 
 func main() {
 
-	connectionStarter, err := clientGo.NewTurnHandlerConfig()
+	connectionStarter, defaultFieldMapper, err := clientGo.NewDefaultStarter()
 	if err != nil {
 		log.Fatalf("failed to load the bot configuration: %s", err)
 	}
 
 	//
 	// Optional: define your own field mapper
-	//
-	//playerMapper, err := mapper.NewMapper(32, 15, connectionStarter.Config.TeamSide)
-	//if err != nil {
-	//	log.Fatalf("failed to create a field mapper: %s", err)
-	//}
-	//connectionStarter.FieldMapper = playerMapper
-	//
+	// defaultFieldMapper, err = mapper.NewMapper(NUM_COLS, NUM_ROWS, connectionStarter.Config.TeamSide)
+	// if err != nil {
+	// 	log.Fatalf("failed to create a field mapper: %s", err)
+	// }
 
-	if err := connectionStarter.Run(&TurnHandler{
-		FieldMapper: connectionStarter.FieldMapper,
+	if err := connectionStarter.RunJustTurnHandler(&BasicBot{
+		FieldMapper: defaultFieldMapper,
 		Config:      connectionStarter.Config,
 		Logger:      connectionStarter.Logger,
 	}); err != nil {
@@ -40,7 +37,7 @@ func main() {
 	}
 }
 
-type TurnHandler struct {
+type BasicBot struct {
 	FieldMapper mapper.Mapper
 	Config      clientGo.Config
 	Logger      *zap.SugaredLogger
@@ -52,11 +49,11 @@ func init() {
 	random = rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
-func (t *TurnHandler) GetReadyHandler(ctx context.Context, snapshot clientGo.SnapshotInspector) {
+func (t *BasicBot) GetReadyHandler(ctx context.Context, snapshot clientGo.SnapshotInspector) {
 	t.Logger.Debug("the game is ready to start or the score has changed")
 }
 
-func (t *TurnHandler) TurnHandler(ctx context.Context, inspector clientGo.SnapshotInspector) ([]proto.PlayerOrder, string, error) {
+func (t *BasicBot) TurnHandler(ctx context.Context, inspector clientGo.SnapshotInspector) ([]proto.PlayerOrder, string, error) {
 	var orders []proto.PlayerOrder
 	// we are going to kick the ball as soon as we catch it
 	me := inspector.GetMe()

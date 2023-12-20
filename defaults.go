@@ -11,6 +11,11 @@ import (
 	"github.com/lugobots/lugo4go/v3/proto"
 )
 
+const (
+	DefaultFieldMapCols = 16
+	DefaultFieldMapRows = 8
+)
+
 // DefaultLogger creates a logger that is compatible with the lugo4go.rawBot expected logger.
 // The bots are NOT obligated to use this logger though. You may implement your own logger.
 func DefaultLogger(config Config) *zap.SugaredLogger {
@@ -31,7 +36,7 @@ func DefaultInitBundle() (Config, mapper.Mapper, *zap.SugaredLogger, error) {
 	}
 
 	// default initial position
-	defaultMapper, _ := mapper.NewMapper(16, 8, config.TeamSide)
+	defaultMapper, _ := mapper.NewMapper(DefaultFieldMapCols, DefaultFieldMapRows, config.TeamSide)
 	defaultFieldMap := DefaultRoleMap["initial"]
 	defaultInitialRegion, _ := defaultMapper.GetRegion(defaultFieldMap[int(config.Number)].Col, defaultFieldMap[int(config.Number)].Row)
 	config.InitialPosition = defaultInitialRegion.Center()
