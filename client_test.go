@@ -14,7 +14,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 
-	util2 "github.com/lugobots/lugo4go/v3/pkg/util"
 	"github.com/lugobots/lugo4go/v3/proto"
 )
 
@@ -54,7 +53,7 @@ func TestNewRawClient(t *testing.T) {
 		t.Fatalf("did not start mock server: %s", err)
 	}
 
-	config := util2.Config{
+	config := Config{
 		GRPCAddress:     fmt.Sprintf(":%d", testServerPort),
 		Insecure:        true,
 		TeamSide:        proto.Team_HOME,
@@ -91,7 +90,7 @@ func TestNewRawClient(t *testing.T) {
 	}
 }
 
-func TestClient_PlayCallsHandlerForEachMessage(t *testing.T) {
+func TestClient_PlayEndsTheConnectionCorrectly(t *testing.T) {
 	// initiates Mock controller
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish() // checks all expected things for mocks
@@ -100,25 +99,39 @@ func TestClient_PlayCallsHandlerForEachMessage(t *testing.T) {
 	mockStream := NewMockGame_JoinATeamClient(ctrl)
 	mockGRPCClient := NewMockGameClient(ctrl)
 	mockHandler := NewMockTurnHandler(ctrl)
+	mockSender := NewMockOrderSender(ctrl)
 
 	c := &Client{
 		Stream:     mockStream,
 		GRPCClient: mockGRPCClient,
 		Handler:    mockHandler,
+		config: Config{
+			TeamSide: proto.Team_AWAY,
+			Number:   5,
+		},
+		Sender: mockSender,
 	}
 
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
 
 	// defining expectations
-	expectedSnapshot := &proto.GameSnapshot{Turn: 200}
+	expectedSnapshot := &proto.GameSnapshot{
+		Turn: 200,
+		AwayTeam: &proto.Team{
+			Players: []*proto.Player{
+				{Number: 5},
+			},
+		},
+	}
 	mockStream.EXPECT().Recv().Return(expectedSnapshot, nil)
 	mockStream.EXPECT().Recv().DoAndReturn(func() {
 		//let's pretend some interval between messages
 		time.Sleep(50 * time.Millisecond)
 	}).Return(nil, io.EOF)
 
-	mockHandler.EXPECT().Handle(gomock.Any(), expectedSnapshot)
+	mockHandler.EXPECT().Handle(gomock.Any(), gomock.Any())
+	mockSender.EXPECT().Send(gomock.Any(), gomock.Any(), nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
 
 	err := c.Play(mockHandler)
 	done()
@@ -171,19 +184,31 @@ func TestClient_PlayShouldStopContextWhenANewTurnStarts(t *testing.T) {
 	mockStream := NewMockGame_JoinATeamClient(ctrl)
 	mockGRPCClient := NewMockGameClient(ctrl)
 	mockHandler := NewMockTurnHandler(ctrl)
+	mockSender := NewMockOrderSender(ctrl)
 
 	c := &Client{
 		Stream:     mockStream,
 		GRPCClient: mockGRPCClient,
 		Handler:    mockHandler,
+		config: Config{
+			TeamSide: proto.Team_AWAY,
+			Number:   5,
+		},
+		Sender: mockSender,
 	}
 
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
 	waiting, done := context.WithTimeout(context.Background(), 500*time.Millisecond)
 
+	awayTeam := &proto.Team{
+		Players: []*proto.Player{
+			{Number: 5},
+		},
+	}
+
 	// defining expectations
-	expectedSnapshotA := &proto.GameSnapshot{Turn: 200}
-	expectedSnapshotB := &proto.GameSnapshot{Turn: 201}
+	expectedSnapshotA := &proto.GameSnapshot{Turn: 200, AwayTeam: awayTeam}
+	expectedSnapshotB := &proto.GameSnapshot{Turn: 201, AwayTeam: awayTeam}
 	mockStream.EXPECT().Recv().Return(expectedSnapshotA, nil)
 	mockStream.EXPECT().Recv().Return(expectedSnapshotB, nil)
 	mockStream.EXPECT().Recv().Return(nil, io.EOF)
@@ -194,22 +219,25 @@ func TestClient_PlayShouldStopContextWhenANewTurnStarts(t *testing.T) {
 	// we expect that it finishes immediately after the stream gets a new turn msg
 	// if it does not, the next handler will unblock it, but it will be considered an error
 	mockHandler.EXPECT().
-		Handle(gomock.Any(), expectedSnapshotA).
-		DoAndReturn(func(ctx context.Context, snapshot *proto.GameSnapshot) {
+		Handle(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, inspector SnapshotInspector) {
 			select {
 			case <-ctx.Done():
 				firstHandlerIsExpired = true
 			case <-holder:
 				firstHandlerIsExpired = false
 			}
-		})
+
+		}).Return(nil, "", nil)
 
 	// the second call to handler will close our channel just to ensure anything will be left behind in your test
 	mockHandler.EXPECT().
-		Handle(gomock.Any(), expectedSnapshotB).
-		DoAndReturn(func(ctx context.Context, snapshot *proto.GameSnapshot) {
+		Handle(gomock.Any(), gomock.Any()).
+		DoAndReturn(func(ctx context.Context, inspector SnapshotInspector) {
 			close(holder)
-		})
+		}).Return(nil, "", nil)
+
+	mockSender.EXPECT().Send(gomock.Any(), gomock.Any(), nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil).AnyTimes()
 
 	err := c.Play(mockHandler)
 	done()

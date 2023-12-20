@@ -47,6 +47,35 @@ type Goal struct {
 	BottomPole proto.Point
 }
 
+func AwayTeamGoal() Goal {
+	return Goal{
+		Place:      proto.Team_HOME,
+		Center:     proto.Point{X: 0, Y: specs.MaxYCoordinate / 2},
+		TopPole:    proto.Point{X: 0, Y: specs.GoalMaxY},
+		BottomPole: proto.Point{X: 0, Y: specs.GoalMinY},
+	}
+}
+
+func HomeTeamGoal() Goal {
+	return Goal{
+		Place:      proto.Team_AWAY,
+		Center:     proto.Point{X: specs.MaxXCoordinate, Y: specs.MaxYCoordinate / 2},
+		TopPole:    proto.Point{X: specs.MaxXCoordinate, Y: specs.GoalMaxY},
+		BottomPole: proto.Point{X: specs.MaxXCoordinate, Y: specs.GoalMinY},
+	}
+}
+
+func GetTeamsGoal(side proto.Team_Side) Goal {
+	if side == proto.Team_HOME {
+		return HomeTeamGoal()
+	}
+	return AwayTeamGoal()
+}
+
+func FieldCenter() proto.Point {
+	return proto.Point{X: specs.MaxXCoordinate / 2, Y: specs.MaxYCoordinate / 2}
+}
+
 // Important note: since our bot needs to have the best performance possible. We may ensure that some errors will never
 // happen based on our configuration. Once the errors are in a controlled and limited list of methods, we are able
 // to ignore the errors during the game, and only test them in our unit tests.
@@ -100,45 +129,16 @@ type Map struct {
 
 func (m *Map) GetMyTeamGoal() Goal {
 	if m.TeamSide == proto.Team_HOME {
-		return m.HomeTeamGoal()
+		return HomeTeamGoal()
 	}
-	return m.AwayTeamGoal()
+	return AwayTeamGoal()
 }
 
 func (m *Map) GetOpponentGoal() Goal {
 	if m.TeamSide != proto.Team_HOME {
-		return m.HomeTeamGoal()
+		return HomeTeamGoal()
 	}
-	return m.AwayTeamGoal()
-}
-
-func (m *Map) AwayTeamGoal() Goal {
-	return Goal{
-		Place:      proto.Team_HOME,
-		Center:     proto.Point{X: 0, Y: specs.MaxYCoordinate / 2},
-		TopPole:    proto.Point{X: 0, Y: specs.GoalMaxY},
-		BottomPole: proto.Point{X: 0, Y: specs.GoalMinY},
-	}
-}
-
-func (m *Map) HomeTeamGoal() Goal {
-	return Goal{
-		Place:      proto.Team_AWAY,
-		Center:     proto.Point{X: specs.MaxXCoordinate, Y: specs.MaxYCoordinate / 2},
-		TopPole:    proto.Point{X: specs.MaxXCoordinate, Y: specs.GoalMaxY},
-		BottomPole: proto.Point{X: specs.MaxXCoordinate, Y: specs.GoalMinY},
-	}
-}
-
-func (m *Map) GetTeamsGoal(side proto.Team_Side) Goal {
-	if side == proto.Team_HOME {
-		return m.HomeTeamGoal()
-	}
-	return m.AwayTeamGoal()
-}
-
-func (m *Map) FieldCenter() proto.Point {
-	return proto.Point{X: specs.MaxXCoordinate / 2, Y: specs.MaxYCoordinate / 2}
+	return AwayTeamGoal()
 }
 
 func (m *Map) GetRegion(col, row int) (Region, error) {

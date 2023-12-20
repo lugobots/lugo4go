@@ -16,7 +16,7 @@ type TurnData struct {
 type TurnHandler interface {
 
 	// Handle is called every turn with the new game state
-	Handle(ctx context.Context, snapshot *proto.GameSnapshot)
+	Handle(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
 }
 
 type OrderSender interface {

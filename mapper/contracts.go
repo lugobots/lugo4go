@@ -20,11 +20,6 @@ type Mapper interface {
 
 	GetMyTeamGoal() Goal
 	GetOpponentGoal() Goal
-
-	AwayTeamGoal() Goal
-	HomeTeamGoal() Goal
-	GetTeamsGoal(side proto.Team_Side) Goal
-	FieldCenter() proto.Point
 }
 
 // Region represent a quadrant on the field. It is not always squared form because you may define how many cols/rows

@@ -2,15 +2,15 @@ package lugo4go
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/lugobots/lugo4go/v3/proto"
 	"github.com/lugobots/lugo4go/v3/specs"
 )
 
-func hewTurnHandler(bot Bot, sender OrderSender, logger Logger, playerNumber uint32, side proto.Team_Side) *handler {
+func hewTurnHandler(bot Bot, logger Logger, playerNumber uint32, side proto.Team_Side) *handler {
 	return &handler{
 		Logger:       logger,
-		Sender:       sender,
 		PlayerNumber: playerNumber,
 		Side:         side,
 		Bot:          bot,
@@ -21,61 +21,38 @@ func hewTurnHandler(bot Bot, sender OrderSender, logger Logger, playerNumber uin
 // states.
 type handler struct {
 	Logger       Logger
-	Sender       OrderSender
 	PlayerNumber uint32
 	Side         proto.Team_Side
 	Bot          Bot
 }
 
-func (h *handler) Handle(ctx context.Context, snapshot *proto.GameSnapshot) {
-	var err error
-	var state PlayerState
+func (h *handler) Handle(ctx context.Context, snapshotTools SnapshotInspector) ([]proto.PlayerOrder, string, error) {
+	if snapshotTools == nil {
+		return nil, "", fmt.Errorf("error processing turn: %s", ErrNilSnapshot)
 
-	if snapshot == nil {
-		h.Logger.Errorf("error processing turn: %s", ErrNilSnapshot)
-		return
 	}
 
-	state, err = defineMyState(snapshot, h.PlayerNumber, h.Side)
+	state, err := defineMyState(snapshotTools.GetSnapshot(), h.PlayerNumber, h.Side)
 	if err != nil {
-		h.Logger.Errorf("error processing turn %d: %s", snapshot.Turn, err)
-		return
-	}
-	// TODO bad practice - create a SnapshotToolMaker to allow it to be created externally
-	snapshotTools, err := newInspector(h.Side, int(h.PlayerNumber), snapshot)
-	if err != nil {
-		h.Logger.Errorf("failed to create an inspector for the game snapshot: %s", err)
-		return
+		return nil, "", fmt.Errorf("error processing turn %d: %s", snapshotTools.GetSnapshot().Turn, err)
+
 	}
 
-	var orders []proto.PlayerOrder
-	var debugMsg string
 	if specs.GoalkeeperNumber == h.PlayerNumber {
-		orders, debugMsg, err = h.Bot.AsGoalkeeper(ctx, snapshotTools, state)
+		return h.Bot.AsGoalkeeper(ctx, snapshotTools, state)
 	} else {
 		switch state {
 		case Supporting:
-			orders, debugMsg, err = h.Bot.OnSupporting(ctx, snapshotTools)
+			return h.Bot.OnSupporting(ctx, snapshotTools)
 		case HoldingTheBall:
-			orders, debugMsg, err = h.Bot.OnHolding(ctx, snapshotTools)
+			return h.Bot.OnHolding(ctx, snapshotTools)
 		case Defending:
-			orders, debugMsg, err = h.Bot.OnDefending(ctx, snapshotTools)
+			return h.Bot.OnDefending(ctx, snapshotTools)
 		case DisputingTheBall:
-			orders, debugMsg, err = h.Bot.OnDisputing(ctx, snapshotTools)
+			return h.Bot.OnDisputing(ctx, snapshotTools)
 		}
 	}
-	if err != nil {
-		h.Logger.Errorf("error processing turn %d: %s", snapshot.Turn, err)
-		return
-	}
-	resp, errSend := h.Sender.Send(ctx, snapshot.Turn, orders, debugMsg)
-	if errSend != nil {
-		h.Logger.Errorf("error sending orders to turn %d: %s", snapshot.Turn, errSend)
-		return
-	} else if resp.Code != proto.OrderResponse_SUCCESS {
-		h.Logger.Errorf("order not sent during turn %d: %s", snapshot.Turn, resp.String())
-		return
-	}
+	return nil, "", fmt.Errorf("unknown player state '%s'", state)
 }
 
 // PlayerState defines states specific for players

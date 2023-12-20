@@ -1,4 +1,4 @@
-package util
+package lugo4go
 
 import (
 	"os"
@@ -126,7 +126,7 @@ func TestLoadConfig(t *testing.T) {
 			}
 
 			config := Config{}
-			err := config.LoadConfig(tc.args)
+			err := config.loadConfig(tc.args)
 			if err == nil {
 				assert.Equal(t, tc.expectedConfig.GRPCAddress, config.GRPCAddress, caseName)
 			} else {

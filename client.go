@@ -10,7 +10,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/stats"
 
-	"github.com/lugobots/lugo4go/v3/pkg/util"
 	"github.com/lugobots/lugo4go/v3/proto"
 )
 
@@ -18,7 +17,7 @@ import (
 const ProtocolVersion = "0.0.1"
 
 // NewClient creates a Lugo4Go client that will hide common logic and let you focus on your bot.
-func NewClient(config util.Config) (*Client, error) {
+func NewClient(config Config) (*Client, error) {
 	var err error
 	c := &Client{
 		config: config,
@@ -51,6 +50,9 @@ func NewClient(config util.Config) (*Client, error) {
 	}); err != nil {
 		return nil, err
 	}
+
+	c.Sender = NewSender(c.GRPCClient)
+
 	return c, nil
 }
 
@@ -61,14 +63,14 @@ type Client struct {
 	grpcConn   *grpc.ClientConn
 	Handler    TurnHandler
 	Logger     Logger
-	config     util.Config
+	Sender     OrderSender
+	config     Config
 }
 
 // PlayAsBot is a sugared Play mode that uses an TurnHandler from coach package.
 // Coach TurnHandler creates basic player states to help the development of new bots.
 func (c *Client) PlayAsBot(bot Bot, logger Logger) error {
-	sender := NewSender(c.GRPCClient)
-	handler := hewTurnHandler(bot, sender, logger, c.config.Number, c.config.TeamSide)
+	handler := hewTurnHandler(bot, logger, c.config.Number, c.config.TeamSide)
 	return c.Play(handler)
 }
 
@@ -90,9 +92,12 @@ func (c *Client) Play(handler TurnHandler) error {
 		turnCrx, stop = context.WithCancel(context.Background())
 		// to avoid race conditions we need to ensure that the loop can only start after the Go routine has started.
 		mustHasStarted := make(chan bool)
+		mySide := c.config.TeamSide
+		myNumber := c.config.Number
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
+					fmt.Printf("%v", r)
 					c.Logger.Warnf("panic recovered: %v", r)
 				}
 			}()
@@ -100,7 +105,27 @@ func (c *Client) Play(handler TurnHandler) error {
 			m.Lock()
 			close(mustHasStarted)
 			defer m.Unlock()
-			handler.Handle(turnCrx, snapshot)
+
+			// TODO bad practice - create a SnapshotToolMaker to allow it to be created externally
+			snapshotInspector, err := newInspector(mySide, int(myNumber), snapshot)
+			if err != nil {
+				c.Logger.Errorf("failed to create an inspector for the game snapshot: %s", err)
+				return
+			}
+
+			playerOrders, debugMsg, err := handler.Handle(turnCrx, snapshotInspector)
+			if err != nil {
+				c.Logger.Errorf("failed to orders to the turn %d: %s", snapshot.Turn, err)
+				return
+			}
+
+			resp, errSend := c.Sender.Send(turnCrx, snapshot.Turn, playerOrders, debugMsg)
+			if errSend != nil {
+				c.Logger.Errorf("error sending orders to turn %d: %s", snapshot.Turn, errSend)
+			} else if resp.Code != proto.OrderResponse_SUCCESS {
+				c.Logger.Errorf("order not sent during turn %d: %s", snapshot.Turn, resp.String())
+			}
+
 		}()
 		<-mustHasStarted
 	}
