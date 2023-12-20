@@ -7,24 +7,28 @@ import (
 	"github.com/lugobots/lugo4go/v3/proto"
 )
 
-type TurnData struct {
-	Me       *proto.Player
-	Snapshot *proto.GameSnapshot
+// RawBot is required by the Lugo4Go client to handle each turn snapshot
+type RawBot interface {
+
+	// TurnHandler is called every turn with the new game state
+	TurnHandler(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
+	GetReadyHandler(ctx context.Context, snapshot SnapshotInspector)
 }
 
-// TurnHandler is required by the Lugo4Go client to handle each turn snapshot
-type TurnHandler interface {
+type Bot interface {
+	// OnDisputing is called when no one has the ball possession
+	OnDisputing(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
+	// OnDefending is called when an opponent player has the ball possession
+	OnDefending(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
+	// OnHolding is called when this bot has the ball possession
+	OnHolding(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
+	// OnSupporting is called when a teammate player has the ball possession
+	OnSupporting(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
+	// AsGoalkeeper is only called when this bot is the goalkeeper (number 1). This method is called on every turn,
+	// and the player state is passed at the last parameter.
+	AsGoalkeeper(ctx context.Context, snapshot SnapshotInspector, state PlayerState) ([]proto.PlayerOrder, string, error)
 
-	// Handle is called every turn with the new game state
-	Handle(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
-}
-
-type OrderSender interface {
-	Send(ctx context.Context, turn uint32, orders []proto.PlayerOrder, debugMsg string) (*proto.OrderResponse, error)
-}
-
-type TurnOrdersSender interface {
-	Send(ctx context.Context, orders []proto.PlayerOrder, debugMsg string) (*proto.OrderResponse, error)
+	OnGetReady(ctx context.Context, snapshot SnapshotInspector)
 }
 
 type SnapshotInspector interface {
@@ -48,8 +52,8 @@ type SnapshotInspector interface {
 
 	MakeOrderMoveMaxSpeed(target proto.Point) (*proto.Order_Move, error)
 	MakeOrderMoveFromPoint(origin, target proto.Point, speed float64) (*proto.Order_Move, error)
-	MakeOrderMoveFromVector(vector proto.Vector, speed float64) (*proto.Order_Move, error)
-	MakeOrderMoveByDirection(direction mapper.Direction, speed float64) (*proto.Order_Move, error)
+	MakeOrderMoveFromVector(vector proto.Vector, speed float64) *proto.Order_Move
+	MakeOrderMoveByDirection(direction mapper.Direction, speed float64) *proto.Order_Move
 
 	MakeOrderJump(target proto.Point, speed float64) (*proto.Order_Jump, error)
 
@@ -60,20 +64,6 @@ type SnapshotInspector interface {
 	MakeOrderCatch() *proto.Order_Catch
 }
 
-type Bot interface {
-	// OnDisputing is called when no one has the ball possession
-	OnDisputing(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
-	// OnDefending is called when an opponent player has the ball possession
-	OnDefending(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
-	// OnHolding is called when this bot has the ball possession
-	OnHolding(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
-	// OnSupporting is called when a teammate player has the ball possession
-	OnSupporting(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
-	// AsGoalkeeper is only called when this bot is the goalkeeper (number 1). This method is called on every turn,
-	// and the player state is passed at the last parameter.
-	AsGoalkeeper(ctx context.Context, snapshot SnapshotInspector, state PlayerState) ([]proto.PlayerOrder, string, error)
-}
-
 type Logger interface {
 	Debug(args ...interface{})
 	Debugf(template string, args ...interface{})
@@ -81,4 +71,8 @@ type Logger interface {
 	Warnf(template string, args ...interface{})
 	Errorf(template string, args ...interface{})
 	Fatalf(template string, args ...interface{})
+}
+
+type OrderSender interface {
+	Send(ctx context.Context, turn uint32, orders []proto.PlayerOrder, debugMsg string) (*proto.OrderResponse, error)
 }

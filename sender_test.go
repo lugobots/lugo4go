@@ -16,7 +16,7 @@ func TestSender_Send(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockGRPCClient := NewMockGameClient(ctrl)
-	sender := Sender{GRPCClient: mockGRPCClient}
+	sender := sender{GRPCClient: mockGRPCClient}
 
 	velocitySample := proto.NewZeroedVelocity(proto.North())
 	moveOrder := &proto.Order_Move{

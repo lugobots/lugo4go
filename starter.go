@@ -3,39 +3,35 @@ package lugo4go
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
+
+	"go.uber.org/zap"
 
 	"github.com/lugobots/lugo4go/v3/mapper"
 )
 
 func NewTurnHandlerConfig() (*Starter, error) {
-	playerConfig, _, err := DefaultInitBundle()
+	playerConfig, defaultMapper, logger, err := DefaultInitBundle()
 	if err != nil {
 		return nil, fmt.Errorf("could not init default config or logger: %w", err)
 	}
-	// defining default initial player position
-	tempMapper, _ := mapper.NewMapper(11, 7, playerConfig.TeamSide)
-
-	region, _ := tempMapper.GetRegion(FieldMap[playerConfig.Number].Col, FieldMap[playerConfig.Number].Row)
-
-	// just creating a position for example purposes
-	playerConfig.InitialPosition = region.Center()
 
 	return &Starter{
 		Config:      playerConfig,
-		FieldMapper: tempMapper,
+		FieldMapper: defaultMapper,
+		Logger:      logger,
 	}, nil
 }
 
 type Starter struct {
 	Config      Config
 	FieldMapper mapper.Mapper
+	Logger      *zap.SugaredLogger
 }
 
-func (s *Starter) Run(handler TurnHandler) error {
-	player, err := NewClient(s.Config)
+func (s *Starter) Run(handler RawBot) error {
+	player, err := NewClient(s.Config, s.Logger)
 	if err != nil {
 		return fmt.Errorf("could not init the client: %w", err)
 	}
@@ -44,7 +40,7 @@ func (s *Starter) Run(handler TurnHandler) error {
 	go func() {
 		defer stop()
 		if err := player.Play(handler); err != nil {
-			log.Printf("bot stopped with an error: %s", err)
+			s.Logger.Errorf("bot stopped with an error: %s", err)
 		}
 	}()
 
@@ -54,24 +50,9 @@ func (s *Starter) Run(handler TurnHandler) error {
 	case <-ctx.Done():
 	case <-signalChan:
 		if err := player.Stop(); err != nil {
-			log.Printf("error stopping bot: %s", err)
+			s.Logger.Errorf("error stopping bot: %s", err)
 		}
 	}
+	s.Logger.Debug("bot stopped")
 	return nil
-}
-
-var FieldMap = map[uint32]struct {
-	Col int
-	Row int
-}{
-	2:  {Col: 1, Row: 1},
-	3:  {Col: 1, Row: 3},
-	4:  {Col: 1, Row: 4},
-	5:  {Col: 1, Row: 6},
-	6:  {Col: 2, Row: 2},
-	7:  {Col: 2, Row: 3},
-	8:  {Col: 2, Row: 4},
-	9:  {Col: 2, Row: 5},
-	10: {Col: 3, Row: 3},
-	11: {Col: 3, Row: 4},
 }

@@ -8,8 +8,8 @@ import (
 	"github.com/lugobots/lugo4go/v3/specs"
 )
 
-func hewTurnHandler(bot Bot, logger Logger, playerNumber uint32, side proto.Team_Side) *handler {
-	return &handler{
+func hewRawBotWrapper(bot Bot, logger Logger, playerNumber uint32, side proto.Team_Side) *rawBotWrapper {
+	return &rawBotWrapper{
 		Logger:       logger,
 		PlayerNumber: playerNumber,
 		Side:         side,
@@ -17,39 +17,43 @@ func hewTurnHandler(bot Bot, logger Logger, playerNumber uint32, side proto.Team
 	}
 }
 
-// handler is a Lugo4go client handler that allow you to create an interface to follow a basic strategy based on team
+// rawBotWrapper is a Lugo4go client that allow you to create an interface to follow a basic strategy based on team
 // states.
-type handler struct {
+type rawBotWrapper struct {
 	Logger       Logger
 	PlayerNumber uint32
 	Side         proto.Team_Side
 	Bot          Bot
 }
 
-func (h *handler) Handle(ctx context.Context, snapshotTools SnapshotInspector) ([]proto.PlayerOrder, string, error) {
-	if snapshotTools == nil {
+func (h *rawBotWrapper) GetReadyHandler(ctx context.Context, inspector SnapshotInspector) {
+	h.Bot.OnGetReady(ctx, inspector)
+}
+
+func (h *rawBotWrapper) TurnHandler(ctx context.Context, inspector SnapshotInspector) ([]proto.PlayerOrder, string, error) {
+	if inspector == nil {
 		return nil, "", fmt.Errorf("error processing turn: %s", ErrNilSnapshot)
 
 	}
 
-	state, err := defineMyState(snapshotTools.GetSnapshot(), h.PlayerNumber, h.Side)
+	state, err := defineMyState(inspector.GetSnapshot(), h.PlayerNumber, h.Side)
 	if err != nil {
-		return nil, "", fmt.Errorf("error processing turn %d: %s", snapshotTools.GetSnapshot().Turn, err)
+		return nil, "", fmt.Errorf("error processing turn %d: %s", inspector.GetSnapshot().Turn, err)
 
 	}
 
 	if specs.GoalkeeperNumber == h.PlayerNumber {
-		return h.Bot.AsGoalkeeper(ctx, snapshotTools, state)
+		return h.Bot.AsGoalkeeper(ctx, inspector, state)
 	} else {
 		switch state {
 		case Supporting:
-			return h.Bot.OnSupporting(ctx, snapshotTools)
+			return h.Bot.OnSupporting(ctx, inspector)
 		case HoldingTheBall:
-			return h.Bot.OnHolding(ctx, snapshotTools)
+			return h.Bot.OnHolding(ctx, inspector)
 		case Defending:
-			return h.Bot.OnDefending(ctx, snapshotTools)
+			return h.Bot.OnDefending(ctx, inspector)
 		case DisputingTheBall:
-			return h.Bot.OnDisputing(ctx, snapshotTools)
+			return h.Bot.OnDisputing(ctx, inspector)
 		}
 	}
 	return nil, "", fmt.Errorf("unknown player state '%s'", state)

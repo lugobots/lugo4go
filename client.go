@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/stats"
 
@@ -17,10 +18,11 @@ import (
 const ProtocolVersion = "0.0.1"
 
 // NewClient creates a Lugo4Go client that will hide common logic and let you focus on your bot.
-func NewClient(config Config) (*Client, error) {
+func NewClient(config Config, logger *zap.SugaredLogger) (*Client, error) {
 	var err error
 	c := &Client{
 		config: config,
+		Logger: logger,
 	}
 
 	// A bot may eventually do not listen to server Stream (ignoring OnNewTurn). In this case, the Client must stop
@@ -50,9 +52,9 @@ func NewClient(config Config) (*Client, error) {
 	}); err != nil {
 		return nil, err
 	}
+	c.Logger.Debug("connected to the game server")
 
-	c.Sender = NewSender(c.GRPCClient)
-
+	c.Sender = newSender(c.GRPCClient)
 	return c, nil
 }
 
@@ -61,24 +63,24 @@ type Client struct {
 	Stream     proto.Game_JoinATeamClient
 	GRPCClient proto.GameClient
 	grpcConn   *grpc.ClientConn
-	Handler    TurnHandler
 	Logger     Logger
 	Sender     OrderSender
 	config     Config
 }
 
-// PlayAsBot is a sugared Play mode that uses an TurnHandler from coach package.
-// Coach TurnHandler creates basic player states to help the development of new bots.
+// PlayAsBot is a sugared Play mode that uses an RawBot from coach package.
+// Coach RawBot creates basic player states to help the development of new bots.
 func (c *Client) PlayAsBot(bot Bot, logger Logger) error {
-	handler := hewTurnHandler(bot, logger, c.config.Number, c.config.TeamSide)
+	handler := hewRawBotWrapper(bot, logger, c.config.Number, c.config.TeamSide)
 	return c.Play(handler)
 }
 
-// Play starts the player communication with the server. The TurnHandler will receive the raw snapshot from the
-// game server. The context passed to the handler will be canceled as soon a new turn starts.
-func (c *Client) Play(handler TurnHandler) error {
+// Play starts the player communication with the server. The RawBot will receive the raw snapshot from the
+// game server. The context passed to the rawBotWrapper will be canceled as soon a new turn starts.
+func (c *Client) Play(rawBot RawBot) error {
 	var turnCrx context.Context
 	var stop context.CancelFunc = func() {}
+	c.Logger.Debug("ready to play")
 	m := sync.Mutex{}
 	for {
 		snapshot, err := c.Stream.Recv()
@@ -89,11 +91,23 @@ func (c *Client) Play(handler TurnHandler) error {
 			}
 			return ErrGRPCConnectionClosed
 		}
+		mySide := c.config.TeamSide
+		myNumber := c.config.Number
+		// TODO bad practice - create a SnapshotToolMaker to allow it to be created externally
+		snapshotInspector, err := newInspector(mySide, int(myNumber), snapshot)
+
+		if snapshot.State == proto.GameSnapshot_GET_READY {
+			rawBot.GetReadyHandler(context.Background(), snapshotInspector)
+			continue
+		}
+		if snapshot.State != proto.GameSnapshot_LISTENING {
+			c.Logger.Errorf("wrong server version? the server sent a snapshot in an expected state: '%s'", snapshot.State)
+			continue
+		}
 		turnCrx, stop = context.WithCancel(context.Background())
 		// to avoid race conditions we need to ensure that the loop can only start after the Go routine has started.
 		mustHasStarted := make(chan bool)
-		mySide := c.config.TeamSide
-		myNumber := c.config.Number
+
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
@@ -106,14 +120,12 @@ func (c *Client) Play(handler TurnHandler) error {
 			close(mustHasStarted)
 			defer m.Unlock()
 
-			// TODO bad practice - create a SnapshotToolMaker to allow it to be created externally
-			snapshotInspector, err := newInspector(mySide, int(myNumber), snapshot)
 			if err != nil {
 				c.Logger.Errorf("failed to create an inspector for the game snapshot: %s", err)
 				return
 			}
 
-			playerOrders, debugMsg, err := handler.Handle(turnCrx, snapshotInspector)
+			playerOrders, debugMsg, err := rawBot.TurnHandler(turnCrx, snapshotInspector)
 			if err != nil {
 				c.Logger.Errorf("failed to orders to the turn %d: %s", snapshot.Turn, err)
 				return
@@ -136,22 +148,22 @@ func (c *Client) Stop() error {
 	return c.grpcConn.Close()
 }
 
-// TagRPC implements the interface required by gRPC handler
+// TagRPC implements the interface required by gRPC rawBotWrapper
 func (c *Client) TagRPC(ctx context.Context, _ *stats.RPCTagInfo) context.Context {
 	return ctx
 }
 
-// HandleRPC implements the interface required by gRPC handler
+// HandleRPC implements the interface required by gRPC rawBotWrapper
 func (c *Client) HandleRPC(context.Context, stats.RPCStats) {
 
 }
 
-// TagConn implements the interface required by gRPC handler
+// TagConn implements the interface required by gRPC rawBotWrapper
 func (c *Client) TagConn(ctx context.Context, _ *stats.ConnTagInfo) context.Context {
 	return ctx
 }
 
-// HandleConn implements the interface required by gRPC handler
+// HandleConn implements the interface required by gRPC rawBotWrapper
 func (c *Client) HandleConn(_ context.Context, sts stats.ConnStats) {
 	switch sts.(type) {
 	case *stats.ConnEnd:

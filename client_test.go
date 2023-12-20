@@ -77,7 +77,7 @@ func TestNewRawClient(t *testing.T) {
 	}), gomock.Any()).Return(nil)
 
 	// Now we may create the Client to connect to our fake server
-	playerClient, err := NewClient(config)
+	playerClient, err := NewClient(config, DefaultLogger(config))
 
 	// This last lines may run really quickly, and the server may not have ran the expected methods yet
 	// Let's give some time to the server run it before finish the test function
@@ -98,17 +98,17 @@ func TestClient_PlayEndsTheConnectionCorrectly(t *testing.T) {
 	// defining mocks and expected method calls
 	mockStream := NewMockGame_JoinATeamClient(ctrl)
 	mockGRPCClient := NewMockGameClient(ctrl)
-	mockHandler := NewMockTurnHandler(ctrl)
+	mockHandler := NewMockRawBot(ctrl)
 	mockSender := NewMockOrderSender(ctrl)
 
 	c := &Client{
 		Stream:     mockStream,
 		GRPCClient: mockGRPCClient,
-		Handler:    mockHandler,
 		config: Config{
 			TeamSide: proto.Team_AWAY,
 			Number:   5,
 		},
+		Logger: DefaultLogger(Config{}),
 		Sender: mockSender,
 	}
 
@@ -117,7 +117,8 @@ func TestClient_PlayEndsTheConnectionCorrectly(t *testing.T) {
 
 	// defining expectations
 	expectedSnapshot := &proto.GameSnapshot{
-		Turn: 200,
+		State: proto.GameSnapshot_LISTENING,
+		Turn:  200,
 		AwayTeam: &proto.Team{
 			Players: []*proto.Player{
 				{Number: 5},
@@ -130,7 +131,7 @@ func TestClient_PlayEndsTheConnectionCorrectly(t *testing.T) {
 		time.Sleep(50 * time.Millisecond)
 	}).Return(nil, io.EOF)
 
-	mockHandler.EXPECT().Handle(gomock.Any(), gomock.Any())
+	mockHandler.EXPECT().TurnHandler(gomock.Any(), gomock.Any())
 	mockSender.EXPECT().Send(gomock.Any(), gomock.Any(), nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
 
 	err := c.Play(mockHandler)
@@ -149,12 +150,12 @@ func TestClient_PlayReturnsTheRightError(t *testing.T) {
 	// defining mocks and expected method calls
 	mockStream := NewMockGame_JoinATeamClient(ctrl)
 	mockGRPCClient := NewMockGameClient(ctrl)
-	mockHandler := NewMockTurnHandler(ctrl)
+	mockHandler := NewMockRawBot(ctrl)
 
 	c := &Client{
 		Stream:     mockStream,
 		GRPCClient: mockGRPCClient,
-		Handler:    mockHandler,
+		Logger:     DefaultLogger(Config{}),
 	}
 
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
@@ -183,18 +184,18 @@ func TestClient_PlayShouldStopContextWhenANewTurnStarts(t *testing.T) {
 	// defining mocks and expected method calls
 	mockStream := NewMockGame_JoinATeamClient(ctrl)
 	mockGRPCClient := NewMockGameClient(ctrl)
-	mockHandler := NewMockTurnHandler(ctrl)
+	mockHandler := NewMockRawBot(ctrl)
 	mockSender := NewMockOrderSender(ctrl)
 
 	c := &Client{
 		Stream:     mockStream,
 		GRPCClient: mockGRPCClient,
-		Handler:    mockHandler,
 		config: Config{
 			TeamSide: proto.Team_AWAY,
 			Number:   5,
 		},
 		Sender: mockSender,
+		Logger: DefaultLogger(Config{}),
 	}
 
 	// it is an async test, we have to wait some stuff be done before finishing the game, but we do not want to freeze
@@ -207,19 +208,19 @@ func TestClient_PlayShouldStopContextWhenANewTurnStarts(t *testing.T) {
 	}
 
 	// defining expectations
-	expectedSnapshotA := &proto.GameSnapshot{Turn: 200, AwayTeam: awayTeam}
-	expectedSnapshotB := &proto.GameSnapshot{Turn: 201, AwayTeam: awayTeam}
+	expectedSnapshotA := &proto.GameSnapshot{State: proto.GameSnapshot_LISTENING, Turn: 200, AwayTeam: awayTeam}
+	expectedSnapshotB := &proto.GameSnapshot{State: proto.GameSnapshot_LISTENING, Turn: 201, AwayTeam: awayTeam}
 	mockStream.EXPECT().Recv().Return(expectedSnapshotA, nil)
 	mockStream.EXPECT().Recv().Return(expectedSnapshotB, nil)
 	mockStream.EXPECT().Recv().Return(nil, io.EOF)
 
 	firstHandlerIsExpired := false
 	holder := make(chan bool, 1)
-	// this is the first time the handler will be called
+	// this is the first time the rawBotWrapper will be called
 	// we expect that it finishes immediately after the stream gets a new turn msg
-	// if it does not, the next handler will unblock it, but it will be considered an error
+	// if it does not, the next rawBotWrapper will unblock it, but it will be considered an error
 	mockHandler.EXPECT().
-		Handle(gomock.Any(), gomock.Any()).
+		TurnHandler(gomock.Any(), gomock.Any()).
 		DoAndReturn(func(ctx context.Context, inspector SnapshotInspector) {
 			select {
 			case <-ctx.Done():
@@ -230,9 +231,9 @@ func TestClient_PlayShouldStopContextWhenANewTurnStarts(t *testing.T) {
 
 		}).Return(nil, "", nil)
 
-	// the second call to handler will close our channel just to ensure anything will be left behind in your test
+	// the second call to rawBotWrapper will close our channel just to ensure anything will be left behind in your test
 	mockHandler.EXPECT().
-		Handle(gomock.Any(), gomock.Any()).
+		TurnHandler(gomock.Any(), gomock.Any()).
 		DoAndReturn(func(ctx context.Context, inspector SnapshotInspector) {
 			close(holder)
 		}).Return(nil, "", nil)

@@ -88,8 +88,8 @@ package lugo4go
 //
 //	config := util.Config{Number: 4, TeamSide: proto.Team_HOME}
 //
-//	handler := hewTurnHandler(mockBot, mockSender, mockLog, config.Number, config.TeamSide)
-//	goalkeeperHandler := hewTurnHandler(mockBotGoalkeeper, mockSender, mockLog, specs.GoalkeeperNumber, config.TeamSide)
+//	rawBotWrapper := hewRawBotWrapper(mockBot, mockSender, mockLog, config.Number, config.TeamSide)
+//	goalkeeperHandler := hewRawBotWrapper(mockBotGoalkeeper, mockSender, mockLog, specs.GoalkeeperNumber, config.TeamSide)
 //
 //	ctx, stop := context.WithTimeout(context.Background(), 1*time.Second)
 //	defer stop()
@@ -110,51 +110,51 @@ package lugo4go
 //	// disputing
 //	mockBot.EXPECT().OnDisputing(ctx, snapshot)
 //	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
-//	handler.Handle(ctx, snapshot)
+//	rawBotWrapper.rawBot(ctx, snapshot)
 //
 //	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, snapshot, DisputingTheBall)
 //	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
-//	goalkeeperHandler.Handle(ctx, snapshot)
+//	goalkeeperHandler.rawBot(ctx, snapshot)
 //
 //	// supporting
 //	ball.Holder = myFriend
 //	mockBot.EXPECT().OnSupporting(ctx, snapshot)
 //	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
-//	handler.Handle(ctx, snapshot)
+//	rawBotWrapper.rawBot(ctx, snapshot)
 //
 //	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, snapshot, Supporting)
 //	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
-//	goalkeeperHandler.Handle(ctx, snapshot)
+//	goalkeeperHandler.rawBot(ctx, snapshot)
 //
 //	// Defending
 //	ball.Holder = myOpponent
 //	mockBot.EXPECT().OnDefending(ctx, snapshot)
 //	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
-//	handler.Handle(ctx, snapshot)
+//	rawBotWrapper.rawBot(ctx, snapshot)
 //
 //	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, snapshot, Defending)
 //	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
-//	goalkeeperHandler.Handle(ctx, snapshot)
+//	goalkeeperHandler.rawBot(ctx, snapshot)
 //
 //	// holding
 //	ball.Holder = me
 //	mockBot.EXPECT().OnHolding(ctx, snapshot)
 //	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
-//	handler.Handle(ctx, snapshot)
+//	rawBotWrapper.rawBot(ctx, snapshot)
 //
 //	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, snapshot, Supporting)
 //	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
-//	goalkeeperHandler.Handle(ctx, snapshot)
+//	goalkeeperHandler.rawBot(ctx, snapshot)
 //
 //	// supporting (goalkeeper holding the ball
 //	ball.Holder = goalKeeper
 //	mockBot.EXPECT().OnSupporting(ctx, snapshot)
 //	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
-//	handler.Handle(ctx, snapshot)
+//	rawBotWrapper.rawBot(ctx, snapshot)
 //
 //	mockBotGoalkeeper.EXPECT().AsGoalkeeper(ctx, snapshot, HoldingTheBall)
 //	mockSender.EXPECT().Send(ctx, snapshot.Turn, nil, "").Return(&proto.OrderResponse{Code: proto.OrderResponse_SUCCESS}, nil)
-//	goalkeeperHandler.Handle(ctx, snapshot)
+//	goalkeeperHandler.rawBot(ctx, snapshot)
 //}
 //
 //func TestHandler_Handle_ShouldLogErrors(t *testing.T) {
@@ -168,7 +168,7 @@ package lugo4go
 //	//mockSender := NewMockOrderSender(ctrl)
 //
 //	config := util.Config{Number: 4, TeamSide: proto.Team_HOME}
-//	handler := hewTurnHandler(mockBot, mockSender, mockLog, config.Number, config.TeamSide)
+//	rawBotWrapper := hewRawBotWrapper(mockBot, mockSender, mockLog, config.Number, config.TeamSide)
 //
 //	//ball := &proto.Ball{}
 //	//snapshot := &proto.GameSnapshot{
@@ -183,7 +183,7 @@ package lugo4go
 //			assert.True(t, ok)
 //			assert.Equal(t, ErrNilSnapshot, e)
 //		})
-//		handler.Handle(ctx, nil)
+//		rawBotWrapper.rawBot(ctx, nil)
 //	})
 //	snapshot := &proto.GameSnapshot{
 //		//Ball:     ball,
@@ -197,7 +197,7 @@ package lugo4go
 //			assert.True(t, ok)
 //			assert.Equal(t, ErrNoBall, e)
 //		})
-//		handler.Handle(ctx, snapshot)
+//		rawBotWrapper.rawBot(ctx, snapshot)
 //	})
 //
 //	snapshot.Ball = &proto.Ball{}
@@ -213,6 +213,6 @@ package lugo4go
 //			assert.True(t, ok)
 //			assert.Equal(t, expectedError, e)
 //		})
-//		handler.Handle(ctx, snapshot)
+//		rawBotWrapper.rawBot(ctx, snapshot)
 //	})
 //}

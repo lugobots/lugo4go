@@ -106,13 +106,16 @@ func (i *inspector) MakeOrderMoveFromPoint(origin, target proto.Point, speed flo
 	return &proto.Order_Move{Move: &proto.Move{Velocity: &vel}}, nil
 }
 
-func (i *inspector) MakeOrderMoveFromVector(vector proto.Vector, speed float64) (*proto.Order_Move, error) {
+func (i *inspector) MakeOrderMoveFromVector(vector proto.Vector, speed float64) *proto.Order_Move {
 	targetPoint := vector.TargetFrom(*i.me.Position)
-	return i.MakeOrderMoveFromPoint(*i.me.Position, targetPoint, speed)
+	// no need to check for errors since a vector will always lead to a valid destination
+	order, _ := i.MakeOrderMoveFromPoint(*i.me.Position, targetPoint, speed)
+	return order
 }
 
-func (i *inspector) MakeOrderMoveByDirection(direction mapper.Direction, speed float64) (*proto.Order_Move, error) {
+func (i *inspector) MakeOrderMoveByDirection(direction mapper.Direction, speed float64) *proto.Order_Move {
 	directionTarget := directionOrientationMap[i.mySide][direction]
+	// no need to check for errors since the vector is known and valid
 	return i.MakeOrderMoveFromVector(proto.Vector(directionTarget), speed)
 }
 
