@@ -100,6 +100,10 @@ func (i *inspector) GetOpponentGoalkeeper() *proto.Player {
 	return i.GetPlayer(i.GetOpponentSide(), int(specs.GoalkeeperNumber))
 }
 
+func (i *inspector) MakeOrderMove(target proto.Point, speed float64) (*proto.Order_Move, error) {
+	return i.MakeOrderMoveFromPoint(*i.me.Position, target, speed)
+}
+
 func (i *inspector) MakeOrderMoveMaxSpeed(target proto.Point) (*proto.Order_Move, error) {
 	return i.MakeOrderMoveFromPoint(*i.me.Position, target, specs.PlayerMaxSpeed)
 }
