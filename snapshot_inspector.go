@@ -92,6 +92,14 @@ func (i *inspector) GetOpponentPlayers() []*proto.Player {
 	return i.GetTeam(i.GetOpponentSide()).Players
 }
 
+func (i *inspector) GetMyTeamGoalkeeper() *proto.Player {
+	return i.GetPlayer(i.GetMyTeamSide(), int(specs.GoalkeeperNumber))
+}
+
+func (i *inspector) GetOpponentGoalkeeper() *proto.Player {
+	return i.GetPlayer(i.GetOpponentSide(), int(specs.GoalkeeperNumber))
+}
+
 func (i *inspector) MakeOrderMoveMaxSpeed(target proto.Point) (*proto.Order_Move, error) {
 	return i.MakeOrderMoveFromPoint(*i.me.Position, target, specs.PlayerMaxSpeed)
 }
@@ -117,6 +125,15 @@ func (i *inspector) MakeOrderMoveByDirection(direction mapper.Direction, speed f
 	directionTarget := directionOrientationMap[i.mySide][direction]
 	// no need to check for errors since the vector is known and valid
 	return i.MakeOrderMoveFromVector(proto.Vector(directionTarget), speed)
+}
+
+func (i *inspector) MakeOrderMoveToStop() *proto.Order_Move {
+	myDirection := i.GetMe().GetVelocity().GetDirection()
+	if myDirection == nil {
+		v := proto.Vector(directionOrientationMap[i.mySide][mapper.Forward])
+		myDirection = &v
+	}
+	return i.MakeOrderMoveFromVector(*myDirection, 0)
 }
 
 func (i *inspector) MakeOrderJump(target proto.Point, speed float64) (*proto.Order_Jump, error) {

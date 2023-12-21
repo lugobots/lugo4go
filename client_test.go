@@ -67,7 +67,7 @@ func TestNewRawClient(t *testing.T) {
 	// the Client will try to join to a team, so our server need to expect it happens
 	srv.EXPECT().JoinATeam(NewMatcher(func(arg interface{}) bool {
 		expectedRequest := &proto.JoinRequest{
-			Number:          config.Number,
+			Number:          uint32(config.Number),
 			InitPosition:    config.InitialPosition,
 			TeamSide:        config.TeamSide,
 			ProtocolVersion: ProtocolVersion,

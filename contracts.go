@@ -50,13 +50,14 @@ type SnapshotInspector interface {
 	GetMyTeamPlayers() []*proto.Player
 	GetOpponentPlayers() []*proto.Player
 
-	//GetMyTeamGoalkeeper() *proto.Player
-	//GetOpponentGoalkeeper() *proto.Player
+	GetMyTeamGoalkeeper() *proto.Player
+	GetOpponentGoalkeeper() *proto.Player
 
 	MakeOrderMoveMaxSpeed(target proto.Point) (*proto.Order_Move, error)
 	MakeOrderMoveFromPoint(origin, target proto.Point, speed float64) (*proto.Order_Move, error)
 	MakeOrderMoveFromVector(vector proto.Vector, speed float64) *proto.Order_Move
 	MakeOrderMoveByDirection(direction mapper.Direction, speed float64) *proto.Order_Move
+	MakeOrderMoveToStop() *proto.Order_Move
 
 	MakeOrderJump(target proto.Point, speed float64) (*proto.Order_Jump, error)
 
