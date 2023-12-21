@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 
 	clientGo "github.com/lugobots/lugo4go/v3"
-	"github.com/lugobots/lugo4go/v3/mapper"
+	"github.com/lugobots/lugo4go/v3/field"
 	"github.com/lugobots/lugo4go/v3/proto"
 	"github.com/lugobots/lugo4go/v3/specs"
 )
@@ -23,7 +23,7 @@ func main() {
 
 	//
 	// Optional: define your own field mapper
-	// defaultFieldMapper, err = mapper.NewMapper(NUM_COLS, NUM_ROWS, connectionStarter.Config.TeamSide)
+	// defaultFieldMapper, err = field.NewMapper(NUM_COLS, NUM_ROWS, connectionStarter.Config.TeamSide)
 	// if err != nil {
 	// 	log.Fatalf("failed to create a field mapper: %s", err)
 	// }
@@ -38,7 +38,7 @@ func main() {
 }
 
 type BasicBot struct {
-	FieldMapper mapper.Mapper
+	FieldMapper field.Mapper
 	Config      clientGo.Config
 	Logger      *zap.SugaredLogger
 }
@@ -49,11 +49,11 @@ func init() {
 	random = rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
-func (t *BasicBot) GetReadyHandler(ctx context.Context, snapshot clientGo.SnapshotInspector) {
+func (t *BasicBot) GetReadyHandler(_ context.Context, _ clientGo.SnapshotInspector) {
 	t.Logger.Debug("the game is ready to start or the score has changed")
 }
 
-func (t *BasicBot) TurnHandler(ctx context.Context, inspector clientGo.SnapshotInspector) ([]proto.PlayerOrder, string, error) {
+func (t *BasicBot) TurnHandler(_ context.Context, inspector clientGo.SnapshotInspector) ([]proto.PlayerOrder, string, error) {
 	var orders []proto.PlayerOrder
 	// we are going to kick the ball as soon as we catch it
 	me := inspector.GetMe()
@@ -81,16 +81,16 @@ func (t *BasicBot) TurnHandler(ctx context.Context, inspector clientGo.SnapshotI
 	debugMsg := "keeping direction"
 	switch random.Intn(30) {
 	case 0:
-		orders = append(orders, inspector.MakeOrderMoveByDirection(mapper.Forward, specs.BallMaxSpeed))
+		orders = append(orders, inspector.MakeOrderMoveByDirection(field.Forward, specs.BallMaxSpeed))
 		debugMsg = "moving Forward"
 	case 1:
-		orders = append(orders, inspector.MakeOrderMoveByDirection(mapper.Backward, specs.BallMaxSpeed))
+		orders = append(orders, inspector.MakeOrderMoveByDirection(field.Backward, specs.BallMaxSpeed))
 		debugMsg = "moving Backward"
 	case 2:
-		orders = append(orders, inspector.MakeOrderMoveByDirection(mapper.Right, specs.BallMaxSpeed))
+		orders = append(orders, inspector.MakeOrderMoveByDirection(field.Right, specs.BallMaxSpeed))
 		debugMsg = "moving to the right"
 	case 3:
-		orders = append(orders, inspector.MakeOrderMoveByDirection(mapper.Left, specs.BallMaxSpeed))
+		orders = append(orders, inspector.MakeOrderMoveByDirection(field.Left, specs.BallMaxSpeed))
 		debugMsg = "moving to the left"
 	}
 

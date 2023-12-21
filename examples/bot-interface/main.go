@@ -16,7 +16,7 @@ func main() {
 
 	//
 	// Optional: define your own field mapper
-	// defaultFieldMapper, err = mapper.NewMapper(NUM_COLS, NUM_ROWS, connectionStarter.Config.TeamSide)
+	// defaultFieldMapper, err = field.NewMapper(NUM_COLS, NUM_ROWS, connectionStarter.Config.TeamSide)
 	// if err != nil {
 	// 	log.Fatalf("failed to create a field mapper: %s", err)
 	// }

@@ -8,10 +8,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/lugobots/lugo4go/v3/mapper"
+	"github.com/lugobots/lugo4go/v3/field"
 )
 
-func NewDefaultStarter() (*Starter, mapper.Mapper, error) {
+func NewDefaultStarter() (*Starter, field.Mapper, error) {
 	playerConfig, defaultMapper, logger, err := DefaultInitBundle()
 	if err != nil {
 		return nil, nil, fmt.Errorf("could not init default config or logger: %w", err)

@@ -7,7 +7,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 
-	"github.com/lugobots/lugo4go/v3/mapper"
+	"github.com/lugobots/lugo4go/v3/field"
 )
 
 const (
@@ -43,7 +43,7 @@ func DefaultLogger(config Config) *zap.SugaredLogger {
 
 // DefaultInitBundle created a basic configuration that may be used by the client to connect to the server.
 // It also creates a logger that is compatible with the lugo4go.rawBot.
-func DefaultInitBundle() (Config, mapper.Mapper, *zap.SugaredLogger, error) {
+func DefaultInitBundle() (Config, field.Mapper, *zap.SugaredLogger, error) {
 	config := Config{}
 
 	if err := config.loadConfig(os.Args[1:]); err != nil {
@@ -51,7 +51,7 @@ func DefaultInitBundle() (Config, mapper.Mapper, *zap.SugaredLogger, error) {
 	}
 
 	// default initial position
-	defaultMapper, _ := mapper.NewMapper(DefaultFieldMapCols, DefaultFieldMapRows, config.TeamSide)
+	defaultMapper, _ := field.NewMapper(DefaultFieldMapCols, DefaultFieldMapRows, config.TeamSide)
 
 	defaultInitialRegion, _ := defaultMapper.GetRegion(DefaultInitialPositions[config.Number].Col, DefaultInitialPositions[config.Number].Row)
 	config.InitialPosition = defaultInitialRegion.Center()

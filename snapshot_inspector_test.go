@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/lugobots/lugo4go/v3/mapper"
+	"github.com/lugobots/lugo4go/v3/field"
 	"github.com/lugobots/lugo4go/v3/proto"
 	"github.com/lugobots/lugo4go/v3/specs"
 )
@@ -226,7 +226,7 @@ func TestMakeOrder_Kick_SameDirection(t *testing.T) {
 		},
 	}}
 
-	origin := mapper.FieldCenter()
+	origin := field.FieldCenter()
 	ball := proto.Ball{Position: &origin, Velocity: proto.NewZeroedVelocity(*proto.North().Copy()).Copy()}
 	insp := inspector{
 		snapshot: &proto.GameSnapshot{

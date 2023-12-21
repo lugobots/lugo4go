@@ -9,12 +9,12 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/lugobots/lugo4go/v3"
-	"github.com/lugobots/lugo4go/v3/mapper"
+	"github.com/lugobots/lugo4go/v3/field"
 	"github.com/lugobots/lugo4go/v3/proto"
 	"github.com/lugobots/lugo4go/v3/specs"
 )
 
-func NewBot(FieldMapper mapper.Mapper, Config lugo4go.Config, Logger *zap.SugaredLogger) *Bot {
+func NewBot(FieldMapper field.Mapper, Config lugo4go.Config, Logger *zap.SugaredLogger) *Bot {
 	return &Bot{
 		FieldMapper: FieldMapper,
 		Config:      Config,
@@ -24,7 +24,7 @@ func NewBot(FieldMapper mapper.Mapper, Config lugo4go.Config, Logger *zap.Sugare
 }
 
 type Bot struct {
-	FieldMapper mapper.Mapper
+	FieldMapper field.Mapper
 	Config      lugo4go.Config
 	Logger      *zap.SugaredLogger
 
@@ -80,16 +80,16 @@ func (b *Bot) myDecider(ctx context.Context, inspector lugo4go.SnapshotInspector
 	debugMsg := "keeping direction"
 	switch b.random.Intn(30) {
 	case 0:
-		orders = append(orders, inspector.MakeOrderMoveByDirection(mapper.Forward, specs.BallMaxSpeed))
+		orders = append(orders, inspector.MakeOrderMoveByDirection(field.Forward, specs.BallMaxSpeed))
 		debugMsg = "moving Forward"
 	case 1:
-		orders = append(orders, inspector.MakeOrderMoveByDirection(mapper.Backward, specs.BallMaxSpeed))
+		orders = append(orders, inspector.MakeOrderMoveByDirection(field.Backward, specs.BallMaxSpeed))
 		debugMsg = "moving Backward"
 	case 2:
-		orders = append(orders, inspector.MakeOrderMoveByDirection(mapper.Right, specs.BallMaxSpeed))
+		orders = append(orders, inspector.MakeOrderMoveByDirection(field.Right, specs.BallMaxSpeed))
 		debugMsg = "moving to the right"
 	case 3:
-		orders = append(orders, inspector.MakeOrderMoveByDirection(mapper.Left, specs.BallMaxSpeed))
+		orders = append(orders, inspector.MakeOrderMoveByDirection(field.Left, specs.BallMaxSpeed))
 		debugMsg = "moving to the left"
 	}
 

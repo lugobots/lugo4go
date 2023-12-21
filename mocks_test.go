@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	mapper "github.com/lugobots/lugo4go/v3/mapper"
+	mapper "github.com/lugobots/lugo4go/v3/field"
 	proto "github.com/lugobots/lugo4go/v3/proto"
 )
 

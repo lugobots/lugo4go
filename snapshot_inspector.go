@@ -3,7 +3,7 @@ package lugo4go
 import (
 	"fmt"
 
-	"github.com/lugobots/lugo4go/v3/mapper"
+	"github.com/lugobots/lugo4go/v3/field"
 	"github.com/lugobots/lugo4go/v3/proto"
 	"github.com/lugobots/lugo4go/v3/specs"
 )
@@ -121,7 +121,7 @@ func (i *inspector) MakeOrderMoveFromVector(vector proto.Vector, speed float64) 
 	return order
 }
 
-func (i *inspector) MakeOrderMoveByDirection(direction mapper.Direction, speed float64) *proto.Order_Move {
+func (i *inspector) MakeOrderMoveByDirection(direction field.Direction, speed float64) *proto.Order_Move {
 	directionTarget := directionOrientationMap[i.mySide][direction]
 	// no need to check for errors since the vector is known and valid
 	return i.MakeOrderMoveFromVector(proto.Vector(directionTarget), speed)
@@ -130,7 +130,7 @@ func (i *inspector) MakeOrderMoveByDirection(direction mapper.Direction, speed f
 func (i *inspector) MakeOrderMoveToStop() *proto.Order_Move {
 	myDirection := i.GetMe().GetVelocity().GetDirection()
 	if myDirection == nil {
-		v := proto.Vector(directionOrientationMap[i.mySide][mapper.Forward])
+		v := proto.Vector(directionOrientationMap[i.mySide][field.Forward])
 		myDirection = &v
 	}
 	return i.MakeOrderMoveFromVector(*myDirection, 0)
@@ -171,25 +171,25 @@ func (i *inspector) MakeOrderCatch() *proto.Order_Catch {
 	return &proto.Order_Catch{Catch: &proto.Catch{}}
 }
 
-var directionOrientationMap = map[proto.Team_Side]map[mapper.Direction]mapper.Orientation{
+var directionOrientationMap = map[proto.Team_Side]map[field.Direction]field.Orientation{
 	proto.Team_HOME: {
-		mapper.Forward:       mapper.East,
-		mapper.Backward:      mapper.West,
-		mapper.Left:          mapper.North,
-		mapper.Right:         mapper.South,
-		mapper.BackwardLeft:  mapper.NorthWest,
-		mapper.BackwardRight: mapper.SouthWest,
-		mapper.ForwardLeft:   mapper.NorthEast,
-		mapper.ForwardRight:  mapper.SouthEast,
+		field.Forward:       field.East,
+		field.Backward:      field.West,
+		field.Left:          field.North,
+		field.Right:         field.South,
+		field.BackwardLeft:  field.NorthWest,
+		field.BackwardRight: field.SouthWest,
+		field.ForwardLeft:   field.NorthEast,
+		field.ForwardRight:  field.SouthEast,
 	},
 	proto.Team_AWAY: {
-		mapper.Forward:       mapper.West,
-		mapper.Backward:      mapper.East,
-		mapper.Left:          mapper.South,
-		mapper.Right:         mapper.North,
-		mapper.BackwardLeft:  mapper.SouthEast,
-		mapper.BackwardRight: mapper.NorthEast,
-		mapper.ForwardLeft:   mapper.SouthWest,
-		mapper.ForwardRight:  mapper.NorthWest,
+		field.Forward:       field.West,
+		field.Backward:      field.East,
+		field.Left:          field.South,
+		field.Right:         field.North,
+		field.BackwardLeft:  field.SouthEast,
+		field.BackwardRight: field.NorthEast,
+		field.ForwardLeft:   field.SouthWest,
+		field.ForwardRight:  field.NorthWest,
 	},
 }

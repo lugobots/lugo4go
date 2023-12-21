@@ -3,7 +3,7 @@ package lugo4go
 import (
 	"context"
 
-	"github.com/lugobots/lugo4go/v3/mapper"
+	"github.com/lugobots/lugo4go/v3/field"
 	"github.com/lugobots/lugo4go/v3/proto"
 )
 
@@ -56,7 +56,7 @@ type SnapshotInspector interface {
 	MakeOrderMoveMaxSpeed(target proto.Point) (*proto.Order_Move, error)
 	MakeOrderMoveFromPoint(origin, target proto.Point, speed float64) (*proto.Order_Move, error)
 	MakeOrderMoveFromVector(vector proto.Vector, speed float64) *proto.Order_Move
-	MakeOrderMoveByDirection(direction mapper.Direction, speed float64) *proto.Order_Move
+	MakeOrderMoveByDirection(direction field.Direction, speed float64) *proto.Order_Move
 	MakeOrderMoveToStop() *proto.Order_Move
 
 	MakeOrderJump(target proto.Point, speed float64) (*proto.Order_Jump, error)
