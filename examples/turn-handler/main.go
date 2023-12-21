@@ -59,7 +59,7 @@ func (t *BasicBot) TurnHandler(_ context.Context, inspector clientGo.SnapshotIns
 	me := inspector.GetMe()
 
 	if inspector.IsBallHolder(me) {
-		orderToKick, err := inspector.MakeOrderKick(t.FieldMapper.GetOpponentGoal().Center, specs.BallMaxSpeed)
+		orderToKick, err := inspector.MakeOrderKick(t.FieldMapper.GetAttackGoal().Center, specs.BallMaxSpeed)
 		if err != nil {
 			t.Logger.Errorf("could not create kick order during turn %d: %s", inspector.GetSnapshot().Turn, err)
 			return nil, "", err

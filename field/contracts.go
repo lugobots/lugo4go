@@ -18,8 +18,8 @@ type Mapper interface {
 	// GetPointRegion returns the MapArea where that point is in
 	GetPointRegion(point *proto.Point) (Region, error)
 
-	GetMyTeamGoal() Goal
-	GetOpponentGoal() Goal
+	GetDefenseGoal() Goal
+	GetAttackGoal() Goal
 
 	GetMyTeamSide() proto.Team_Side
 	GetOpponentSide() proto.Team_Side

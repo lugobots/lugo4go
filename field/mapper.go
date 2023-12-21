@@ -47,16 +47,7 @@ type Goal struct {
 	BottomPole proto.Point
 }
 
-func AwayTeamGoal() Goal {
-	return Goal{
-		Place:      proto.Team_HOME,
-		Center:     proto.Point{X: 0, Y: specs.MaxYCoordinate / 2},
-		TopPole:    proto.Point{X: 0, Y: specs.GoalMaxY},
-		BottomPole: proto.Point{X: 0, Y: specs.GoalMinY},
-	}
-}
-
-func HomeTeamGoal() Goal {
+func AwaySideTeamGoal() Goal {
 	return Goal{
 		Place:      proto.Team_AWAY,
 		Center:     proto.Point{X: specs.MaxXCoordinate, Y: specs.MaxYCoordinate / 2},
@@ -65,11 +56,20 @@ func HomeTeamGoal() Goal {
 	}
 }
 
-func GetTeamsGoal(side proto.Team_Side) Goal {
-	if side == proto.Team_HOME {
-		return HomeTeamGoal()
+func HomeSideTeamGoal() Goal {
+	return Goal{
+		Place:      proto.Team_HOME,
+		Center:     proto.Point{X: 0, Y: specs.MaxYCoordinate / 2},
+		TopPole:    proto.Point{X: 0, Y: specs.GoalMaxY},
+		BottomPole: proto.Point{X: 0, Y: specs.GoalMinY},
 	}
-	return AwayTeamGoal()
+}
+
+func GetGoal(side proto.Team_Side) Goal {
+	if side == proto.Team_HOME {
+		return HomeSideTeamGoal()
+	}
+	return AwaySideTeamGoal()
 }
 
 func FieldCenter() proto.Point {
@@ -138,18 +138,18 @@ func (m *Map) GetOpponentSide() proto.Team_Side {
 	return proto.Team_HOME
 }
 
-func (m *Map) GetMyTeamGoal() Goal {
+func (m *Map) GetDefenseGoal() Goal {
 	if m.TeamSide == proto.Team_HOME {
-		return HomeTeamGoal()
+		return HomeSideTeamGoal()
 	}
-	return AwayTeamGoal()
+	return AwaySideTeamGoal()
 }
 
-func (m *Map) GetOpponentGoal() Goal {
-	if m.TeamSide != proto.Team_HOME {
-		return HomeTeamGoal()
+func (m *Map) GetAttackGoal() Goal {
+	if m.TeamSide == proto.Team_HOME {
+		return AwaySideTeamGoal()
 	}
-	return AwayTeamGoal()
+	return HomeSideTeamGoal()
 }
 
 func (m *Map) GetRegion(col, row int) (Region, error) {

@@ -61,7 +61,7 @@ func (b *Bot) myDecider(ctx context.Context, inspector lugo4go.SnapshotInspector
 	me := inspector.GetMe()
 
 	if state == lugo4go.HoldingTheBall {
-		orderToKick, err := inspector.MakeOrderKick(b.FieldMapper.GetOpponentGoal().Center, specs.BallMaxSpeed)
+		orderToKick, err := inspector.MakeOrderKick(b.FieldMapper.GetAttackGoal().Center, specs.BallMaxSpeed)
 		if err != nil {
 			return nil, "", fmt.Errorf("could not create kick order during turn %d: %s", inspector.GetSnapshot().Turn, err)
 		}
