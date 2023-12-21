@@ -43,9 +43,6 @@ type SnapshotInspector interface {
 	GetMyTeam() *proto.Team
 	GetOpponentMyTeam() *proto.Team
 
-	GetMyTeamSide() proto.Team_Side
-	GetOpponentSide() proto.Team_Side
-
 	GetPlayer(side proto.Team_Side, number int) *proto.Player
 	GetMyTeamPlayers() []*proto.Player
 	GetOpponentPlayers() []*proto.Player

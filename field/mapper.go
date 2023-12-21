@@ -127,6 +127,17 @@ type Map struct {
 	regionHeight float64
 }
 
+func (m *Map) GetMyTeamSide() proto.Team_Side {
+	return m.TeamSide
+}
+
+func (m *Map) GetOpponentSide() proto.Team_Side {
+	if m.TeamSide == proto.Team_HOME {
+		return proto.Team_AWAY
+	}
+	return proto.Team_HOME
+}
+
 func (m *Map) GetMyTeamGoal() Goal {
 	if m.TeamSide == proto.Team_HOME {
 		return HomeTeamGoal()

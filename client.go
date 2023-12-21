@@ -41,6 +41,7 @@ func NewClient(config Config, logger *zap.SugaredLogger) (*Client, error) {
 		return nil, err
 	}
 
+	c.Logger.Debug("trying to connect to the server")
 	c.GRPCClient = proto.NewGameClient(c.grpcConn)
 
 	if c.Stream, err = c.GRPCClient.JoinATeam(context.Background(), &proto.JoinRequest{
