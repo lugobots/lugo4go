@@ -11,24 +11,24 @@ import (
 type RawBot interface {
 
 	// TurnHandler is called every turn with the new game state
-	TurnHandler(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
-	GetReadyHandler(ctx context.Context, snapshot SnapshotInspector)
+	TurnHandler(ctx context.Context, inspector SnapshotInspector) ([]proto.PlayerOrder, string, error)
+	GetReadyHandler(ctx context.Context, inspector SnapshotInspector)
 }
 
 type Bot interface {
 	// OnDisputing is called when no one has the ball possession
-	OnDisputing(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
+	OnDisputing(ctx context.Context, inspector SnapshotInspector) ([]proto.PlayerOrder, string, error)
 	// OnDefending is called when an opponent player has the ball possession
-	OnDefending(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
+	OnDefending(ctx context.Context, inspector SnapshotInspector) ([]proto.PlayerOrder, string, error)
 	// OnHolding is called when this bot has the ball possession
-	OnHolding(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
+	OnHolding(ctx context.Context, inspector SnapshotInspector) ([]proto.PlayerOrder, string, error)
 	// OnSupporting is called when a teammate player has the ball possession
-	OnSupporting(ctx context.Context, snapshot SnapshotInspector) ([]proto.PlayerOrder, string, error)
+	OnSupporting(ctx context.Context, inspector SnapshotInspector) ([]proto.PlayerOrder, string, error)
 	// AsGoalkeeper is only called when this bot is the goalkeeper (number 1). This method is called on every turn,
 	// and the player state is passed at the last parameter.
-	AsGoalkeeper(ctx context.Context, snapshot SnapshotInspector, state PlayerState) ([]proto.PlayerOrder, string, error)
+	AsGoalkeeper(ctx context.Context, inspector SnapshotInspector, state PlayerState) ([]proto.PlayerOrder, string, error)
 
-	OnGetReady(ctx context.Context, snapshot SnapshotInspector)
+	OnGetReady(ctx context.Context, inspector SnapshotInspector)
 }
 
 type SnapshotInspector interface {
@@ -49,6 +49,9 @@ type SnapshotInspector interface {
 	GetPlayer(side proto.Team_Side, number int) *proto.Player
 	GetMyTeamPlayers() []*proto.Player
 	GetOpponentPlayers() []*proto.Player
+
+	//GetMyTeamGoalkeeper() *proto.Player
+	//GetOpponentGoalkeeper() *proto.Player
 
 	MakeOrderMoveMaxSpeed(target proto.Point) (*proto.Order_Move, error)
 	MakeOrderMoveFromPoint(origin, target proto.Point, speed float64) (*proto.Order_Move, error)

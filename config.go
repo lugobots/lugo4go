@@ -23,14 +23,14 @@ const (
 
 // Config is the set of values expected as a initial configuration of the player
 type Config struct {
-	PlayerPositionFn func(playerNumber int, inspector SnapshotInspector) *proto.Point
+	//PlayerPositionFn func(playerNumber int, inspector SnapshotInspector) *proto.Point
 
 	// Full url to the gRPC server
 	GRPCAddress     string          `json:"grpc_address"`
 	Insecure        bool            `json:"insecure"`
 	Token           string          `json:"token"`
 	TeamSide        proto.Team_Side `json:"-"`
-	Number          uint32          `json:"-"`
+	Number          int             `json:"-"`
 	InitialPosition *proto.Point    `json:"-"`
 
 	readValues configReadValues
@@ -105,7 +105,7 @@ func (c *Config) loadConfig(args []string) error {
 	if c.readValues.Num < 1 || c.readValues.Num > specs.MaxPlayers {
 		return fmt.Errorf("invalid player number '%d'. Must be 1 to %d", c.readValues.Num, specs.MaxPlayers)
 	}
-	c.Number = uint32(c.readValues.Num)
+	c.Number = int(c.readValues.Num)
 
 	c.GRPCAddress = c.readValues.GRPCAddress
 	c.Token = c.readValues.Token

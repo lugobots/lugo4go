@@ -8,13 +8,28 @@ import (
 	"go.uber.org/zap/zapcore"
 
 	"github.com/lugobots/lugo4go/v3/mapper"
-	"github.com/lugobots/lugo4go/v3/proto"
 )
 
 const (
 	DefaultFieldMapCols = 16
 	DefaultFieldMapRows = 8
 )
+
+var DefaultInitialPositions = map[int]struct {
+	Col int
+	Row int
+}{
+	2:  {Col: 1, Row: 2},
+	3:  {Col: 1, Row: 3},
+	4:  {Col: 1, Row: 4},
+	5:  {Col: 1, Row: 5},
+	6:  {Col: 4, Row: 1},
+	7:  {Col: 4, Row: 3},
+	8:  {Col: 4, Row: 4},
+	9:  {Col: 4, Row: 6},
+	10: {Col: 6, Row: 3},
+	11: {Col: 6, Row: 4},
+}
 
 // DefaultLogger creates a logger that is compatible with the lugo4go.rawBot expected logger.
 // The bots are NOT obligated to use this logger though. You may implement your own logger.
@@ -37,80 +52,10 @@ func DefaultInitBundle() (Config, mapper.Mapper, *zap.SugaredLogger, error) {
 
 	// default initial position
 	defaultMapper, _ := mapper.NewMapper(DefaultFieldMapCols, DefaultFieldMapRows, config.TeamSide)
-	defaultFieldMap := DefaultRoleMap["initial"]
-	defaultInitialRegion, _ := defaultMapper.GetRegion(defaultFieldMap[int(config.Number)].Col, defaultFieldMap[int(config.Number)].Row)
+
+	defaultInitialRegion, _ := defaultMapper.GetRegion(DefaultInitialPositions[config.Number].Col, DefaultInitialPositions[config.Number].Row)
 	config.InitialPosition = defaultInitialRegion.Center()
-
-	config.PlayerPositionFn = func(playerNumber int, inspector SnapshotInspector) *proto.Point {
-		ballRegion, _ := defaultMapper.GetPointRegion(inspector.GetBall().GetPosition())
-		regionCol := ballRegion.Col()
-
-		teamState := "neutral"
-		if regionCol > 7 {
-			teamState = "regionCol"
-		} else if regionCol > 4 {
-			teamState = "neutral"
-		}
-		pos := DefaultRoleMap[teamState][playerNumber]
-		reg, _ := defaultMapper.GetRegion(pos.Col, pos.Row)
-		return reg.Center()
-	}
 
 	logger := DefaultLogger(config)
 	return config, defaultMapper, logger, nil
-}
-
-var DefaultRoleMap = map[string]map[int]struct {
-	Col int
-	Row int
-}{
-
-	"initial": {
-		2:  {Col: 1, Row: 2},
-		3:  {Col: 1, Row: 3},
-		4:  {Col: 1, Row: 4},
-		5:  {Col: 1, Row: 5},
-		6:  {Col: 4, Row: 1},
-		7:  {Col: 4, Row: 3},
-		8:  {Col: 4, Row: 4},
-		9:  {Col: 4, Row: 6},
-		10: {Col: 6, Row: 3},
-		11: {Col: 6, Row: 4},
-	},
-	"defensive": {
-		2:  {Col: 1, Row: 2},
-		3:  {Col: 1, Row: 3},
-		4:  {Col: 1, Row: 4},
-		5:  {Col: 1, Row: 5},
-		6:  {Col: 4, Row: 1},
-		7:  {Col: 4, Row: 3},
-		8:  {Col: 4, Row: 4},
-		9:  {Col: 4, Row: 6},
-		10: {Col: 6, Row: 3},
-		11: {Col: 6, Row: 4},
-	},
-	"neutral": {
-		2:  {Col: 3, Row: 1},
-		3:  {Col: 3, Row: 3},
-		4:  {Col: 3, Row: 4},
-		5:  {Col: 3, Row: 6},
-		6:  {Col: 6, Row: 1},
-		7:  {Col: 6, Row: 3},
-		8:  {Col: 6, Row: 4},
-		9:  {Col: 6, Row: 6},
-		10: {Col: 10, Row: 2},
-		11: {Col: 10, Row: 5},
-	},
-	"offensive": {
-		2:  {Col: 5, Row: 1},
-		3:  {Col: 4, Row: 3},
-		4:  {Col: 4, Row: 4},
-		5:  {Col: 5, Row: 6},
-		6:  {Col: 9, Row: 2},
-		7:  {Col: 11, Row: 1},
-		8:  {Col: 9, Row: 5},
-		9:  {Col: 11, Row: 6},
-		10: {Col: 13, Row: 2},
-		11: {Col: 13, Row: 5},
-	},
 }

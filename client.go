@@ -45,7 +45,7 @@ func NewClient(config Config, logger *zap.SugaredLogger) (*Client, error) {
 
 	if c.Stream, err = c.GRPCClient.JoinATeam(context.Background(), &proto.JoinRequest{
 		Token:           config.Token,
-		Number:          config.Number,
+		Number:          uint32(config.Number),
 		InitPosition:    config.InitialPosition,
 		TeamSide:        config.TeamSide,
 		ProtocolVersion: ProtocolVersion,
