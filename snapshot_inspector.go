@@ -15,7 +15,7 @@ type inspector struct {
 	snapshot *proto.GameSnapshot
 }
 
-func newInspector(botSide proto.Team_Side, playerNumber int, gameSnapshot *proto.GameSnapshot) (*inspector, error) {
+func NewGameSnapshotInspector(botSide proto.Team_Side, playerNumber int, gameSnapshot *proto.GameSnapshot) (SnapshotInspector, error) {
 	tools := &inspector{mySide: botSide, myNumber: playerNumber, snapshot: gameSnapshot}
 
 	me := tools.GetPlayer(botSide, playerNumber)

@@ -95,7 +95,7 @@ func (c *Client) Play(rawBot RawBot) error {
 		mySide := c.config.TeamSide
 		myNumber := c.config.Number
 		// TODO bad practice - create a SnapshotToolMaker to allow it to be created externally
-		snapshotInspector, err := newInspector(mySide, int(myNumber), snapshot)
+		snapshotInspector, err := NewGameSnapshotInspector(mySide, myNumber, snapshot)
 
 		if snapshot.State == proto.GameSnapshot_GET_READY {
 			rawBot.GetReadyHandler(context.Background(), snapshotInspector)
