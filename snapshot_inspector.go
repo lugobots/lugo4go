@@ -2,6 +2,7 @@ package lugo4go
 
 import (
 	"fmt"
+	"github.com/lugobots/lugo4go/v3/helpers"
 
 	"github.com/lugobots/lugo4go/v3/field"
 	"github.com/lugobots/lugo4go/v3/proto"
@@ -39,27 +40,22 @@ func (i *inspector) GetBall() *proto.Ball {
 }
 
 func (i *inspector) GetBallHolder() (*proto.Player, bool) {
-	holder := i.snapshot.GetBall().GetHolder()
-	return holder, holder != nil
+	return helpers.GetBallHolder(i.snapshot)
 }
 
 func (i *inspector) IsBallHolder(player *proto.Player) bool {
-	holder := i.snapshot.GetBall().GetHolder()
-	return holder != nil && holder.TeamSide == player.TeamSide && holder.Number == player.Number
+	return helpers.IsBallHolder(i.snapshot, player)
 }
 
 func (i *inspector) GetTeam(side proto.Team_Side) *proto.Team {
-	if side == proto.Team_HOME {
-		return i.snapshot.HomeTeam
-	}
-	return i.snapshot.AwayTeam
+	return helpers.GetTeam(i.snapshot, side)
 }
 
 func (i *inspector) GetMyTeam() *proto.Team {
 	return i.GetTeam(i.mySide)
 }
 
-func (i *inspector) GetOpponentMyTeam() *proto.Team {
+func (i *inspector) GetOpponentTeam() *proto.Team {
 	return i.GetTeam(i.GetOpponentSide())
 }
 
@@ -68,20 +64,11 @@ func (i *inspector) GetMyTeamSide() proto.Team_Side {
 }
 
 func (i *inspector) GetOpponentSide() proto.Team_Side {
-	if i.mySide == proto.Team_HOME {
-		return proto.Team_AWAY
-	}
-	return proto.Team_HOME
+	return helpers.GetOpponentSide(i.mySide)
 }
 
 func (i *inspector) GetPlayer(side proto.Team_Side, number int) *proto.Player {
-	team := i.GetTeam(side)
-	for _, player := range team.GetPlayers() {
-		if int(player.Number) == number {
-			return player
-		}
-	}
-	return nil
+	return helpers.GetPlayer(i.snapshot, side, number)
 }
 
 func (i *inspector) GetMyTeamPlayers() []*proto.Player {

@@ -290,7 +290,7 @@ func (mr *MockSnapshotInspectorMockRecorder) GetMyTeamSide() *gomock.Call {
 // GetOpponentMyTeam mocks base method.
 func (m *MockSnapshotInspector) GetOpponentMyTeam() *proto.Team {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOpponentMyTeam")
+	ret := m.ctrl.Call(m, "GetOpponentTeam")
 	ret0, _ := ret[0].(*proto.Team)
 	return ret0
 }
@@ -298,7 +298,7 @@ func (m *MockSnapshotInspector) GetOpponentMyTeam() *proto.Team {
 // GetOpponentMyTeam indicates an expected call of GetOpponentMyTeam.
 func (mr *MockSnapshotInspectorMockRecorder) GetOpponentMyTeam() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOpponentMyTeam", reflect.TypeOf((*MockSnapshotInspector)(nil).GetOpponentMyTeam))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOpponentTeam", reflect.TypeOf((*MockSnapshotInspector)(nil).GetOpponentMyTeam))
 }
 
 // GetOpponentPlayers mocks base method.
