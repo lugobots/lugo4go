@@ -547,6 +547,176 @@ func (*ResumeListeningResponse) Descriptor() ([]byte, []int) {
 	return file_remote_proto_rawDescGZIP(), []int{8}
 }
 
+type ResetPlayerPositionsRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ResetPlayerPositionsRequest) Reset() {
+	*x = ResetPlayerPositionsRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_remote_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ResetPlayerPositionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResetPlayerPositionsRequest) ProtoMessage() {}
+
+func (x *ResetPlayerPositionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_remote_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResetPlayerPositionsRequest.ProtoReflect.Descriptor instead.
+func (*ResetPlayerPositionsRequest) Descriptor() ([]byte, []int) {
+	return file_remote_proto_rawDescGZIP(), []int{9}
+}
+
+type ResetPlayerPositionsResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	GameSnapshot *GameSnapshot `protobuf:"bytes,1,opt,name=game_snapshot,json=gameSnapshot,proto3" json:"game_snapshot,omitempty"`
+}
+
+func (x *ResetPlayerPositionsResponse) Reset() {
+	*x = ResetPlayerPositionsResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_remote_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ResetPlayerPositionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResetPlayerPositionsResponse) ProtoMessage() {}
+
+func (x *ResetPlayerPositionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_remote_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResetPlayerPositionsResponse.ProtoReflect.Descriptor instead.
+func (*ResetPlayerPositionsResponse) Descriptor() ([]byte, []int) {
+	return file_remote_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *ResetPlayerPositionsResponse) GetGameSnapshot() *GameSnapshot {
+	if x != nil {
+		return x.GameSnapshot
+	}
+	return nil
+}
+
+type GameSnapshotRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *GameSnapshotRequest) Reset() {
+	*x = GameSnapshotRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_remote_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GameSnapshotRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GameSnapshotRequest) ProtoMessage() {}
+
+func (x *GameSnapshotRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_remote_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GameSnapshotRequest.ProtoReflect.Descriptor instead.
+func (*GameSnapshotRequest) Descriptor() ([]byte, []int) {
+	return file_remote_proto_rawDescGZIP(), []int{11}
+}
+
+type GameSnapshotResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	GameSnapshot *GameSnapshot `protobuf:"bytes,1,opt,name=game_snapshot,json=gameSnapshot,proto3" json:"game_snapshot,omitempty"`
+}
+
+func (x *GameSnapshotResponse) Reset() {
+	*x = GameSnapshotResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_remote_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GameSnapshotResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GameSnapshotResponse) ProtoMessage() {}
+
+func (x *GameSnapshotResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_remote_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GameSnapshotResponse.ProtoReflect.Descriptor instead.
+func (*GameSnapshotResponse) Descriptor() ([]byte, []int) {
+	return file_remote_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *GameSnapshotResponse) GetGameSnapshot() *GameSnapshot {
+	if x != nil {
+		return x.GameSnapshot
+	}
+	return nil
+}
+
 var File_remote_proto protoreflect.FileDescriptor
 
 var file_remote_proto_rawDesc = []byte{
@@ -606,7 +776,21 @@ var file_remote_proto_rawDesc = []byte{
 	0x52, 0x65, 0x73, 0x75, 0x6d, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x69, 0x6e, 0x67, 0x52,
 	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x22, 0x19, 0x0a, 0x17, 0x52, 0x65, 0x73, 0x75, 0x6d, 0x65,
 	0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73,
-	0x65, 0x32, 0xdf, 0x03, 0x0a, 0x06, 0x52, 0x65, 0x6d, 0x6f, 0x74, 0x65, 0x12, 0x40, 0x0a, 0x0d,
+	0x65, 0x22, 0x1d, 0x0a, 0x1b, 0x52, 0x65, 0x73, 0x65, 0x74, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72,
+	0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x22, 0x57, 0x0a, 0x1c, 0x52, 0x65, 0x73, 0x65, 0x74, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x50,
+	0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x12, 0x37, 0x0a, 0x0d, 0x67, 0x61, 0x6d, 0x65, 0x5f, 0x73, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f,
+	0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x12, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x47,
+	0x61, 0x6d, 0x65, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74, 0x52, 0x0c, 0x67, 0x61, 0x6d,
+	0x65, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74, 0x22, 0x15, 0x0a, 0x13, 0x47, 0x61, 0x6d,
+	0x65, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x22, 0x4f, 0x0a, 0x14, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74,
+	0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x37, 0x0a, 0x0d, 0x67, 0x61, 0x6d, 0x65,
+	0x5f, 0x73, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x12, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x6e, 0x61, 0x70, 0x73,
+	0x68, 0x6f, 0x74, 0x52, 0x0c, 0x67, 0x61, 0x6d, 0x65, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f,
+	0x74, 0x32, 0x88, 0x05, 0x0a, 0x06, 0x52, 0x65, 0x6d, 0x6f, 0x74, 0x65, 0x12, 0x40, 0x0a, 0x0d,
 	0x50, 0x61, 0x75, 0x73, 0x65, 0x4f, 0x72, 0x52, 0x65, 0x73, 0x75, 0x6d, 0x65, 0x12, 0x18, 0x2e,
 	0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x50, 0x61, 0x75, 0x73, 0x65, 0x52, 0x65, 0x73, 0x75, 0x6d, 0x65,
 	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x15, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x43,
@@ -636,9 +820,20 @@ var file_remote_proto_rawDesc = []byte{
 	0x73, 0x75, 0x6d, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71,
 	0x75, 0x65, 0x73, 0x74, 0x1a, 0x1d, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x75,
 	0x6d, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x65, 0x6e, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x6f,
-	0x6e, 0x73, 0x65, 0x42, 0x23, 0x5a, 0x21, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
-	0x6d, 0x2f, 0x6c, 0x75, 0x67, 0x6f, 0x62, 0x6f, 0x74, 0x73, 0x2f, 0x6c, 0x75, 0x67, 0x6f, 0x34,
-	0x67, 0x6f, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6e, 0x73, 0x65, 0x12, 0x5d, 0x0a, 0x14, 0x52, 0x65, 0x73, 0x65, 0x74, 0x50, 0x6c, 0x61, 0x79,
+	0x65, 0x72, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x21, 0x2e, 0x6c, 0x75,
+	0x67, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x65, 0x74, 0x50, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x50, 0x6f,
+	0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x22,
+	0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x52, 0x65, 0x73, 0x65, 0x74, 0x50, 0x6c, 0x61, 0x79, 0x65,
+	0x72, 0x50, 0x6f, 0x73, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
+	0x73, 0x65, 0x12, 0x48, 0x0a, 0x0f, 0x47, 0x65, 0x74, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x6e, 0x61,
+	0x70, 0x73, 0x68, 0x6f, 0x74, 0x12, 0x19, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x47, 0x61, 0x6d,
+	0x65, 0x53, 0x6e, 0x61, 0x70, 0x73, 0x68, 0x6f, 0x74, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74,
+	0x1a, 0x1a, 0x2e, 0x6c, 0x75, 0x67, 0x6f, 0x2e, 0x47, 0x61, 0x6d, 0x65, 0x53, 0x6e, 0x61, 0x70,
+	0x73, 0x68, 0x6f, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x23, 0x5a, 0x21,
+	0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6c, 0x75, 0x67, 0x6f, 0x62,
+	0x6f, 0x74, 0x73, 0x2f, 0x6c, 0x75, 0x67, 0x6f, 0x34, 0x67, 0x6f, 0x2f, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -654,54 +849,64 @@ func file_remote_proto_rawDescGZIP() []byte {
 }
 
 var file_remote_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_remote_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_remote_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_remote_proto_goTypes = []interface{}{
-	(CommandResponse_StatusCode)(0), // 0: lugo.CommandResponse.StatusCode
-	(*PauseResumeRequest)(nil),      // 1: lugo.PauseResumeRequest
-	(*NextTurnRequest)(nil),         // 2: lugo.NextTurnRequest
-	(*NextOrderRequest)(nil),        // 3: lugo.NextOrderRequest
-	(*BallProperties)(nil),          // 4: lugo.BallProperties
-	(*PlayerProperties)(nil),        // 5: lugo.PlayerProperties
-	(*GameProperties)(nil),          // 6: lugo.GameProperties
-	(*CommandResponse)(nil),         // 7: lugo.CommandResponse
-	(*ResumeListeningRequest)(nil),  // 8: lugo.ResumeListeningRequest
-	(*ResumeListeningResponse)(nil), // 9: lugo.ResumeListeningResponse
-	(*Point)(nil),                   // 10: lugo.Point
-	(*Velocity)(nil),                // 11: lugo.Velocity
-	(*Player)(nil),                  // 12: lugo.Player
-	(Team_Side)(0),                  // 13: lugo.Team.Side
-	(*ShotClock)(nil),               // 14: lugo.ShotClock
-	(*GameSnapshot)(nil),            // 15: lugo.GameSnapshot
+	(CommandResponse_StatusCode)(0),      // 0: lugo.CommandResponse.StatusCode
+	(*PauseResumeRequest)(nil),           // 1: lugo.PauseResumeRequest
+	(*NextTurnRequest)(nil),              // 2: lugo.NextTurnRequest
+	(*NextOrderRequest)(nil),             // 3: lugo.NextOrderRequest
+	(*BallProperties)(nil),               // 4: lugo.BallProperties
+	(*PlayerProperties)(nil),             // 5: lugo.PlayerProperties
+	(*GameProperties)(nil),               // 6: lugo.GameProperties
+	(*CommandResponse)(nil),              // 7: lugo.CommandResponse
+	(*ResumeListeningRequest)(nil),       // 8: lugo.ResumeListeningRequest
+	(*ResumeListeningResponse)(nil),      // 9: lugo.ResumeListeningResponse
+	(*ResetPlayerPositionsRequest)(nil),  // 10: lugo.ResetPlayerPositionsRequest
+	(*ResetPlayerPositionsResponse)(nil), // 11: lugo.ResetPlayerPositionsResponse
+	(*GameSnapshotRequest)(nil),          // 12: lugo.GameSnapshotRequest
+	(*GameSnapshotResponse)(nil),         // 13: lugo.GameSnapshotResponse
+	(*Point)(nil),                        // 14: lugo.Point
+	(*Velocity)(nil),                     // 15: lugo.Velocity
+	(*Player)(nil),                       // 16: lugo.Player
+	(Team_Side)(0),                       // 17: lugo.Team.Side
+	(*ShotClock)(nil),                    // 18: lugo.ShotClock
+	(*GameSnapshot)(nil),                 // 19: lugo.GameSnapshot
 }
 var file_remote_proto_depIdxs = []int32{
-	10, // 0: lugo.BallProperties.position:type_name -> lugo.Point
-	11, // 1: lugo.BallProperties.velocity:type_name -> lugo.Velocity
-	12, // 2: lugo.BallProperties.holder:type_name -> lugo.Player
-	13, // 3: lugo.PlayerProperties.side:type_name -> lugo.Team.Side
-	10, // 4: lugo.PlayerProperties.position:type_name -> lugo.Point
-	11, // 5: lugo.PlayerProperties.velocity:type_name -> lugo.Velocity
-	14, // 6: lugo.GameProperties.shot_clock:type_name -> lugo.ShotClock
+	14, // 0: lugo.BallProperties.position:type_name -> lugo.Point
+	15, // 1: lugo.BallProperties.velocity:type_name -> lugo.Velocity
+	16, // 2: lugo.BallProperties.holder:type_name -> lugo.Player
+	17, // 3: lugo.PlayerProperties.side:type_name -> lugo.Team.Side
+	14, // 4: lugo.PlayerProperties.position:type_name -> lugo.Point
+	15, // 5: lugo.PlayerProperties.velocity:type_name -> lugo.Velocity
+	18, // 6: lugo.GameProperties.shot_clock:type_name -> lugo.ShotClock
 	0,  // 7: lugo.CommandResponse.code:type_name -> lugo.CommandResponse.StatusCode
-	15, // 8: lugo.CommandResponse.game_snapshot:type_name -> lugo.GameSnapshot
-	1,  // 9: lugo.Remote.PauseOrResume:input_type -> lugo.PauseResumeRequest
-	2,  // 10: lugo.Remote.NextTurn:input_type -> lugo.NextTurnRequest
-	3,  // 11: lugo.Remote.NextOrder:input_type -> lugo.NextOrderRequest
-	4,  // 12: lugo.Remote.SetBallProperties:input_type -> lugo.BallProperties
-	5,  // 13: lugo.Remote.SetPlayerProperties:input_type -> lugo.PlayerProperties
-	6,  // 14: lugo.Remote.SetGameProperties:input_type -> lugo.GameProperties
-	8,  // 15: lugo.Remote.ResumeListeningPhase:input_type -> lugo.ResumeListeningRequest
-	7,  // 16: lugo.Remote.PauseOrResume:output_type -> lugo.CommandResponse
-	7,  // 17: lugo.Remote.NextTurn:output_type -> lugo.CommandResponse
-	7,  // 18: lugo.Remote.NextOrder:output_type -> lugo.CommandResponse
-	7,  // 19: lugo.Remote.SetBallProperties:output_type -> lugo.CommandResponse
-	7,  // 20: lugo.Remote.SetPlayerProperties:output_type -> lugo.CommandResponse
-	7,  // 21: lugo.Remote.SetGameProperties:output_type -> lugo.CommandResponse
-	9,  // 22: lugo.Remote.ResumeListeningPhase:output_type -> lugo.ResumeListeningResponse
-	16, // [16:23] is the sub-list for method output_type
-	9,  // [9:16] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	19, // 8: lugo.CommandResponse.game_snapshot:type_name -> lugo.GameSnapshot
+	19, // 9: lugo.ResetPlayerPositionsResponse.game_snapshot:type_name -> lugo.GameSnapshot
+	19, // 10: lugo.GameSnapshotResponse.game_snapshot:type_name -> lugo.GameSnapshot
+	1,  // 11: lugo.Remote.PauseOrResume:input_type -> lugo.PauseResumeRequest
+	2,  // 12: lugo.Remote.NextTurn:input_type -> lugo.NextTurnRequest
+	3,  // 13: lugo.Remote.NextOrder:input_type -> lugo.NextOrderRequest
+	4,  // 14: lugo.Remote.SetBallProperties:input_type -> lugo.BallProperties
+	5,  // 15: lugo.Remote.SetPlayerProperties:input_type -> lugo.PlayerProperties
+	6,  // 16: lugo.Remote.SetGameProperties:input_type -> lugo.GameProperties
+	8,  // 17: lugo.Remote.ResumeListeningPhase:input_type -> lugo.ResumeListeningRequest
+	10, // 18: lugo.Remote.ResetPlayerPositions:input_type -> lugo.ResetPlayerPositionsRequest
+	12, // 19: lugo.Remote.GetGameSnapshot:input_type -> lugo.GameSnapshotRequest
+	7,  // 20: lugo.Remote.PauseOrResume:output_type -> lugo.CommandResponse
+	7,  // 21: lugo.Remote.NextTurn:output_type -> lugo.CommandResponse
+	7,  // 22: lugo.Remote.NextOrder:output_type -> lugo.CommandResponse
+	7,  // 23: lugo.Remote.SetBallProperties:output_type -> lugo.CommandResponse
+	7,  // 24: lugo.Remote.SetPlayerProperties:output_type -> lugo.CommandResponse
+	7,  // 25: lugo.Remote.SetGameProperties:output_type -> lugo.CommandResponse
+	9,  // 26: lugo.Remote.ResumeListeningPhase:output_type -> lugo.ResumeListeningResponse
+	11, // 27: lugo.Remote.ResetPlayerPositions:output_type -> lugo.ResetPlayerPositionsResponse
+	13, // 28: lugo.Remote.GetGameSnapshot:output_type -> lugo.GameSnapshotResponse
+	20, // [20:29] is the sub-list for method output_type
+	11, // [11:20] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_remote_proto_init() }
@@ -820,6 +1025,54 @@ func file_remote_proto_init() {
 				return nil
 			}
 		}
+		file_remote_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ResetPlayerPositionsRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_remote_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ResetPlayerPositionsResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_remote_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GameSnapshotRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_remote_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GameSnapshotResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -827,7 +1080,7 @@ func file_remote_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_remote_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   9,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -861,6 +1114,8 @@ type RemoteClient interface {
 	SetPlayerProperties(ctx context.Context, in *PlayerProperties, opts ...grpc.CallOption) (*CommandResponse, error)
 	SetGameProperties(ctx context.Context, in *GameProperties, opts ...grpc.CallOption) (*CommandResponse, error)
 	ResumeListeningPhase(ctx context.Context, in *ResumeListeningRequest, opts ...grpc.CallOption) (*ResumeListeningResponse, error)
+	ResetPlayerPositions(ctx context.Context, in *ResetPlayerPositionsRequest, opts ...grpc.CallOption) (*ResetPlayerPositionsResponse, error)
+	GetGameSnapshot(ctx context.Context, in *GameSnapshotRequest, opts ...grpc.CallOption) (*GameSnapshotResponse, error)
 }
 
 type remoteClient struct {
@@ -934,6 +1189,24 @@ func (c *remoteClient) ResumeListeningPhase(ctx context.Context, in *ResumeListe
 	return out, nil
 }
 
+func (c *remoteClient) ResetPlayerPositions(ctx context.Context, in *ResetPlayerPositionsRequest, opts ...grpc.CallOption) (*ResetPlayerPositionsResponse, error) {
+	out := new(ResetPlayerPositionsResponse)
+	err := c.cc.Invoke(ctx, "/lugo.Remote/ResetPlayerPositions", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *remoteClient) GetGameSnapshot(ctx context.Context, in *GameSnapshotRequest, opts ...grpc.CallOption) (*GameSnapshotResponse, error) {
+	out := new(GameSnapshotResponse)
+	err := c.cc.Invoke(ctx, "/lugo.Remote/GetGameSnapshot", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RemoteServer is the server API for Remote service.
 type RemoteServer interface {
 	PauseOrResume(context.Context, *PauseResumeRequest) (*CommandResponse, error)
@@ -943,6 +1216,8 @@ type RemoteServer interface {
 	SetPlayerProperties(context.Context, *PlayerProperties) (*CommandResponse, error)
 	SetGameProperties(context.Context, *GameProperties) (*CommandResponse, error)
 	ResumeListeningPhase(context.Context, *ResumeListeningRequest) (*ResumeListeningResponse, error)
+	ResetPlayerPositions(context.Context, *ResetPlayerPositionsRequest) (*ResetPlayerPositionsResponse, error)
+	GetGameSnapshot(context.Context, *GameSnapshotRequest) (*GameSnapshotResponse, error)
 }
 
 // UnimplementedRemoteServer can be embedded to have forward compatible implementations.
@@ -969,6 +1244,12 @@ func (*UnimplementedRemoteServer) SetGameProperties(context.Context, *GameProper
 }
 func (*UnimplementedRemoteServer) ResumeListeningPhase(context.Context, *ResumeListeningRequest) (*ResumeListeningResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ResumeListeningPhase not implemented")
+}
+func (*UnimplementedRemoteServer) ResetPlayerPositions(context.Context, *ResetPlayerPositionsRequest) (*ResetPlayerPositionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResetPlayerPositions not implemented")
+}
+func (*UnimplementedRemoteServer) GetGameSnapshot(context.Context, *GameSnapshotRequest) (*GameSnapshotResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetGameSnapshot not implemented")
 }
 
 func RegisterRemoteServer(s *grpc.Server, srv RemoteServer) {
@@ -1101,6 +1382,42 @@ func _Remote_ResumeListeningPhase_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Remote_ResetPlayerPositions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResetPlayerPositionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RemoteServer).ResetPlayerPositions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lugo.Remote/ResetPlayerPositions",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RemoteServer).ResetPlayerPositions(ctx, req.(*ResetPlayerPositionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Remote_GetGameSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GameSnapshotRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RemoteServer).GetGameSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/lugo.Remote/GetGameSnapshot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RemoteServer).GetGameSnapshot(ctx, req.(*GameSnapshotRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _Remote_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "lugo.Remote",
 	HandlerType: (*RemoteServer)(nil),
@@ -1132,6 +1449,14 @@ var _Remote_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ResumeListeningPhase",
 			Handler:    _Remote_ResumeListeningPhase_Handler,
+		},
+		{
+			MethodName: "ResetPlayerPositions",
+			Handler:    _Remote_ResetPlayerPositions_Handler,
+		},
+		{
+			MethodName: "GetGameSnapshot",
+			Handler:    _Remote_GetGameSnapshot_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
