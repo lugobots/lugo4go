@@ -1,14 +1,11 @@
 #!/bin/bash
 
-mockgen -package=lugo4go_test \
+mockgen -package=lugo4go \
         -source=./contracts.go \
         -destination=./mocks_test.go
 
-mockgen -package=lugo4go_test \
+mockgen -package=lugo4go \
         -destination=./mocks_lugo_test.go \
-        github.com/lugobots/lugo4go/v2/proto PlayerOrder,GameServer,GameClient,Game_JoinATeamClient,\
+        github.com/lugobots/lugo4go/v3/proto PlayerOrder,GameServer,GameClient,Game_JoinATeamClient,\
 Game_JoinATeamServer,BroadcastClient,Broadcast_OnEventClient,BroadcastServer,Broadcast_OnEventServer
 
-mockgen -package=lugo4go_test \
-        -destination=./mocks_log_test.go \
-        github.com/lugobots/lugo4go/v2/pkg/util Logger

@@ -1,4 +1,4 @@
-package field
+package specs
 
 import "time"
 
@@ -10,14 +10,17 @@ const (
 	// PlayerSize is the size of each player
 	PlayerSize = 4 * BaseUnit
 
+	// GoalkeeperSize is the width of the goalkeeper
+	GoalkeeperSize = PlayerSize * 2.3
+
 	// PlayerReconnectionWaitTime is a penalty time imposed to the player that needs to reconnect during the match.
 	// this interval ensure players won't drop connection in purpose to be reallocated to their initial position.
 	PlayerReconnectionWaitTime = 20 * time.Second
 
-	// max number of players in a team by mach
+	// MaxPlayers max number of players in a team by mach
 	MaxPlayers = 11
 
-	// min number of players in a team by mach, if a team gets to have less to this number, the team loses by W.O.
+	// MinPlayers min number of players in a team by mach, if a team gets to have less to this number, the team loses by W.O.
 	MinPlayers = 6
 
 	// PlayerMaxSpeed is the max speed that a play may move  by frame
@@ -86,6 +89,6 @@ const (
 	// GoalkeeperNumber defines the goalkeeper number
 	GoalkeeperNumber = uint32(1)
 
-	// Number of turns each teams has on attack before losing the ball possession.
+	// ShotClockTime Number of turns each teams has on attack before losing the ball possession.
 	ShotClockTime = 300
 )

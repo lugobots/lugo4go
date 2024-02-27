@@ -2,20 +2,21 @@ package lugo4go
 
 import (
 	"context"
-	"github.com/lugobots/lugo4go/v2/proto"
+
+	"github.com/lugobots/lugo4go/v3/proto"
 )
 
-func NewSender(grpcClient proto.GameClient) *Sender {
-	return &Sender{
+func newSender(grpcClient proto.GameClient) *sender {
+	return &sender{
 		GRPCClient: grpcClient,
 	}
 }
 
-type Sender struct {
+type sender struct {
 	GRPCClient proto.GameClient
 }
 
-func (s *Sender) Send(ctx context.Context, turn uint32, orders []proto.PlayerOrder, debugMsg string) (*proto.OrderResponse, error) {
+func (s *sender) Send(ctx context.Context, turn uint32, orders []proto.PlayerOrder, debugMsg string) (*proto.OrderResponse, error) {
 	orderSet := &proto.OrderSet{
 		Turn:         turn,
 		DebugMessage: debugMsg,

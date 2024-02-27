@@ -1,13 +1,14 @@
-package lugo4go_test
+package lugo4go
 
 import (
-	"github.com/golang/mock/gomock"
-	"github.com/lugobots/lugo4go/v2"
-	"github.com/lugobots/lugo4go/v2/proto"
-	"github.com/stretchr/testify/assert"
-	"golang.org/x/net/context"
 	"testing"
 	"time"
+
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+	"golang.org/x/net/context"
+
+	"github.com/lugobots/lugo4go/v3/proto"
 )
 
 func TestSender_Send(t *testing.T) {
@@ -15,7 +16,7 @@ func TestSender_Send(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockGRPCClient := NewMockGameClient(ctrl)
-	sender := lugo4go.Sender{GRPCClient: mockGRPCClient}
+	sender := sender{GRPCClient: mockGRPCClient}
 
 	velocitySample := proto.NewZeroedVelocity(proto.North())
 	moveOrder := &proto.Order_Move{

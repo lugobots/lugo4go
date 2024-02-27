@@ -3,62 +3,96 @@ package main
 import (
 	"context"
 	"log"
-	"os"
-	"os/signal"
+	"math/rand"
+	"time"
 
-	clientGo "github.com/lugobots/lugo4go/v2"
-	"github.com/lugobots/lugo4go/v2/examples/turn-handler/bot"
-	"github.com/lugobots/lugo4go/v2/pkg/field"
-	"github.com/lugobots/lugo4go/v2/pkg/util"
+	"go.uber.org/zap"
+
+	clientGo "github.com/lugobots/lugo4go/v3"
+	"github.com/lugobots/lugo4go/v3/field"
+	"github.com/lugobots/lugo4go/v3/proto"
+	"github.com/lugobots/lugo4go/v3/specs"
 )
 
 func main() {
-	// DefaultInitBundle is a shortcut for stuff that usually we define in init functions
-	playerConfig, logger, err := util.DefaultInitBundle()
+
+	connectionStarter, defaultFieldMapper, err := clientGo.NewDefaultStarter()
 	if err != nil {
-		log.Fatalf("could not init default config or logger: %s", err)
+		log.Fatalf("failed to load the bot configuration: %s", err)
 	}
 
-	// Creating a field grid will help us to map the play positions
-	fieldGridCols := uint(8)
-	fieldGridRows := uint(8)
+	//
+	// Optional: define your own field mapper
+	// defaultFieldMapper, err = field.NewMapper(NUM_COLS, NUM_ROWS, connectionStarter.Config.TeamSide)
+	// if err != nil {
+	// 	log.Fatalf("failed to create a field mapper: %s", err)
+	// }
 
-	fieldMapper, _ := field.NewMapper(fieldGridCols, fieldGridRows, playerConfig.TeamSide)
-
-	region, _ := fieldMapper.GetRegion(bot.FieldMap[playerConfig.Number].Col, bot.FieldMap[playerConfig.Number].Row)
-
-	// just creating a position for example purposes
-	playerConfig.InitialPosition = region.Center()
-
-	player, err := clientGo.NewClient(playerConfig)
-	if err != nil {
-		log.Fatalf("could not init the client: %s", err)
+	if err := connectionStarter.RunJustTurnHandler(&BasicBot{
+		FieldMapper: defaultFieldMapper,
+		Config:      connectionStarter.Config,
+		Logger:      connectionStarter.Logger,
+	}); err != nil {
+		log.Fatalf("bot stopped: %s", err)
 	}
-	logger.Info("connected to the game server")
+}
 
-	// The order send will be used by the bot to send the order during each turn
-	orderSender := clientGo.NewSender(player.GRPCClient)
+type BasicBot struct {
+	FieldMapper field.Mapper
+	Config      clientGo.Config
+	Logger      *zap.SugaredLogger
+}
 
-	// Creating a bot to play
-	myBot := bot.NewBot(orderSender, logger, playerConfig.TeamSide, playerConfig.Number)
+var random *rand.Rand
 
-	ctx, stop := context.WithCancel(context.Background())
-	go func() {
-		defer stop()
-		if err := player.Play(myBot); err != nil {
-			log.Printf("bot stopped with an error: %s", err)
+func init() {
+	random = rand.New(rand.NewSource(time.Now().UnixNano()))
+}
+
+func (t *BasicBot) GetReadyHandler(_ context.Context, _ clientGo.SnapshotInspector) {
+	t.Logger.Debug("the game is ready to start or the score has changed")
+}
+
+func (t *BasicBot) TurnHandler(_ context.Context, inspector clientGo.SnapshotInspector) ([]proto.PlayerOrder, string, error) {
+	var orders []proto.PlayerOrder
+	// we are going to kick the ball as soon as we catch it
+	me := inspector.GetMe()
+
+	if inspector.IsBallHolder(me) {
+		orderToKick, err := inspector.MakeOrderKick(t.FieldMapper.GetAttackGoal().Center, specs.BallMaxSpeed)
+		if err != nil {
+			t.Logger.Errorf("could not create kick order during turn %d: %s", inspector.GetSnapshot().Turn, err)
+			return nil, "", err
 		}
-	}()
-
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt)
-	select {
-	case <-ctx.Done():
-	case <-signalChan:
-		logger.Warnf("got interruption signal")
-		if err := player.Stop(); err != nil {
-			log.Printf("error stopping bot: %s", err)
-		}
+		return []proto.PlayerOrder{orderToKick}, "just kick it", nil
 	}
-	logger.Infof("process finished")
+
+	if me.Number == 10 {
+		// otherwise, let's run towards the ball like kids
+		orderToMove, err := inspector.MakeOrderMoveMaxSpeed(*inspector.GetBall().Position)
+		if err != nil {
+			t.Logger.Errorf("could not create move order during turn %d: %s", inspector.GetSnapshot().Turn, err)
+			return nil, "", err
+		}
+		return []proto.PlayerOrder{orderToMove, inspector.MakeOrderCatch()}, "advancing because I am the number 10", nil
+	}
+
+	orders = []proto.PlayerOrder{inspector.MakeOrderCatch()}
+	debugMsg := "keeping direction"
+	switch random.Intn(30) {
+	case 0:
+		orders = append(orders, inspector.MakeOrderMoveByDirection(field.Forward, specs.BallMaxSpeed))
+		debugMsg = "moving Forward"
+	case 1:
+		orders = append(orders, inspector.MakeOrderMoveByDirection(field.Backward, specs.BallMaxSpeed))
+		debugMsg = "moving Backward"
+	case 2:
+		orders = append(orders, inspector.MakeOrderMoveByDirection(field.Right, specs.BallMaxSpeed))
+		debugMsg = "moving to the right"
+	case 3:
+		orders = append(orders, inspector.MakeOrderMoveByDirection(field.Left, specs.BallMaxSpeed))
+		debugMsg = "moving to the left"
+	}
+
+	return orders, debugMsg, nil
 }

@@ -1,10 +1,12 @@
-package util
+package lugo4go
 
 import (
-	"github.com/lugobots/lugo4go/v2/proto"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/lugobots/lugo4go/v3/proto"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -124,7 +126,7 @@ func TestLoadConfig(t *testing.T) {
 			}
 
 			config := Config{}
-			err := config.LoadConfig(tc.args)
+			err := config.loadConfig(tc.args)
 			if err == nil {
 				assert.Equal(t, tc.expectedConfig.GRPCAddress, config.GRPCAddress, caseName)
 			} else {

@@ -1,14 +1,16 @@
-package util
+package lugo4go
 
 import (
 	"flag"
 	"fmt"
-	"github.com/lugobots/lugo4go/v2/pkg/field"
-	"github.com/lugobots/lugo4go/v2/proto"
-	"github.com/pkg/errors"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
+
+	"github.com/lugobots/lugo4go/v3/proto"
+	"github.com/lugobots/lugo4go/v3/specs"
 )
 
 const (
@@ -21,12 +23,14 @@ const (
 
 // Config is the set of values expected as a initial configuration of the player
 type Config struct {
+	//PlayerPositionFn func(playerNumber int, inspector SnapshotInspector) *proto.Point
+
 	// Full url to the gRPC server
 	GRPCAddress     string          `json:"grpc_address"`
 	Insecure        bool            `json:"insecure"`
 	Token           string          `json:"token"`
 	TeamSide        proto.Team_Side `json:"-"`
-	Number          uint32          `json:"-"`
+	Number          int             `json:"-"`
 	InitialPosition *proto.Point    `json:"-"`
 
 	readValues configReadValues
@@ -83,7 +87,7 @@ func (c *Config) readEnvVars() (err error) {
 	return nil
 }
 
-func (c *Config) LoadConfig(args []string) error {
+func (c *Config) loadConfig(args []string) error {
 	if err := c.parseConfigFlags(args); err != nil {
 		return err
 	}
@@ -98,13 +102,42 @@ func (c *Config) LoadConfig(args []string) error {
 	}
 	c.TeamSide = proto.Team_Side(side)
 
-	if c.readValues.Num < 1 || c.readValues.Num > field.MaxPlayers {
-		return fmt.Errorf("invalid player number '%d'. Must be 1 to %d", c.readValues.Num, field.MaxPlayers)
+	if c.readValues.Num < 1 || c.readValues.Num > specs.MaxPlayers {
+		return fmt.Errorf("invalid player number '%d'. Must be 1 to %d", c.readValues.Num, specs.MaxPlayers)
 	}
-	c.Number = uint32(c.readValues.Num)
+	c.Number = int(c.readValues.Num)
 
 	c.GRPCAddress = c.readValues.GRPCAddress
 	c.Token = c.readValues.Token
 	c.Insecure = c.readValues.Insecure
 	return nil
 }
+
+/*func DefaultPlayerPositionFn(ballRegion field.Region, myTeamSide, possession proto.Team_Side) (s TeamState, e error) {
+	regionCol := ballRegion.Col()
+	if possession == myTeamSide {
+		switch regionCol {
+		case 5, 6, 7, 8, 9:
+			return OnAttack, nil
+		case 2, 3, 4:
+			return Offensive, nil
+		case 0, 1:
+			return Neutral, nil
+		}
+
+	} else {
+		switch regionCol {
+		case 9:
+			return Defensive, nil
+		case 6, 7, 8:
+			return Defensive, nil
+		case 3, 4, 5:
+			return Defensive, nil
+		case 0, 1, 2:
+			return UnderPressure, nil
+		}
+		//return Offensive, nil
+	}
+	return "", fmt.Errorf("unknown team state for ball in %d col, tor possion with %s", regionCol, possession)
+}
+*/

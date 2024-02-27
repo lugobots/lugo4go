@@ -2,77 +2,73 @@ package lugo4go
 
 import (
 	"context"
-	"github.com/lugobots/lugo4go/v2/pkg/field"
-	"github.com/lugobots/lugo4go/v2/proto"
+	"fmt"
+
+	"github.com/pkg/errors"
+
+	"github.com/lugobots/lugo4go/v3/proto"
+	"github.com/lugobots/lugo4go/v3/specs"
 )
 
-func NewHandler(bot Bot, sender OrderSender, logger Logger, playerNumber uint32, side proto.Team_Side) *Handler {
-	return &Handler{
+func hewRawBotWrapper(bot Bot, logger Logger, playerNumber int, side proto.Team_Side) *rawBotWrapper {
+	return &rawBotWrapper{
 		Logger:       logger,
-		Sender:       sender,
 		PlayerNumber: playerNumber,
 		Side:         side,
 		Bot:          bot,
 	}
 }
 
-// Handler is a Lugo4go client handler that allow you to create an interface to follow a basic strategy based on team
+// rawBotWrapper is a Lugo4go client that allow you to create an interface to follow a basic strategy based on team
 // states.
-type Handler struct {
+type rawBotWrapper struct {
 	Logger       Logger
-	Sender       OrderSender
-	PlayerNumber uint32
+	PlayerNumber int
 	Side         proto.Team_Side
 	Bot          Bot
 }
 
-func (h *Handler) Handle(ctx context.Context, snapshot *proto.GameSnapshot) {
-	var err error
-	var state PlayerState
+func (h *rawBotWrapper) GetReadyHandler(ctx context.Context, inspector SnapshotInspector) {
+	h.Bot.OnGetReady(ctx, inspector)
+}
 
-	if snapshot == nil {
-		h.Logger.Errorf("error processing turn: %s", ErrNilSnapshot)
-		return
+func (h *rawBotWrapper) TurnHandler(ctx context.Context, inspector SnapshotInspector) ([]proto.PlayerOrder, string, error) {
+	if inspector == nil {
+		return nil, "", fmt.Errorf("error processing turn: %s", ErrNilSnapshot)
+
 	}
 
-	state, err = DefineMyState(snapshot, h.PlayerNumber, h.Side)
+	state, err := defineMyState(inspector.GetSnapshot(), int(h.PlayerNumber), h.Side)
 	if err != nil {
-		h.Logger.Errorf("error processing turn %d: %s", snapshot.Turn, err)
-		return
+		return nil, "", fmt.Errorf("error processing turn %d: %s", inspector.GetSnapshot().Turn, err)
+
 	}
-	if field.GoalkeeperNumber == h.PlayerNumber {
-		err = h.Bot.AsGoalkeeper(ctx, wrapSender(h.Sender, snapshot.Turn), snapshot, state)
+	var order []proto.PlayerOrder
+	var debugMsg string
+	if specs.GoalkeeperNumber == uint32(h.PlayerNumber) {
+		order, debugMsg, err = h.Bot.AsGoalkeeper(ctx, inspector, state)
+		return errorWrapper("GoalkeeperNumber", order, debugMsg, err)
 	} else {
 		switch state {
 		case Supporting:
-			err = h.Bot.OnSupporting(ctx, wrapSender(h.Sender, snapshot.Turn), snapshot)
+			order, debugMsg, err = h.Bot.OnSupporting(ctx, inspector)
 		case HoldingTheBall:
-			err = h.Bot.OnHolding(ctx, wrapSender(h.Sender, snapshot.Turn), snapshot)
+			order, debugMsg, err = h.Bot.OnHolding(ctx, inspector)
 		case Defending:
-			err = h.Bot.OnDefending(ctx, wrapSender(h.Sender, snapshot.Turn), snapshot)
+			order, debugMsg, err = h.Bot.OnDefending(ctx, inspector)
 		case DisputingTheBall:
-			err = h.Bot.OnDisputing(ctx, wrapSender(h.Sender, snapshot.Turn), snapshot)
+			order, debugMsg, err = h.Bot.OnDisputing(ctx, inspector)
+
+		default:
+			return nil, "", fmt.Errorf("unknown player state '%s'", state)
 		}
+		return errorWrapper(string(state), order, debugMsg, err)
 	}
-	if err != nil {
-		h.Logger.Errorf("error processing turn %d: %s", snapshot.Turn, err)
-	}
+
 }
 
-func wrapSender(sender OrderSender, turn uint32) senderWrapper {
-	return senderWrapper{
-		sender: sender,
-		turn:   turn,
-	}
-}
-
-type senderWrapper struct {
-	sender OrderSender
-	turn   uint32
-}
-
-func (s senderWrapper) Send(ctx context.Context, orders []proto.PlayerOrder, debugMsg string) (*proto.OrderResponse, error) {
-	return s.sender.Send(ctx, s.turn, orders, debugMsg)
+func errorWrapper(method string, order []proto.PlayerOrder, debugMsg string, err error) ([]proto.PlayerOrder, string, error) {
+	return order, debugMsg, errors.Wrapf(err, "method %s returned an error", method)
 }
 
 // PlayerState defines states specific for players
@@ -89,12 +85,24 @@ const (
 	DisputingTheBall PlayerState = "disputing"
 )
 
-func DefineMyState(snapshot *proto.GameSnapshot, playerNumber uint32, side proto.Team_Side) (PlayerState, error) {
+func defineMyState(snapshot *proto.GameSnapshot, playerNumber int, side proto.Team_Side) (PlayerState, error) {
 	if snapshot == nil || snapshot.Ball == nil {
 		return "", ErrNoBall
 	}
 
-	me := field.GetPlayer(snapshot, side, playerNumber)
+	myTeam := snapshot.HomeTeam
+	if side == proto.Team_AWAY {
+		myTeam = snapshot.AwayTeam
+	}
+
+	var me *proto.Player
+	for _, player := range myTeam.GetPlayers() {
+		if int(player.Number) == playerNumber {
+			me = player
+			break
+		}
+	}
+
 	if me == nil {
 		return "", ErrPlayerNotFound
 	}
@@ -104,7 +112,7 @@ func DefineMyState(snapshot *proto.GameSnapshot, playerNumber uint32, side proto
 	if ballHolder == nil {
 		return DisputingTheBall, nil
 	} else if ballHolder.TeamSide == side {
-		if ballHolder.Number == playerNumber {
+		if int(ballHolder.Number) == playerNumber {
 			return HoldingTheBall, nil
 		}
 		return Supporting, nil
