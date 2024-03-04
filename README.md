@@ -3,17 +3,17 @@
 [![GoDoc](https://godoc.org/github.com/lugobots/lugo4go?status.svg)](https://godoc.org/github.com/lugobots/lugo4go)
 [![Go Report Card](https://goreportcard.com/badge/github.com/lugobots/lugo4go)](https://goreportcard.com/report/github.com/lugobots/lugo4go)
 
-Lugo4Go is a [Go](http://golang.org/) implementation of a client player for [Lugo](https://lugobots.dev/) game. 
+Lugo4Go is a Go implementation of a client player for [Lugo](https://lugobots.dev/) game. 
 
-It **is not a bot** that plays the game, it is only the client for the game server. 
+It **is not a bot** that plays the game, it is only the client to connect to the game server. 
 
-This client implements a brainless player in the game. So, this library implements many methods that does not affect the player
-intelligence/behaviour/decisions. It is meant to reduce the developer concerns on communication, protocols, attributes, etc.
+This package implements many methods that does not affect the player intelligence/behaviour/decisions. It is meant to reduce the developer concerns on communication, protocols, attributes, etc.
 
-Using this client, you just need to implement the Artificial Intelligence of your player and some other few methods to support
-your strategy (see the project [The Dummies](https://github.com/lugobots/the-dummies-go) as an example). 
+Using this client, you just need to implement the Artificial Intelligence of your player and some other few methods to support your strategy (see the [example](./example/simple) folder and [The Dummies GO](https://github.com/lugobots/the-dummies-go)).
+
 
 # Table of Contents
+* [Documentation](#documentation)
 * [Requirements](#requirements)
 * [Installation](#installation)
 * [Usage](#usage)
@@ -27,8 +27,6 @@ your strategy (see the project [The Dummies](https://github.com/lugobots/the-dum
  
 ### Documentation
 
-(usage examples below)
-
 * [API Reference](http://godoc.org/github.com/lugobots/lugo4go)
 
 ### Requirements
@@ -37,7 +35,7 @@ your strategy (see the project [The Dummies](https://github.com/lugobots/the-dum
 
 ### Installation
 
-    git get https://github.com/lugobots/lugo4go.git
+git get https://github.com/lugobots/lugo4go.git
 
 ### Usage
 
