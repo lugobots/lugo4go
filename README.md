@@ -12,6 +12,18 @@ intelligence/behaviour/decisions. It is meant to reduce the developer concerns o
 
 Using this client, you just need to implement the Artificial Intelligence of your player and some other few methods to support
 your strategy (see the project [The Dummies](https://github.com/lugobots/the-dummies-go) as an example). 
+
+# Table of Contents
+* [Requirements](#requirements)
+* [Installation](#installation)
+* [Usage](#usage)
+* [First option: Implementing a Bot class (simpler and recommended)](#first-option-implementing-a-bot-class-simpler-and-recommended)
+* [Second option: Implementing the turn handler (a little more work)](#second-option-implementing-the-turn-handler-a-little-more-work)
+- [Helpers](#helpers)
+  * [Snapshot inspector](#snapshot-inspector)
+  * [Mapper and Region classes](#mapper-and-region-classes)
+    + [The Mapper](#the-mapper)
+    + [The Region](#the-region)
  
 ### Documentation
 
@@ -31,7 +43,7 @@ your strategy (see the project [The Dummies](https://github.com/lugobots/the-dum
 
 There are two ways to use **Lugo4Go** client:
 
-### Implementing a Bot Interface (simpler and recommended)
+### First option: Implementing a Bot class (simpler and recommended)
 
 See [example](./examples/bot-interface)
 
@@ -47,38 +59,38 @@ type Bot struct {
 }
 
 // OnDisputing is called when no one has the ball possession
-func (b *Bot) OnDisputing(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
+func (b *Bot) OnDisputing(ctx context.Context, inspector SnapshotInspector) ([]proto.PlayerOrder, string, error) {
 	// the magic code comes here
 	return ...
 }
 
 // OnDefending is called when an opponent player has the ball possession
-func (b *Bot) OnDefending(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
+func (b *Bot) OnDefending(ctx context.Context, inspector SnapshotInspector) ([]proto.PlayerOrder, string, error) {
 	// the magic code comes here
 	return ...
 }
 
 // OnHolding is called when this bot has the ball possession
-func (b *Bot) OnHolding(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
+func (b *Bot) OnHolding(ctx context.Context, inspector SnapshotInspector) ([]proto.PlayerOrder, string, error) {
 	// the magic code comes here
 	return ...
 }
 
 // OnSupporting is called when a teammate player has the ball possession
-func (b *Bot) OnSupporting(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot) error {
+func (b *Bot) OnSupporting(ctx context.Context, inspector SnapshotInspector) ([]proto.PlayerOrder, string, error) {
 	// the magic code comes here
 	return ...
 }
 
 // AsGoalkeeper is only called when this bot is the goalkeeper (number 1). This method is called on every turn,
 // and the player state is passed at the last parameter.
-func (b *Bot) AsGoalkeeper(ctx context.Context, sender lugo4go.TurnOrdersSender, snapshot *proto.GameSnapshot, state lugo4go.PlayerState) error {
+func (b *Bot) AsGoalkeeper(ctx context.Context, inspector SnapshotInspector, state PlayerState) ([]proto.PlayerOrder, string, error) {
 	// the magic code comes here
 	return ...
 }
 ```
 
-### Implementing the turn handler (a little more work)
+### Second option: Implementing the turn handler (a little more work)
 
 See [example](./examples/turn-handler)
 
@@ -94,9 +106,9 @@ type Bot struct {
     OrderSender lugo4go.OrderSender
 }
 
-func (b *Bot) Handle(ctx context.Context, snapshot *proto.GameSnapshot) {
+func (b *Bot) Handle(ctx context.Context, inspector clientGo.SnapshotInspector) {
 	// the magic code comes here
-	resp, err := b.OrderSender.Send(ctx, snapshot.Turn, orders, "")
+	resp, "", err := b.OrderSender.Send(ctx, snapshot.Turn, orders, "")
 }
 
 ```
@@ -140,7 +152,7 @@ Please find the instructions for uploading your bot on [lugobots.dev](https://lu
 There is a Dockerfile template in [the example directory](./examples) to guide you how to create a container.
 
 
-## Field Library
+<!-- ## Field Library
 
 There are a many things that you will repeatedly need to do on your bot code, e.g. getting your bot position,
 creating a move/kick/catch order, finding your teammates positions, etc.
@@ -155,11 +167,59 @@ myTeamGoal := field.GetTeamsGoal(proto.Team_HOME)
 
 moveOrder, err := field.MakeOrderMoveMaxSpeed(*me.Position, myTeamGoal)
 
+``` -->
+
+## Helpers
+
+There are a many things that you will repeatedly need to do on your bot code, e.g. getting your bot position, creating a
+move/kick/catch order, finding your teammates positions, etc.
+
+**Lugo4Go** brings some libraries to help you with that:
+
+### Snapshot inspector
+
+The Snapshot inspector is quite useful. Firs to it helps you to extract data from the [Game Snapshot](https://github.com/lugobots/protos/blob/master/doc/docs.md#lugo.GameSnapshot) each game turn.
+
+```go
+inspector, err := NewGameSnapshotInspector(proto.Team_HOME, 8, snapshot);
+
+inspector.GetSnapshot() *proto.GameSnapshot
+inspector.GetMe() *proto.Player
+inspector.GetBall() *proto.Ball
+inspector.GetBallHolder() (*proto.Player, bool)
+inspector.IsBallHolder(player *proto.Player) bool
+inspector.GetTeam(side proto.Team_Side) *proto.Team
+inspector.GetMyTeam() *proto.Team
+inspector.GetOpponentTeam() *proto.Team
+inspector.GetPlayer(side proto.Team_Side, number int) *proto.Player
+inspector.GetMyTeamPlayers() []*proto.Player
+inspector.GetOpponentPlayers() []*proto.Player
+inspector.GetMyTeamGoalkeeper() *proto.Player
+inspector.GetOpponentGoalkeeper() *proto.Player
 ```
 
-### Mapper and Region
+And also help us to create the [Turn Orders Set](https://github.com/lugobots/protos/blob/master/doc/docs.md#lugo.OrderSet) based on the game state and our bot team side:
 
-The Field library also provides a quite useful pair: the Mapper interface and Region struct.
+```go
+inspector.MakeOrderMove(target proto.Point, speed float64) (*proto.Order_Move, error)
+inspector.MakeOrderMoveMaxSpeed(target proto.Point) (*proto.Order_Move, error)
+inspector.MakeOrderMoveFromPoint(origin, target proto.Point, speed float64) (*proto.Order_Move, error)
+inspector.MakeOrderMoveFromVector(vector proto.Vector, speed float64) *proto.Order_Move
+inspector.MakeOrderMoveByDirection(direction field.Direction, speed float64) *proto.Order_Move
+inspector.MakeOrderMoveToStop() *proto.Order_Move
+inspector.MakeOrderJump(target proto.Point, speed float64) (*proto.Order_Jump, error)
+inspector.MakeOrderKick(target proto.Point, speed float64) (*proto.Order_Kick, error)
+inspector.MakeOrderKickMaxSpeed(target proto.Point) (*proto.Order_Kick, error)
+inspector.MakeOrderCatch() *proto.Order_Catch
+```
+
+### Mapper and Region classes
+
+Naturally, the bots see the game field based on coordinates `x` and `y`, as in a cartesian plane.
+
+However, that's not something that we want to be concerned about during the bot development.
+
+The classes Mapper and Region work together to facilitate it for use.
 
 #### The Mapper
 
@@ -173,19 +233,24 @@ And you may define how many columns/rows your field will be divided into.
 // let's create a map 10x5 
 fieldMapper, err := field.NewMapper(10, 5, proto.Team_HOME)
 
+// you may find a Map Region based in coordinates:
 aRegion, err := fieldMapper.GetRegion(2, 4)
+
+// and you can also know the position of the goals
+fieldMapper.GetAttackGoal(): Goal
+fieldMapper.GetDefenseGoal(): Goal
 
 ```
 
 #### The Region
 
-The `Mapper` will slice the field into `Region`s. The Region struct helps your bot to move over the field without caring
-about coordinates or team side.
+The Region helps your bot to see the game map in quadrants, so it can move over the field without caring about coordinates or team side.
 
 ```go
 
-regionInFrontOfMe _:= aRegion.Front()
-
-moveOrder, err_ := field.MakeOrderMoveMaxSpeed(*me.Position, regionInFrontOfMe.Center())
+region.Front()
+region.Back()
+region.Left()
+region.Right()
 
 ```
