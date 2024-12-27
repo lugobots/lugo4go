@@ -4,13 +4,13 @@ go 1.21
 
 require (
 	github.com/golang/mock v1.3.1
-	github.com/golang/protobuf v1.4.0-rc.4.0.20200313231945-b860323f09d0
+	github.com/golang/protobuf v1.5.4
 	github.com/pkg/errors v0.8.1
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/zap v1.13.0
 	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b
 	google.golang.org/grpc v1.28.0
-	google.golang.org/protobuf v1.21.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
