@@ -40,13 +40,13 @@ func NewGym(config Config, logger *zap.SugaredLogger) (*Gym, proto.RemoteClient,
 	}, remote, nil
 }
 
-func (g *Gym) Start(ctx context.Context, trainner BotTrainer, trainingFunction TrainingFunction) error {
+func (g *Gym) Start(ctx context.Context, trainer BotTrainer, trainingFunction TrainingFunction) error {
 	defer g.grpcConn.Close()
 	startingCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
 	// TODO bad practice, this constructors should not be here!
-	trainingCrl := NewTrainingCrl(trainner, g.remote, g.assistant)
+	trainingCrl := NewTrainingCrl(ctx, trainer, g.remote, g.assistant)
 
 	g.Logger.Debug("starting training session")
 	session, err := g.assistant.StartSession(startingCtx, &proto.RLSessionConfig{

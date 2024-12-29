@@ -13,15 +13,16 @@ type TrainingCrl struct {
 	assistant      proto.RLAssistantClient
 	latestSnapShot proto.GameSnapshot
 	//snapshotLocker sync.RWMutex
-	trainner BotTrainer
+	trainner        BotTrainer
+	trainingContext context.Context
 }
 
-func NewTrainingCrl(trainner BotTrainer, remote proto.RemoteClient, assistant proto.RLAssistantClient) *TrainingCrl {
+func NewTrainingCrl(ctx context.Context, trainner BotTrainer, remote proto.RemoteClient, assistant proto.RLAssistantClient) *TrainingCrl {
 	return &TrainingCrl{
-		remote:    remote,
-		assistant: assistant,
-		//snapshotLocker: sync.RWMutex{},
-		trainner: trainner,
+		remote:          remote,
+		assistant:       assistant,
+		trainingContext: ctx,
+		trainner:        trainner,
 	}
 }
 
@@ -52,14 +53,12 @@ func (t *TrainingCrl) GetState() interface{} {
 }
 
 func (t *TrainingCrl) Update(action interface{}) (reward float64, done bool, err error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-	defer cancel()
 
 	playersOrders, err := t.trainner.Play(t.latestSnapShot, action)
 	if err != nil {
 		return 0, false, errors.Wrap(err, "trainer bot failed to play")
 	}
-	turnOutcome, err := t.assistant.SendPlayersOrders(ctx, &playersOrders)
+	turnOutcome, err := t.assistant.SendPlayersOrders(t.trainingContext, &playersOrders)
 
 	if err != nil {
 		return 0, false, errors.Wrap(err, "RL assistant failed to send the orders")
