@@ -81,7 +81,6 @@ func (g *Gym) Start(ctx context.Context, trainer BotTrainer, trainingFunction Tr
 				g.Logger.Errorf("the RL assistant session ended with error: %v", err)
 				return
 			}
-			g.Logger.Infof("meleca")
 		}
 	}()
 
