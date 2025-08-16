@@ -3,6 +3,12 @@ package specs
 import "time"
 
 const (
+	GameDuration = 200
+
+	ExtraOvertimeDuration = 1200 // 2400
+
+	ShootoutShootMaxTime = 600
+
 	// BaseUnit is used to increase the integer units scale and improve the precision when the integer numbers
 	// come from float  calculations. Some units have to be integer to avoid infinite intervals (e.g. a point in the field)
 	BaseUnit = 100
