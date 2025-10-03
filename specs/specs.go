@@ -3,6 +3,16 @@ package specs
 import "time"
 
 const (
+	// GameDuration Number of turns in the regular phase of the game.
+	// After this many turns, if one team is ahead, the game ends.
+	// If the score is tied, overtime may be applied if the game it configured to accept golden goal
+	GameDuration = 6000
+
+	// ExtraOvertimeDuration Number of additional turns granted if the game is tied
+	// at the end of the regular duration.
+	// If still tied after this period, the match ends in a draw.
+	ExtraOvertimeDuration = 1200 // 2400
+
 	// BaseUnit is used to increase the integer units scale and improve the precision when the integer numbers
 	// come from float  calculations. Some units have to be integer to avoid infinite intervals (e.g. a point in the field)
 	BaseUnit = 100
