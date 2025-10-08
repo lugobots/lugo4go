@@ -11,7 +11,7 @@ const (
 	// ExtraOvertimeDuration Number of additional turns granted if the game is tied
 	// at the end of the regular duration.
 	// If still tied after this period, the match ends in a draw.
-	ExtraOvertimeDuration = 1200 // 2400
+	ExtraOvertimeDuration = 2400
 
 	// BaseUnit is used to increase the integer units scale and improve the precision when the integer numbers
 	// come from float  calculations. Some units have to be integer to avoid infinite intervals (e.g. a point in the field)
